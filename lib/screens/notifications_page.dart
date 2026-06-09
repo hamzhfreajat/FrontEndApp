@@ -162,7 +162,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             if (mounted) {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
                                 create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                                child: const MyAdsScreen(),
+                                child: const MyAdsScreen(isStandalone: true),
                               )));
                             }
                           } else if (notif['reference_id'] != null) {
@@ -324,7 +324,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                 provider.markAsRead(notif['id']);
                                                 Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
                                                   create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                                                  child: const MyAdsScreen(),
+                                                  child: const MyAdsScreen(isStandalone: true),
                                                 )));
                                               }
                                             } else if (notif['type'] == 'category_milestone' && notif['reference_id'] != null) {

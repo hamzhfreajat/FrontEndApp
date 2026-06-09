@@ -13,7 +13,8 @@ import '../widgets/my_ads_skeleton.dart';
 import '../../domain/entities/my_ad_entities.dart';
 
 class MyAdsScreen extends StatefulWidget {
-  const MyAdsScreen({Key? key}) : super(key: key);
+  final bool isStandalone;
+  const MyAdsScreen({Key? key, this.isStandalone = false}) : super(key: key);
 
   @override
   State<MyAdsScreen> createState() => _MyAdsScreenState();
@@ -277,6 +278,14 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             onPressed: () => context.read<MyAdsBloc>().add(SelectAllAds()),
           ),
         ],
+      );
+    }
+    if (widget.isStandalone) {
+      return AppBar(
+        title: const Text('إعلاناتي', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
       );
     }
     
