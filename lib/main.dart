@@ -1,0 +1,233 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'screens/root_screen.dart';
+import 'screens/splash_screen.dart';
+import 'screens/login_page.dart';
+import 'providers/app_provider.dart';
+import 'providers/auth_provider.dart';
+import 'providers/notification_provider.dart';
+import 'providers/settings_provider.dart';
+import 'providers/saved_search_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+import 'widgets/connectivity_wrapper.dart';
+import 'services/api_service.dart';
+import 'screens/ad_details_page.dart';
+import 'features/chat/presentation/screens/premium_inbox_screen.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// Ignore SSL handshake warnings for development and R2 dev bucket URLs on older/restricted emulators
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+
+  if (message.data['type'] == 'chat_message') {
+    final chatId = message.data['chat_id']?.toString();
+    final messageId = message.data['message_id']?.toString();
+
+    if (chatId != null && chatId.isNotEmpty && messageId != null && messageId.isNotEmpty) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatId)
+            .collection('messages')
+            .doc(messageId)
+            .update({'status': 'delivered'});
+      } catch (e) {
+        print("Failed to update message status to delivered: $e");
+      }
+    }
+
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    
+    final senderName = message.data['sender_name']?.toString() ?? 'مستخدم';
+    final adTitle = message.data['ad_title']?.toString();
+    final messageBody = message.data['body']?.toString() ?? '';
+    final messageTitle = message.data['title']?.toString() ?? 'رسالة جديدة';
+
+    AndroidNotificationDetails androidDetails;
+
+    if (adTitle != null && adTitle.isNotEmpty) {
+      final person = Person(name: senderName);
+      androidDetails = AndroidNotificationDetails(
+        'high_importance_channel',
+        'High Importance Notifications',
+        channelDescription: 'This channel is used for important notifications.',
+        icon: '@mipmap/ic_launcher',
+        priority: Priority.high,
+        importance: Importance.max,
+        styleInformation: MessagingStyleInformation(
+          person,
+          conversationTitle: adTitle,
+          groupConversation: true,
+          messages: [
+            Message(messageBody, DateTime.now(), person),
+          ],
+        ),
+      );
+    } else {
+      androidDetails = const AndroidNotificationDetails(
+        'high_importance_channel',
+        'High Importance Notifications',
+        channelDescription: 'This channel is used for important notifications.',
+        icon: '@mipmap/ic_launcher',
+        priority: Priority.high,
+        importance: Importance.max,
+      );
+    }
+
+    await flutterLocalNotificationsPlugin.show(
+      id: message.hashCode,
+      title: messageTitle,
+      body: messageBody,
+      notificationDetails: NotificationDetails(android: androidDetails),
+      payload: message.data['type']?.toString() ?? 'chat_message',
+    );
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent, // transparent status bar
+    statusBarIconBrightness: Brightness.dark, // dark icons
+    statusBarBrightness: Brightness.light, // for iOS
+  ));
+  
+  HttpOverrides.global = MyHttpOverrides();
+
+  await Firebase.initializeApp();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Initialize the high importance channel for Android 8+
+  const AndroidNotificationChannel channel = AndroidNotificationChannel(
+    'high_importance_channel', // id
+    'High Importance Notifications', // title
+    description:
+        'This channel is used for important notifications.', // description
+    importance: Importance.max,
+  );
+
+  // Initialize flutterLocalNotificationsPlugin properly so we can handle clicks
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: const InitializationSettings(
+      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      iOS: DarwinInitializationSettings(),
+    ),
+    onDidReceiveNotificationResponse: (NotificationResponse response) {
+      if (response.payload == 'chat_message') {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const PremiumInboxScreen()),
+        );
+      }
+    },
+  );
+
+  await flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+      ?.createNotificationChannel(channel);
+
+  // Handle clicking on push notifications when app is in background
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+    print('Notification clicked! Data: ${message.data}');
+    
+    if (message.data['type'] == 'chat_message') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const PremiumInboxScreen()),
+      );
+      return;
+    }
+
+    if (message.data.containsKey('reference_id')) {
+      try {
+        final adId = int.parse(message.data['reference_id']);
+        final ad = await ApiService().fetchAdById(adId);
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)),
+        );
+      } catch (e) {
+        print('Error navigating to ad from push notification: $e');
+      }
+    }
+  });
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => AppProvider()..refreshAll()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(create: (_) => SavedSearchProvider()),
+      ],
+      child: const OpenSooqApp(),
+    ),
+  );
+}
+
+class OpenSooqApp extends StatelessWidget {
+  const OpenSooqApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      title: 'سوقكم',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarBrightness: Brightness.light,
+          ),
+        ),
+        primarySwatch: Colors.blue,
+        cardColor: Colors.white,
+        scaffoldBackgroundColor: const Color(0xFFF3F4F9),
+        textTheme: GoogleFonts.tajawalTextTheme(
+          Theme.of(context).textTheme,
+        ),
+      ),
+      builder: (context, child) {
+        final settings = Provider.of<SettingsProvider>(context);
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: ConnectivityWrapper(child: child!),
+        );
+      },
+      supportedLocales: const [
+        Locale('en'),
+        Locale('ar'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: const Locale('ar'),
+      home: const SplashScreen(),
+    );
+  }
+}

@@ -1,0 +1,73 @@
+name: classifieds_frontend
+description: A new Flutter project for Multi-vendor Classifieds App.
+
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  google_fonts: ^8.0.2
+  http: ^1.1.0
+  intl: ^0.20.2
+  json_annotation: ^4.11.0
+  jwt_decoder: ^2.0.1
+  provider: ^6.1.5+1
+  shared_preferences: ^2.5.4
+  shimmer: ^3.0.0
+  web_socket_channel: ^3.0.1
+  timeago: ^3.7.0
+  url_launcher: ^6.3.2
+  firebase_core: ^3.8.0
+  firebase_messaging: ^15.1.5
+  flutter_local_notifications: ^21.0.0
+  image_picker: ^1.2.1
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+  lottie: ^3.3.2
+  fl_chart: ^1.2.0
+  animate_do: ^4.2.0
+  camera: ^0.11.0
+  uuid: ^4.3.3
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  cloud_firestore: ^5.6.12
+  connectivity_plus: ^7.1.1
+  cached_network_image: ^3.4.1
+  video_player: ^2.11.1
+  record: ^6.2.1
+  audioplayers: ^6.6.0
+  path_provider: ^2.1.5
+  emoji_picker_flutter: ^4.4.0
+  visibility_detector: ^0.4.0+2
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^7.1.1
+  sign_in_with_apple: ^8.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.5.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/real_estate/
+    - assets/sounds/
+
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/app_icon.png"

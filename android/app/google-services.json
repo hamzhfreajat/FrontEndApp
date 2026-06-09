@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "683492643202",
+    "project_id": "classifiedsapp-6d4ea",
+    "storage_bucket": "classifiedsapp-6d4ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:683492643202:android:38ec11d2c78240b4daff9b",
+        "android_client_info": {
+          "package_name": "com.sooqcom.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "683492643202-oscdnql95hv1lohsh1ej1u5918drlehi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sooqcom.app",
+            "certificate_hash": "e6e5c2c64d3da31509ed7d3250cad634efc6c04b"
+          }
+        },
+        {
+          "client_id": "683492643202-gaki00v62u58p3gh84vjavkdst9c36sb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAdXn5vB8YIFpy2b2iXY2Lkzsu8eHOw3hY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "683492643202-gaki00v62u58p3gh84vjavkdst9c36sb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
