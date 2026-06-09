@@ -76,6 +76,7 @@ class AppProvider extends ChangeNotifier {
       metrics = await _apiService.fetchDashboardMetrics();
       tickers = await _apiService.fetchTicker();
       final rawCats = await _apiService.fetchCategories(parentId: 'null');
+      fetchedParentIds.clear(); // Clear the fetch cache since we are overwriting the category tree
       categories = rawCats.where((c) => !c.name.contains('بنتهاوس') && !c.name.contains('دوبليكس')).toList();
       stories = await _apiService.fetchStories();
       await loadRecentlyViewed();
