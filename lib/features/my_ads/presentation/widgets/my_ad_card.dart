@@ -71,7 +71,7 @@ class MyAdCard extends StatelessWidget {
           ),
           const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
           _buildPerformanceRow(context),
-          if (ad.status == 'Sold') ...[
+          if (ad.status == 'Active') ...[
             const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
             RepublishTimerButton(
               lastRepublishedAt: ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt ?? DateTime.now().subtract(const Duration(days: 1)),
@@ -124,12 +124,33 @@ class MyAdCard extends StatelessWidget {
             children: [
               const Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey),
               const SizedBox(width: 4),
-              Text(
-                DateFormat('yyyy-MM-dd • hh:mm a').format(ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt!),
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              Expanded(
+                child: Text(
+                  'تاريخ النشر: ${DateFormat('yyyy-MM-dd • hh:mm a').format(ad.baseAd.createdAt!)}',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
+          if (ad.baseAd.lastRepublishedAt != null && ad.baseAd.lastRepublishedAt != ad.baseAd.createdAt) ...[
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.update_rounded, size: 12, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'تاريخ التحديث: ${DateFormat('yyyy-MM-dd • hh:mm a').format(ad.baseAd.lastRepublishedAt!)}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
         if (ad.suggestedAction != null) ...[
           const SizedBox(height: 8),

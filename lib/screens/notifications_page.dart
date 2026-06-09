@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import 'ad_details_page.dart';
 import 'category_details_page.dart';
 import '../features/chat/presentation/screens/premium_inbox_screen.dart';
+import '../features/my_ads/presentation/screens/my_ads_screen.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -154,6 +155,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             if (mounted) {
                               Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
                             }
+                          } else if (notif['type'] == 'republish_available') {
+                            if (mounted) {
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => const MyAdsScreen()));
+                            }
                           } else if (notif['reference_id'] != null) {
                             try {
                               final adId = int.parse(notif['reference_id'].toString());
@@ -276,7 +281,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         ),
                                       ],
                                     ),
-                                    if (notif['reference_id'] != null || isChat) ...[
+                                    if (notif['reference_id'] != null || isChat || notif['type'] == 'republish_available') ...[
                                       const SizedBox(height: 12),
                                       SizedBox(
                                         width: double.infinity,
@@ -302,25 +307,30 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                   );
                                                 }
                                               }
-                                            } else if (notif['type'] == 'republish_available' && notif['reference_id'] != null) {
-                                              try {
-                                                final adId = int.parse(notif['reference_id'].toString());
-                                                await ApiService().republishAd(adId);
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(
-                                                      content: Text('تم إعادة نشر إعلانك ورفعه للأعلى! 🚀', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
-                                                      backgroundColor: Colors.green,
-                                                    ),
-                                                  );
-                                                  provider.markAsRead(notif['id']);
+                                            } else if (notif['type'] == 'republish_available') {
+                                              if (notif['reference_id'] != null) {
+                                                try {
+                                                  final adId = int.parse(notif['reference_id'].toString());
+                                                  await ApiService().republishAd(adId);
+                                                  if (mounted) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text('تم إعادة نشر إعلانك ورفعه للأعلى! 🚀', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+                                                        backgroundColor: Colors.green,
+                                                      ),
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  if (mounted) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('حدث خطأ أثناء إعادة النشر')),
+                                                    );
+                                                  }
                                                 }
-                                              } catch (e) {
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('حدث خطأ أثناء إعادة النشر')),
-                                                  );
-                                                }
+                                              }
+                                              if (mounted) {
+                                                provider.markAsRead(notif['id']);
+                                                Navigator.push(context, MaterialPageRoute(builder: (_) => const MyAdsScreen()));
                                               }
                                             } else if (notif['type'] == 'category_milestone' && notif['reference_id'] != null) {
                                               try {
