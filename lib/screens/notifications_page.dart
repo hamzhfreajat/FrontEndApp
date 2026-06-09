@@ -7,6 +7,9 @@ import 'ad_details_page.dart';
 import 'category_details_page.dart';
 import '../features/chat/presentation/screens/premium_inbox_screen.dart';
 import '../features/my_ads/presentation/screens/my_ads_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../features/my_ads/presentation/bloc/my_ads_bloc.dart';
+import '../features/my_ads/data/repositories/my_ads_repository_impl.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -157,7 +160,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             }
                           } else if (notif['type'] == 'republish_available') {
                             if (mounted) {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const MyAdsScreen()));
+                              Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
+                                create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
+                                child: const MyAdsScreen(),
+                              )));
                             }
                           } else if (notif['reference_id'] != null) {
                             try {
@@ -316,7 +322,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                               }
                                               if (mounted) {
                                                 provider.markAsRead(notif['id']);
-                                                Navigator.push(context, MaterialPageRoute(builder: (_) => const MyAdsScreen()));
+                                                Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
+                                                  create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
+                                                  child: const MyAdsScreen(),
+                                                )));
                                               }
                                             } else if (notif['type'] == 'category_milestone' && notif['reference_id'] != null) {
                                               try {
