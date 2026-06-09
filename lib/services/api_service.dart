@@ -707,7 +707,12 @@ class ApiService {
     if (response.statusCode == 200) {
       return Ad.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
-      throw Exception('Failed to republish ad');
+      try {
+        final error = json.decode(response.body);
+        throw Exception(error['detail'] ?? 'Failed to republish ad');
+      } catch (e) {
+        throw Exception('Failed to republish ad');
+      }
     }
   }
 

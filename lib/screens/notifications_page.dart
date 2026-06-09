@@ -316,8 +316,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                   }
                                                 } catch (e) {
                                                   if (mounted) {
+                                                    String msg = 'حدث خطأ أثناء إعادة النشر';
+                                                    bool isAlreadyPub = e.toString().contains('already_republished');
+                                                    if (isAlreadyPub) {
+                                                      msg = 'هذا الإعلان تم إعادة نشره بالفعل وهو الآن في أعلى القائمة';
+                                                    }
                                                     ScaffoldMessenger.of(context).showSnackBar(
-                                                      const SnackBar(content: Text('حدث خطأ أثناء إعادة النشر')),
+                                                      SnackBar(
+                                                        content: Text(msg, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+                                                        backgroundColor: isAlreadyPub ? Colors.orange : Colors.red,
+                                                      ),
                                                     );
                                                   }
                                                 }

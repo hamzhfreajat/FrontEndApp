@@ -108,8 +108,15 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           String translatedMsg = 'تم تنفيذ العملية بنجاح';
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translatedMsg), backgroundColor: Colors.green));
         }
-        if (state.errorMessage != null && state.errorMessage!.contains('Bulk action')) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ أثناء التنفيذ'), backgroundColor: Colors.red));
+        if (state.errorMessage != null) {
+          if (state.errorMessage!.contains('already_republished')) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('هذا الإعلان تم إعادة نشره بالفعل وهو الآن في أعلى القائمة', style: TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)), 
+              backgroundColor: Colors.orange,
+            ));
+          } else if (state.errorMessage!.contains('Bulk action') || state.errorMessage!.contains('Failed to perform')) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء التنفيذ'), backgroundColor: Colors.red));
+          }
         }
       },
       builder: (context, state) {
