@@ -10,6 +10,7 @@ import '../features/my_ads/presentation/screens/my_ads_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/my_ads/presentation/bloc/my_ads_bloc.dart';
 import '../features/my_ads/data/repositories/my_ads_repository_impl.dart';
+import 'root_screen.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -160,10 +161,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             }
                           } else if (notif['type'] == 'republish_available') {
                             if (mounted) {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
-                                create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                                child: const MyAdsScreen(isStandalone: true),
-                              )));
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (_) => const RootScreen(initialIndex: 2)),
+                                (route) => false,
+                              );
                             }
                           } else if (notif['reference_id'] != null) {
                             try {
@@ -322,10 +324,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                               }
                                               if (mounted) {
                                                 provider.markAsRead(notif['id']);
-                                                Navigator.push(context, MaterialPageRoute(builder: (_) => BlocProvider(
-                                                  create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                                                  child: const MyAdsScreen(isStandalone: true),
-                                                )));
+                                                Navigator.pushAndRemoveUntil(
+                                                  context,
+                                                  MaterialPageRoute(builder: (_) => const RootScreen(initialIndex: 2)),
+                                                  (route) => false,
+                                                );
                                               }
                                             } else if (notif['type'] == 'category_milestone' && notif['reference_id'] != null) {
                                               try {
