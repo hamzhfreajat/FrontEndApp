@@ -293,20 +293,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                               if (mounted) {
                                                 Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
                                               }
-                                            } else if (notif['reference_id'] != null) {
-                                              try {
-                                                final adId = int.parse(notif['reference_id'].toString());
-                                                final ad = await ApiService().fetchAdById(adId);
-                                                if (mounted) {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)));
-                                                }
-                                              } catch (e) {
-                                                if (mounted) {
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    const SnackBar(content: Text('تعذر تحميل الإعلان')),
-                                                  );
-                                                }
-                                              }
                                             } else if (notif['type'] == 'republish_available') {
                                               if (notif['reference_id'] != null) {
                                                 try {
@@ -343,6 +329,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                 if (mounted) {
                                                   ScaffoldMessenger.of(context).showSnackBar(
                                                     const SnackBar(content: Text('تعذر تحميل القسم')),
+                                                  );
+                                                }
+                                              }
+                                            } else if (notif['reference_id'] != null) {
+                                              try {
+                                                final adId = int.parse(notif['reference_id'].toString());
+                                                final ad = await ApiService().fetchAdById(adId);
+                                                if (mounted) {
+                                                  Navigator.push(context, MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)));
+                                                }
+                                              } catch (e) {
+                                                if (mounted) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(content: Text('تعذر تحميل الإعلان')),
                                                   );
                                                 }
                                               }

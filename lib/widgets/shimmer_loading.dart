@@ -248,11 +248,13 @@ class ShimmerHomeScreen extends StatelessWidget {
                 ),
               ),
 
-              // 4. Premium Category Grids (Title + 2x2 Grid)
+              // 4. Horizontal Ad Lists
               const SizedBox(height: 12),
-              _buildShimmerPremiumGrid(),
-              const SizedBox(height: 24),
-              _buildShimmerPremiumGrid(),
+              _buildShimmerHorizontalList(context),
+              const SizedBox(height: 20),
+              _buildShimmerHorizontalList(context),
+              const SizedBox(height: 20),
+              _buildShimmerHorizontalList(context),
               
               const SizedBox(height: 30),
            ]
@@ -260,72 +262,56 @@ class ShimmerHomeScreen extends StatelessWidget {
      );
   }
   
-  Widget _buildShimmerPremiumGrid() {
+  Widget _buildShimmerHorizontalList(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final cardWidth = screenWidth / 2.25;
+    final cardHeight = cardWidth * 1.5;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              ShimmerLoading(
-                child: Container(width: 120, height: 24, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+              Row(
+                children: [
+                  ShimmerLoading(
+                    child: Container(width: 4, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)))
+                  ),
+                  const SizedBox(width: 8),
+                  ShimmerLoading(
+                    child: Container(width: 120, height: 20, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)))
+                  ),
+                ],
               ),
               ShimmerLoading(
-                child: Container(width: 60, height: 16, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4))),
+                child: Container(width: 60, height: 16, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)))
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: ShimmerLoading(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+        ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: cardHeight),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: 3,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: ShimmerLoading(
+                    child: Container(
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                    )
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ShimmerLoading(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: ShimmerLoading(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ShimmerLoading(
-                  child: AspectRatio(
-                    aspectRatio: 1.0,
-                    child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
-                  ),
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ],
