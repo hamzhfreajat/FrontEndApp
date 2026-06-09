@@ -206,14 +206,12 @@ class ShimmerHomeScreen extends StatelessWidget {
               // 1. Quick Actions Gateways (3 large vertical cards)
               const SizedBox(height: 16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 child: Row(
                   children: [
-                    Expanded(child: _shimmerBox(double.infinity, 120)),
-                    const SizedBox(width: 10),
-                    Expanded(child: _shimmerBox(double.infinity, 120)),
-                    const SizedBox(width: 10),
-                    Expanded(child: _shimmerBox(double.infinity, 120)),
+                    Expanded(child: _buildQuickActionShimmer()),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildQuickActionShimmer()),
                   ],
                 ),
               ),
@@ -331,4 +329,43 @@ class ShimmerHomeScreen extends StatelessWidget {
         )
      );
   }
+  Widget _buildQuickActionShimmer() {
+    return ShimmerLoading(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200, width: 1.5),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 110,
+              height: 110,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: 80,
+              height: 16,
+              color: Colors.white,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 100,
+              height: 12,
+              color: Colors.white,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
 }
