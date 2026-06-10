@@ -56,12 +56,14 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        // Use .wav extension and pcm16bits which is 100% foolproof on all Android devices
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
+        // Use .m4a extension and aacLc which is best for cross-platform playback.
+        // Explicitly set sampleRate and numChannels to prevent Oppo/Oplus MediaCodec crashes.
+        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
         
         await _audioRecorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.pcm16bits, 
+            encoder: AudioEncoder.aacLc, 
+            bitRate: 128000,
             sampleRate: 44100,
             numChannels: 1,
           ),
