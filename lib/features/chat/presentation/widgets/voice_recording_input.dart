@@ -56,9 +56,9 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        // Use .m4a extension and aacLc which is best for cross-platform playback.
-        // Explicitly set sampleRate and numChannels to prevent Oppo/Oplus MediaCodec crashes.
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        // By using .aac instead of .m4a, we force Android to use the ADTS container
+        // which completely bypasses the buggy MPEG4Writer hardware muxer on Oppo devices!
+        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.aac';
         
         await _audioRecorder.start(
           const RecordConfig(

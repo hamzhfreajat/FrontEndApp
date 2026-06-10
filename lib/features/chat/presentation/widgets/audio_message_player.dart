@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AudioMessagePlayer extends StatefulWidget {
   final String audioUrl;
@@ -34,6 +35,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   StreamSubscription? _playerStateSubscription;
 
   bool _isInit = false;
+  bool _isLoading = false;
   List<double>? _waveformHeights;
 
   @override
@@ -92,17 +94,21 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
         await _audioPlayer.pause();
       } else {
         if (!_isInit) {
+          setState(() => _isLoading = true);
           if (widget.audioUrl.startsWith('http')) {
-            String mimeType = 'audio/mpeg'; // Default
-            if (widget.audioUrl.toLowerCase().endsWith('.wav')) {
-              mimeType = 'audio/wav';
-            } else if (widget.audioUrl.toLowerCase().endsWith('.m4a') || widget.audioUrl.toLowerCase().endsWith('.aac')) {
-              mimeType = 'audio/mp4';
+            try {
+              // Downloading the file completely bypasses Android MediaPlayer HTTP MIME type streaming bugs
+              final fileInfo = await DefaultCacheManager().downloadFile(widget.audioUrl);
+              await _audioPlayer.setSourceDeviceFile(fileInfo.file.path);
+            } catch (e) {
+              // Fallback to streaming if download fails
+              await _audioPlayer.setSourceUrl(widget.audioUrl);
             }
-            await _audioPlayer.setSource(UrlSource(widget.audioUrl, mimeType: mimeType));
           } else {
             await _audioPlayer.setSourceDeviceFile(widget.audioUrl);
           }
+          if (mounted) setState(() => _isLoading = false);
+          
           _isInit = true;
           await _audioPlayer.setPlaybackRate(_playbackRate);
           
@@ -197,12 +203,24 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
 
               // 2. Play/Pause Button
               GestureDetector(
-                onTap: _togglePlay,
-                child: Icon(
-                  _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  size: 34,
-                  color: activeColor,
-                ),
+                onTap: _isLoading ? null : _togglePlay,
+                child: _isLoading 
+                  ? SizedBox(
+                      width: 34,
+                      height: 34,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: activeColor,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      size: 34,
+                      color: activeColor,
+                    ),
               ),
               
               const SizedBox(width: 8),
