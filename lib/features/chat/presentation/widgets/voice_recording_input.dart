@@ -56,15 +56,15 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        // By using .aac instead of .m4a, we force Android to use the ADTS container
-        // which completely bypasses the buggy MPEG4Writer hardware muxer on Oppo devices!
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.aac';
+        // pcm16bits is the ONLY encoder that produces real audio on Oppo devices.
+        // aacLc crashes the MPEG4Writer and produces empty 5KB files.
+        // Playback works because audio_message_player downloads the file locally first.
+        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
         
         await _audioRecorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.aacLc, 
-            bitRate: 128000,
-            sampleRate: 44100,
+            encoder: AudioEncoder.pcm16bits, 
+            sampleRate: 16000,
             numChannels: 1,
           ),
           path: filePath,
