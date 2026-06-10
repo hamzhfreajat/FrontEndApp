@@ -56,14 +56,14 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        // pcm16bits is the ONLY encoder that produces real audio on Oppo devices.
-        // aacLc crashes the MPEG4Writer and produces empty 5KB files.
-        // Playback works because audio_message_player downloads the file locally first.
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
+        // Opus uses SOFTWARE encoding (libopus), completely bypassing the
+        // broken hardware MPEG4Writer on Oppo devices.
+        // OGG container has proper headers that ExoPlayer's OggExtractor reads.
+        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.ogg';
         
         await _audioRecorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.pcm16bits, 
+            encoder: AudioEncoder.opus, 
             sampleRate: 16000,
             numChannels: 1,
           ),
