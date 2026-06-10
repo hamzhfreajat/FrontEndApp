@@ -56,13 +56,14 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
-        // Use .m4a extension which is standard for aacLc encoder
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
+        // Use .wav extension and pcm16bits which is 100% foolproof on all Android devices
+        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
         
         await _audioRecorder.start(
           const RecordConfig(
-            encoder: AudioEncoder.aacLc, 
-            bitRate: 128000,
+            encoder: AudioEncoder.pcm16bits, 
+            sampleRate: 44100,
+            numChannels: 1,
           ),
           path: filePath,
         );

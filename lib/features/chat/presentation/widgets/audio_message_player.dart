@@ -93,7 +93,13 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
       } else {
         if (!_isInit) {
           if (widget.audioUrl.startsWith('http')) {
-            await _audioPlayer.setSourceUrl(widget.audioUrl);
+            String mimeType = 'audio/mpeg'; // Default
+            if (widget.audioUrl.toLowerCase().endsWith('.wav')) {
+              mimeType = 'audio/wav';
+            } else if (widget.audioUrl.toLowerCase().endsWith('.m4a') || widget.audioUrl.toLowerCase().endsWith('.aac')) {
+              mimeType = 'audio/mp4';
+            }
+            await _audioPlayer.setSource(UrlSource(widget.audioUrl, mimeType: mimeType));
           } else {
             await _audioPlayer.setSourceDeviceFile(widget.audioUrl);
           }
