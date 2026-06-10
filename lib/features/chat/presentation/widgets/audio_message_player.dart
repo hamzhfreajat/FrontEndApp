@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:just_audio/just_audio.dart';
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AudioMessagePlayer extends StatefulWidget {
   final String audioUrl;
@@ -28,10 +27,9 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   double _playbackRate = 1.0;
-  
+
   StreamSubscription? _durationSubscription;
   StreamSubscription? _positionSubscription;
-  StreamSubscription? _playerCompleteSubscription;
   StreamSubscription? _playerStateSubscription;
 
   bool _isInit = false;
@@ -42,38 +40,37 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
-    
+
     if (widget.recordedDuration != null) {
       _duration = widget.recordedDuration!;
     }
-    
+
     _initAudioPlayer();
   }
 
   void _initAudioPlayer() {
-    _durationSubscription = _audioPlayer.onDurationChanged.listen((duration) {
-      if (mounted) setState(() => _duration = duration);
+    _durationSubscription = _audioPlayer.durationStream.listen((duration) {
+      if (mounted && duration != null) setState(() => _duration = duration);
     });
 
-    _positionSubscription = _audioPlayer.onPositionChanged.listen((p) {
+    _positionSubscription = _audioPlayer.positionStream.listen((p) {
       if (mounted) setState(() => _position = p);
     });
 
-    _playerCompleteSubscription = _audioPlayer.onPlayerComplete.listen((event) {
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen((state) {
       if (mounted) {
         setState(() {
-          _isPlaying = false;
-          _position = Duration.zero;
-          _isInit = false;
+          _isPlaying = state.playing;
         });
-      }
-    });
-
-    _playerStateSubscription = _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (mounted) {
-        setState(() {
-          _isPlaying = state == PlayerState.playing;
-        });
+        // Handle completion
+        if (state.processingState == ProcessingState.completed) {
+          setState(() {
+            _isPlaying = false;
+            _position = Duration.zero;
+          });
+          _audioPlayer.seek(Duration.zero);
+          _audioPlayer.pause();
+        }
       }
     });
   }
@@ -82,7 +79,6 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   void dispose() {
     _durationSubscription?.cancel();
     _positionSubscription?.cancel();
-    _playerCompleteSubscription?.cancel();
     _playerStateSubscription?.cancel();
     _audioPlayer.dispose();
     super.dispose();
@@ -95,34 +91,24 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
       } else {
         if (!_isInit) {
           setState(() => _isLoading = true);
-          if (widget.audioUrl.startsWith('http')) {
-            try {
-              // Downloading the file completely bypasses Android MediaPlayer HTTP MIME type streaming bugs
-              final fileInfo = await DefaultCacheManager().downloadFile(widget.audioUrl);
-              await _audioPlayer.setSourceDeviceFile(fileInfo.file.path);
-            } catch (e) {
-              // Fallback to streaming if download fails
-              await _audioPlayer.setSourceUrl(widget.audioUrl);
+          try {
+            if (widget.audioUrl.startsWith('http')) {
+              await _audioPlayer.setUrl(widget.audioUrl);
+            } else {
+              await _audioPlayer.setFilePath(widget.audioUrl);
             }
-          } else {
-            await _audioPlayer.setSourceDeviceFile(widget.audioUrl);
+          } catch (e) {
+            debugPrint("Error setting audio source: $e");
+            if (mounted) setState(() => _isLoading = false);
+            return;
           }
           if (mounted) setState(() => _isLoading = false);
-          
+
           _isInit = true;
-          await _audioPlayer.setPlaybackRate(_playbackRate);
-          
-          if (_position.inMilliseconds > 0) {
-            await _audioPlayer.seek(_position);
-          }
+          await _audioPlayer.setSpeed(_playbackRate);
         }
-        
-        // If it was completed, seek to 0 before resuming
-        if (_position.inMilliseconds > 0 && _duration.inMilliseconds > 0 && _position.inMilliseconds >= _duration.inMilliseconds - 100) {
-          await _audioPlayer.seek(Duration.zero);
-        }
-        
-        await _audioPlayer.resume();
+
+        await _audioPlayer.play();
       }
     } catch (e) {
       debugPrint("Error playing audio: $e");
@@ -140,7 +126,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
       }
     });
     if (_isInit) {
-      _audioPlayer.setPlaybackRate(_playbackRate);
+      _audioPlayer.setSpeed(_playbackRate);
     }
   }
 
@@ -159,12 +145,12 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final displayDuration = _position.inMilliseconds > 0 ? _position : _duration;
-    
+
     // Premium Colors
     Color activeColor = widget.isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF1A73E8));
-    Color inactiveColor = widget.isMe ? Colors.white.withOpacity(0.3) : (isDark ? Colors.white30 : Colors.grey.shade400);
+    Color inactiveColor = widget.isMe ? Colors.white.withValues(alpha: 0.3) : (isDark ? Colors.white30 : Colors.grey.shade400);
     Color thumbColor = widget.isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF1A73E8));
-    Color speedBgColor = widget.isMe ? Colors.black.withOpacity(0.15) : (isDark ? Colors.white10 : Colors.grey.shade200);
+    Color speedBgColor = widget.isMe ? Colors.black.withValues(alpha: 0.15) : (isDark ? Colors.white10 : Colors.grey.shade200);
     Color speedTextColor = widget.isMe ? Colors.white : (isDark ? Colors.white : Colors.black87);
 
     return Container(
@@ -274,13 +260,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
                           max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 100.0,
                           onChanged: (val) {
                             if (_duration.inMilliseconds > 0) {
-                              if (_isInit) {
-                                _audioPlayer.seek(Duration(milliseconds: val.toInt()));
-                              } else {
-                                setState(() {
-                                  _position = Duration(milliseconds: val.toInt());
-                                });
-                              }
+                              _audioPlayer.seek(Duration(milliseconds: val.toInt()));
                             }
                           },
                         ),
@@ -304,7 +284,7 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
-                    color: widget.isMe ? Colors.white.withOpacity(0.8) : Colors.grey.shade600,
+                    color: widget.isMe ? Colors.white.withValues(alpha: 0.8) : Colors.grey.shade600,
                   ),
                 ),
               ),
@@ -317,4 +297,3 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   );
 }
 }
-
