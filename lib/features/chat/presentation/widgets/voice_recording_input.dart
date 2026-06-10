@@ -35,6 +35,8 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
   Timer? _ampTimer;
   final List<double> _amplitudes = List.filled(35, 0.0, growable: true);
 
+  StreamSubscription<Amplitude>? _ampSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -45,7 +47,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
   @override
   void dispose() {
     _timer?.cancel();
-    _ampTimer?.cancel();
+    _ampSubscription?.cancel();
     _audioRecorder.dispose();
     super.dispose();
   }
@@ -54,10 +56,14 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     try {
       if (await _audioRecorder.hasPermission()) {
         final dir = await getTemporaryDirectory();
+        // Use .m4a extension which is standard for aacLc encoder
         final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.m4a';
         
         await _audioRecorder.start(
-          const RecordConfig(encoder: AudioEncoder.aacLc, bitRate: 128000),
+          const RecordConfig(
+            encoder: AudioEncoder.aacLc, 
+            bitRate: 128000,
+          ),
           path: filePath,
         );
         
@@ -70,7 +76,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
         });
 
         _startTimer();
-        _startAmpTimer();
+        _startAmpListener();
       } else {
         widget.onCancel();
       }
@@ -87,39 +93,24 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     });
   }
 
-  void _startAmpTimer() {
-    _ampTimer?.cancel();
-    _ampTimer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) async {
-      if (_isRecording && !_isPaused) {
-        try {
-          final amp = await _audioRecorder.getAmplitude();
-          if (mounted) {
-            setState(() {
-              _amplitudes.removeAt(0);
-              final db = amp.current;
-              // Very sensitive mapping (-60dB to 0dB)
-              double minDb = -60.0;
-              double normalized = 0.0;
-              if (db > minDb) {
-                normalized = (db - minDb) / (0.0 - minDb);
-              }
-              
-              // Add a bit of liveliness if there's audio
-              if (normalized > 0.1) {
-                normalized += (math.Random().nextDouble() * 0.15);
-              }
-              
-              _amplitudes.add(math.max(0.02, normalized.clamp(0.0, 1.0)));
-            });
+  void _startAmpListener() {
+    _ampSubscription?.cancel();
+    _ampSubscription = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
+      if (_isRecording && !_isPaused && mounted) {
+        setState(() {
+          _amplitudes.removeAt(0);
+          final db = amp.current;
+          double minDb = -160.0;
+          double normalized = 0.0;
+          if (db > minDb) {
+            normalized = (db - minDb) / (0.0 - minDb);
+            normalized = math.pow(normalized, 0.4).toDouble(); // Boost faint noises significantly
           }
-        } catch (e) {
-          if (mounted) {
-            setState(() {
-              _amplitudes.removeAt(0);
-              _amplitudes.add(0.02);
-            });
+          if (normalized > 0.05) {
+            normalized += (math.Random().nextDouble() * 0.15);
           }
-        }
+          _amplitudes.add(math.max(0.02, normalized.clamp(0.0, 1.0)));
+        });
       }
     });
   }
@@ -127,7 +118,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
   Future<void> stopAndSend() async {
     if (!mounted) return;
     _timer?.cancel();
-    _ampTimer?.cancel();
+    _ampSubscription?.cancel();
     final path = await _audioRecorder.stop();
     SoundService.playMicStop(); // Professional tone
     if (mounted) {
@@ -147,7 +138,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
   Future<void> cancelRecording() async {
     if (!mounted) return;
     _timer?.cancel();
-    _ampTimer?.cancel();
+    _ampSubscription?.cancel();
     await _audioRecorder.stop();
     SoundService.playMicStop(); // Professional tone
     if (mounted) {
@@ -170,13 +161,13 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
       await _audioRecorder.resume();
       if (!mounted) return;
       _startTimer();
-      _startAmpTimer();
+      _startAmpListener();
       setState(() => _isPaused = false);
     } else {
       await _audioRecorder.pause();
       if (!mounted) return;
       _timer?.cancel();
-      _ampTimer?.cancel();
+      _ampSubscription?.cancel();
       setState(() => _isPaused = true);
     }
   }
