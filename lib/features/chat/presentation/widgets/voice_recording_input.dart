@@ -76,7 +76,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
         });
 
         _startTimer();
-        _startAmpListener();
+        _startAmpTimer();
       } else {
         widget.onCancel();
       }
@@ -93,24 +93,45 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
     });
   }
 
-  void _startAmpListener() {
-    _ampSubscription?.cancel();
-    _ampSubscription = _audioRecorder.onAmplitudeChanged(const Duration(milliseconds: 100)).listen((amp) {
-      if (_isRecording && !_isPaused && mounted) {
-        setState(() {
-          _amplitudes.removeAt(0);
-          final db = amp.current;
-          double minDb = -160.0;
-          double normalized = 0.0;
-          if (db > minDb) {
-            normalized = (db - minDb) / (0.0 - minDb);
-            normalized = math.pow(normalized, 0.4).toDouble(); // Boost faint noises significantly
+  void _startAmpTimer() {
+    _ampSubscription?.cancel(); // Cancel any existing stream
+    
+    _ampTimer?.cancel();
+    _ampTimer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) async {
+      if (_isRecording && !_isPaused) {
+        try {
+          final amp = await _audioRecorder.getAmplitude();
+          if (mounted) {
+            setState(() {
+              _amplitudes.removeAt(0);
+              final db = amp.current;
+              
+              double minDb = -160.0;
+              double normalized = 0.0;
+              
+              if (db > minDb) {
+                normalized = (db - minDb) / (0.0 - minDb);
+                normalized = math.pow(normalized, 0.4).toDouble();
+              }
+              
+              // Always add a tiny random jitter so it looks alive even in total silence
+              if (normalized <= 0.05) {
+                 normalized = 0.02 + (math.Random().nextDouble() * 0.05);
+              } else {
+                 normalized += (math.Random().nextDouble() * 0.15);
+              }
+              
+              _amplitudes.add(math.max(0.02, normalized.clamp(0.0, 1.0)));
+            });
           }
-          if (normalized > 0.05) {
-            normalized += (math.Random().nextDouble() * 0.15);
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _amplitudes.removeAt(0);
+              _amplitudes.add(0.02 + (math.Random().nextDouble() * 0.05));
+            });
           }
-          _amplitudes.add(math.max(0.02, normalized.clamp(0.0, 1.0)));
-        });
+        }
       }
     });
   }
@@ -161,7 +182,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
       await _audioRecorder.resume();
       if (!mounted) return;
       _startTimer();
-      _startAmpListener();
+      _startAmpTimer();
       setState(() => _isPaused = false);
     } else {
       await _audioRecorder.pause();
