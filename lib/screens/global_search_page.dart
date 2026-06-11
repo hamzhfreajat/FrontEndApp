@@ -79,6 +79,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   void _navigateToAds(String keyword, {int? categoryId, String? section, bool isTag = false, String? rawTag}) async {
     // Hide keyboard
     FocusScope.of(context).unfocus();
+    String? cleanSearchQuery = keyword.isNotEmpty ? keyword : null;
     
     // Save to recent searches if there's a keyword
     if (keyword.isNotEmpty) {
@@ -94,6 +95,10 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       try {
         final results = await _apiService.searchAutocomplete(keyword);
         _searchIntent = results['intent'] as Map<String, dynamic>?;
+        if (results['normalized_query'] != null) {
+          cleanSearchQuery = (results['normalized_query'] as String).trim();
+          if (cleanSearchQuery!.isEmpty) cleanSearchQuery = null;
+        }
       } catch (_) {
         _searchIntent = null;
       }
@@ -147,7 +152,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailsPage(
         category: targetCat, 
         allCategories: _topCategories,
-        initialSearchQuery: keyword,
+        initialSearchQuery: cleanSearchQuery,
         initialTags: intentTags,
         initialLocations: intentLocs,
       )));
@@ -159,7 +164,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
         Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailsPage(
           category: cat, 
           allCategories: _topCategories,
-          initialSearchQuery: keyword,
+          initialSearchQuery: cleanSearchQuery,
           initialTags: intentTags,
           initialLocations: intentLocs,
         )));

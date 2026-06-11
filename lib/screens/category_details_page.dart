@@ -4,6 +4,7 @@ import 'package:flutter/rendering.dart';
 import '../models/category.dart';
 import '../models/ad.dart';
 import '../models/location.dart';
+import '../models/saved_search.dart';
 import '../services/api_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
@@ -1061,7 +1062,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
                             onPressed: () => setModalState(() {
                               selectedCityForFilter = null;
-                              selectedRegionsForFilter.clear();
                               searchQuery = '';
                               searchController.clear();
                             }),
@@ -1119,6 +1119,40 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   ),
                   const SizedBox(height: 8),
                   
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 36,
+                      child: selectedRegionsForFilter.isEmpty
+                          ? const SizedBox.shrink()
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: selectedRegionsForFilter.map((r) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Chip(
+                                      label: Text(r.nameAr, style: TextStyle(color: brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                      backgroundColor: brandColor.withOpacity(0.1),
+                                      deleteIcon: Icon(Icons.close, size: 16, color: brandColor),
+                                      onDeleted: () {
+                                        setModalState(() {
+                                          selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                        });
+                                      },
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(color: brandColor.withOpacity(0.2)),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                    ),
+                  ),
+                  
                   if (selectedCityForFilter == null) ...[
                     // Step 1: Cities
                     Expanded(
@@ -1154,14 +1188,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                   selectedCityForFilter = c;
                                   searchQuery = '';
                                   searchController.clear();
-                                });
-
-                                final appProvider = Provider.of<AppProvider>(context, listen: false);
-                                appProvider.setLocation(c, null, null).then((_) {
-                                  if (mounted) {
-                                    setState(() { _locationsFilter = [c.nameAr]; });
-                                    _fetchAds();
-                                  }
                                 });
                               },
                             ),
@@ -1231,9 +1257,21 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                               await appProvider.setLocation(selectedCityForFilter, null, null);
                               setState(() { _locationsFilter = [selectedCityForFilter!.nameAr]; });
                             } else {
-                              await appProvider.setLocation(selectedCityForFilter, selectedRegionsForFilter, null);
+                              Set<City> involvedCities = {};
+                              if (appProvider.dbCities != null) {
+                                for (var r in selectedRegionsForFilter) {
+                                  try {
+                                    final city = appProvider.dbCities!.firstWhere((c) => c.id == r.cityId);
+                                    involvedCities.add(city);
+                                  } catch (_) {}
+                                }
+                              }
+                              await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : selectedCityForFilter, selectedRegionsForFilter, null);
                               setState(() { 
-                                _locationsFilter = [selectedCityForFilter!.nameAr, ...selectedRegionsForFilter.map((r) => r.nameAr)]; 
+                                _locationsFilter = [
+                                  ...involvedCities.map((c) => c.nameAr),
+                                  ...selectedRegionsForFilter.map((r) => r.nameAr)
+                                ]; 
                               });
                             }
                             Navigator.pop(ctx);
@@ -1840,28 +1878,77 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     Text('عوامل التصفية النشطة:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedTags.removeWhere((t) => t.contains(':'));
-                      _minPrice = null;
-                      _maxPrice = null;
-                      
-                      // If we are clearing location filters, also clear the global preference
-                      if (_locationsFilter != null && _locationsFilter!.isNotEmpty) {
-                        final appProvider = Provider.of<AppProvider>(context, listen: false);
-                        appProvider.setLocation(null, null, 'كل الأردن');
-                      }
-                      
-                      _locationsFilter = null;
-                      _ads.clear();
-                      _skip = 0;
-                      _hasMoreAds = true;
-                      _isLoadingAds = true;
-                    });
-                    _fetchAds();
-                  },
-                  child: Text('مسح الكل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red.shade500)),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        final savedSearch = SavedSearch(
+                          id: '',
+                          categoryId: widget.category.id,
+                          categoryName: widget.category.name,
+                          searchQuery: _searchQuery,
+                          minPrice: _minPrice,
+                          maxPrice: _maxPrice,
+                          locations: _locationsFilter ?? [],
+                          tags: _selectedTags,
+                          alertType: 'instant',
+                          createdAt: DateTime.now(),
+                        );
+                        
+                        await Provider.of<SavedSearchProvider>(context, listen: false).saveSearch(savedSearch);
+                        
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('تم حفظ البحث للفئة ${widget.category.name}'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.bookmark_border, size: 14, color: Theme.of(context).primaryColor),
+                            const SizedBox(width: 4),
+                            Text('حفظ البحث', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedTags.removeWhere((t) => t.contains(':'));
+                          _minPrice = null;
+                          _maxPrice = null;
+                          
+                          // If we are clearing location filters, also clear the global preference
+                          if (_locationsFilter != null && _locationsFilter!.isNotEmpty) {
+                            final appProvider = Provider.of<AppProvider>(context, listen: false);
+                            appProvider.setLocation(null, null, 'كل الأردن');
+                          }
+                          
+                          _locationsFilter = null;
+                          _searchQuery = '';
+                          _ads.clear();
+                          _skip = 0;
+                          _hasMoreAds = true;
+                          _isLoadingAds = true;
+                        });
+                        _fetchAds();
+                      },
+                      child: Text('مسح الكل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red.shade500)),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1934,44 +2021,43 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     Widget? savedFiltersRestoreWidget;
     if (_savedCategoryFilters != null) {
-      savedFiltersRestoreWidget = Container(
-        width: double.infinity,
-        color: brandColor.withOpacity(0.08),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        child: Row(
-          children: [
-            Icon(Icons.history_rounded, size: 20, color: brandColor),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text('يوجد فلاتر استخدمتها مسبقاً', style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade800, fontWeight: FontWeight.w700, fontFamily: 'Tajawal')),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _minPrice = _savedCategoryFilters!['min_price']?.toDouble();
-                  _maxPrice = _savedCategoryFilters!['max_price']?.toDouble();
-                  if (_savedCategoryFilters!['tags'] != null) {
-                    _selectedTags = List<String>.from(_savedCategoryFilters!['tags']);
-                  }
-                  _savedCategoryFilters = null; // Hide the widget after applying
-                  _ads.clear();
-                  _skip = 0;
-                  _hasMoreAds = true;
-                  _isLoadingAds = true;
-                });
-                _fetchAds();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: brandColor,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                minimumSize: const Size(0, 32),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      savedFiltersRestoreWidget = GestureDetector(
+        onTap: () {
+          setState(() {
+            _minPrice = _savedCategoryFilters!['min_price']?.toDouble();
+            _maxPrice = _savedCategoryFilters!['max_price']?.toDouble();
+            if (_savedCategoryFilters!['tags'] != null) {
+              _selectedTags = List<String>.from(_savedCategoryFilters!['tags']);
+            }
+            _savedCategoryFilters = null; // Hide the widget after applying
+            _ads.clear();
+            _skip = 0;
+            _hasMoreAds = true;
+            _isLoadingAds = true;
+          });
+          _fetchAds();
+        },
+        child: Container(
+          width: double.infinity,
+          color: brandColor.withOpacity(0.08),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          child: Row(
+            children: [
+              Icon(Icons.history_rounded, size: 20, color: brandColor),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('يوجد فلاتر استخدمتها مسبقاً', style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade800, fontWeight: FontWeight.w700, fontFamily: 'Tajawal')),
               ),
-              child: const Text('استعادة الفلاتر ♻️', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: brandColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text('استعادة الفلاتر ♻️', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
+              ),
+            ],
+          ),
         ),
       );
     }

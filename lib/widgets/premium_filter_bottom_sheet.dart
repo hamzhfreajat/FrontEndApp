@@ -546,14 +546,29 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                         // Lands already added governorate, directorate, etc from _dynamicDataLoc
                       } else if (_isRealEstate()) {
                         final appProvider = Provider.of<AppProvider>(context, listen: false);
-                        if (_selectedCityId != null) {
+                        if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
+                          List<Region> selectedRegionsList = [];
+                          Set<City> involvedCities = {};
+                          for (var c in appProvider.dbCities!) {
+                            final matchingRegions = c.regions.where((r) => _selectedRegionIds.contains(r.id)).toList();
+                            if (matchingRegions.isNotEmpty) {
+                              involvedCities.add(c);
+                              selectedRegionsList.addAll(matchingRegions);
+                            }
+                          }
+                          for (var c in involvedCities) {
+                            locs.add(c.nameAr);
+                          }
+                          locs.addAll(selectedRegionsList.map((r) => r.nameAr));
+                          appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : null, selectedRegionsList, null);
+                        } else if (_selectedCityId != null) {
                           final city = appProvider.dbCities?.firstWhere((c) => c.id == _selectedCityId, orElse: () => appProvider.dbCities!.first);
                           if (city != null) {
                             locs.add(city.nameAr);
-                            if (_selectedRegionIds.isNotEmpty) {
-                              locs.addAll(city.regions.where((r) => _selectedRegionIds.contains(r.id)).map((r) => r.nameAr));
-                            }
+                            appProvider.setLocation(city, null, null);
                           }
+                        } else {
+                          appProvider.setLocation(null, null, 'كل الأردن');
                         }
                       } else {
                         if (_dynamicDataLoc['city'] != null) {
@@ -600,14 +615,29 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                         // Lands already added governorate, directorate, etc from _dynamicDataLoc
                       } else if (_isRealEstate()) {
                         final appProvider = Provider.of<AppProvider>(context, listen: false);
-                        if (_selectedCityId != null) {
+                        if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
+                          List<Region> selectedRegionsList = [];
+                          Set<City> involvedCities = {};
+                          for (var c in appProvider.dbCities!) {
+                            final matchingRegions = c.regions.where((r) => _selectedRegionIds.contains(r.id)).toList();
+                            if (matchingRegions.isNotEmpty) {
+                              involvedCities.add(c);
+                              selectedRegionsList.addAll(matchingRegions);
+                            }
+                          }
+                          for (var c in involvedCities) {
+                            locs.add(c.nameAr);
+                          }
+                          locs.addAll(selectedRegionsList.map((r) => r.nameAr));
+                          appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : null, selectedRegionsList, null);
+                        } else if (_selectedCityId != null) {
                           final city = appProvider.dbCities?.firstWhere((c) => c.id == _selectedCityId, orElse: () => appProvider.dbCities!.first);
                           if (city != null) {
                             locs.add(city.nameAr);
-                            if (_selectedRegionIds.isNotEmpty) {
-                              locs.addAll(city.regions.where((r) => _selectedRegionIds.contains(r.id)).map((r) => r.nameAr));
-                            }
+                            appProvider.setLocation(city, null, null);
                           }
+                        } else {
+                          appProvider.setLocation(null, null, 'كل الأردن');
                         }
                       } else {
                         if (_dynamicDataLoc['city'] != null) {
@@ -1076,8 +1106,10 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
       selectedCityForFilter = appProvider.dbCities?.firstWhere((c) => c.id == _selectedCityId, orElse: () => appProvider.dbCities!.first);
     }
     Set<Region> selectedRegionsForFilter = {};
-    if (selectedCityForFilter != null && _selectedRegionIds.isNotEmpty) {
-      selectedRegionsForFilter = selectedCityForFilter.regions.where((r) => _selectedRegionIds.contains(r.id)).toSet();
+    if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
+      for (var c in appProvider.dbCities!) {
+        selectedRegionsForFilter.addAll(c.regions.where((r) => _selectedRegionIds.contains(r.id)));
+      }
     }
     String searchQuery = '';
     final TextEditingController searchController = TextEditingController();
@@ -1118,7 +1150,6 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                             icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
                             onPressed: () => setModalState(() {
                               selectedCityForFilter = null;
-                              selectedRegionsForFilter.clear();
                               searchQuery = '';
                               searchController.clear();
                             }),
@@ -1172,6 +1203,40 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   ),
                   const SizedBox(height: 8),
                   
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 36,
+                      child: selectedRegionsForFilter.isEmpty
+                          ? const SizedBox.shrink()
+                          : SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: selectedRegionsForFilter.map((r) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Chip(
+                                      label: Text(r.nameAr, style: TextStyle(color: widget.brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                      backgroundColor: widget.brandColor.withOpacity(0.1),
+                                      deleteIcon: Icon(Icons.close, size: 16, color: widget.brandColor),
+                                      onDeleted: () {
+                                        setModalState(() {
+                                          selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                        });
+                                      },
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(color: widget.brandColor.withOpacity(0.2)),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                    ),
+                  ),
+                  
                   if (selectedCityForFilter == null) ...[
                     // Cities
                     Expanded(
@@ -1206,7 +1271,6 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                               onTap: () {
                                 setState(() {
                                   _selectedCityId = c.id;
-                                  _selectedRegionIds.clear();
                                 });
                                 _triggerCountUpdate();
                                 setModalState(() {
@@ -1279,7 +1343,9 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                           ),
                           onPressed: () {
                             setState(() {
-                              _selectedCityId = selectedCityForFilter!.id;
+                              if (selectedCityForFilter != null) {
+                                _selectedCityId = selectedCityForFilter!.id;
+                              }
                               _selectedRegionIds = selectedRegionsForFilter.map((e) => e.id).toSet();
                             });
                             _triggerCountUpdate();

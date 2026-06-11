@@ -802,33 +802,45 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               Text('${ad.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.w900, fontFamily: 'Roboto', fontSize: 32, letterSpacing: -1, color: Color(0xFF0075FF), height: 1)),
               const SizedBox(width: 6),
               const Padding(padding: EdgeInsets.only(bottom: 4), child: Text('دينار', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Color(0xFF0075FF)))),
-              const Spacer(),
-              if (_negotiable)
-                Container(
-                  margin: const EdgeInsets.only(bottom: 5, left: 6),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade200)),
-                  child: const Text('قابل للتفاوض 💸', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.w900)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.end,
+                  runSpacing: 4,
+                  children: [
+                    if (_negotiable)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 5, left: 6),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.green.shade200)),
+                        child: const Text('قابل للتفاوض 💸', style: TextStyle(color: Colors.green, fontSize: 11, fontWeight: FontWeight.w900)),
+                      ),
+                    if (_mortgage) 
+                       Container(
+                          margin: const EdgeInsets.only(bottom: 5),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFBFDBFE))),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.account_balance, size: 14, color: Color(0xFF2563EB)),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  (paymentMethod == 'أقساط' || paymentMethod == 'كاش أو أقساط') && downPayment > 0 
+                                    ? 'دفعة ${downPayment.toStringAsFixed(0)} د.أ🏦' 
+                                    : 'متاح تقسيط🏦', 
+                                  style: const TextStyle(fontSize: 11, color: Color(0xFF2563EB), fontWeight: FontWeight.w900),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                       ),
+                  ],
                 ),
-              if (_mortgage) 
-                 Container(
-                    margin: const EdgeInsets.only(bottom: 5),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFBFDBFE))),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.account_balance, size: 14, color: Color(0xFF2563EB)),
-                        const SizedBox(width: 4),
-                        Text(
-                          (paymentMethod == 'أقساط' || paymentMethod == 'كاش أو أقساط') && downPayment > 0 
-                            ? 'دفعة ${downPayment.toStringAsFixed(0)} د.أ🏦' 
-                            : 'متاح تقسيط🏦', 
-                          style: const TextStyle(fontSize: 11, color: Color(0xFF2563EB), fontWeight: FontWeight.w900)
-                        ),
-                      ],
-                    ),
-                 ),
+              ),
            ]
         ),
       ]),
@@ -1765,8 +1777,6 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                     Row(
                       children: [
                         Text(ad.ownerName ?? 'مستخدم جديد', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B))),
-                        const SizedBox(width: 4),
-                        const Icon(Icons.verified, color: Color(0xFF3B82F6), size: 16),
                       ],
                     ),
                     const SizedBox(height: 4),

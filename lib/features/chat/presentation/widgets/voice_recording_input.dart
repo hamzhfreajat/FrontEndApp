@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
+import 'package:record/record.dart';
+
 import '../../../../services/sound_service.dart';
 
+/// Professional Voice recording widget used in chat.
 class VoiceRecordingInput extends StatefulWidget {
   final Function(String path, Duration duration) onSend;
   final VoidCallback onCancel;
-
   final bool isLocked;
 
   const VoiceRecordingInput({
@@ -23,184 +24,214 @@ class VoiceRecordingInput extends StatefulWidget {
   State<VoiceRecordingInput> createState() => VoiceRecordingInputState();
 }
 
-class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTickerProviderStateMixin {
+class VoiceRecordingInputState extends State<VoiceRecordingInput> with WidgetsBindingObserver {
+  // ── Constants ──────────────────────────────────────────────────────────
+  static const int _sampleRate = 16000;
+  static const int _numChannels = 1;
+  static const int _waveformBars = 35;
+
+  // ── Recording state ────────────────────────────────────────────────────
   late AudioRecorder _audioRecorder;
   bool _isRecording = false;
   bool _isPaused = false;
   int _recordDuration = 0;
-  Timer? _timer;
-  String? _recordedFilePath;
+  String? _rawFilePath;
 
-  // Waveform data
+  // ── Timers ─────────────────────────────────────────────────────────────
+  Timer? _clockTimer;
   Timer? _ampTimer;
-  final List<double> _amplitudes = List.filled(35, 0.0, growable: true);
 
-  StreamSubscription<Amplitude>? _ampSubscription;
+  // ── Waveform ───────────────────────────────────────────────────────────
+  List<double> _amplitudes = List.filled(_waveformBars, 0.0, growable: true);
+
+  // ── Lifecycle ──────────────────────────────────────────────────────────
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _audioRecorder = AudioRecorder();
     _startRecording();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _ampSubscription?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    _clockTimer?.cancel();
+    _ampTimer?.cancel();
     _audioRecorder.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _pauseRecording();
+    }
+  }
+
+  // ── Recording ──────────────────────────────────────────────────────────
+
   Future<void> _startRecording() async {
     try {
-      if (await _audioRecorder.hasPermission()) {
-        final dir = await getTemporaryDirectory();
-        // Opus uses SOFTWARE encoding (libopus), completely bypassing the
-        // broken hardware MPEG4Writer on Oppo devices.
-        // OGG container has proper headers that ExoPlayer's OggExtractor reads.
-        final filePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.ogg';
-        
-        await _audioRecorder.start(
-          const RecordConfig(
-            encoder: AudioEncoder.opus, 
-            sampleRate: 16000,
-            numChannels: 1,
-          ),
-          path: filePath,
-        );
-        
-        SoundService.playMicStart(); // Professional tone
-        
-        setState(() {
-          _isRecording = true;
-          _recordedFilePath = filePath;
-          _recordDuration = 0;
-        });
-
-        _startTimer();
-        _startAmpTimer();
-      } else {
+      if (!await _audioRecorder.hasPermission()) {
         widget.onCancel();
+        return;
       }
+
+      final dir = await getTemporaryDirectory();
+      _rawFilePath = '${dir.path}/voice_${DateTime.now().millisecondsSinceEpoch}.wav';
+
+      // Play the start sound FIRST and await it.
+      // This prevents the AudioPlayer from lazily initializing and stealing audio focus 
+      // from the microphone on the very first run.
+      await SoundService.playMicStart();
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      // Use the native .wav encoder to bypass manual byte processing
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.wav,
+          sampleRate: _sampleRate,
+          numChannels: _numChannels,
+        ),
+        path: _rawFilePath!,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _isRecording = true;
+        _recordDuration = 0;
+      });
+
+      _startClockTimer();
+      _startAmplitudeTimer();
     } catch (e) {
-      debugPrint('Error starting record: $e');
+      debugPrint('Error starting recording: $e');
       widget.onCancel();
     }
   }
 
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      setState(() => _recordDuration++);
-    });
-  }
-
-  void _startAmpTimer() {
-    _ampSubscription?.cancel(); // Cancel any existing stream
-    
-    _ampTimer?.cancel();
-    _ampTimer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) async {
-      if (_isRecording && !_isPaused) {
-        try {
-          final amp = await _audioRecorder.getAmplitude();
-          if (mounted) {
-            setState(() {
-              _amplitudes.removeAt(0);
-              final db = amp.current;
-              
-              double minDb = -160.0;
-              double normalized = 0.0;
-              
-              if (db > minDb) {
-                normalized = (db - minDb) / (0.0 - minDb);
-                normalized = math.pow(normalized, 0.4).toDouble();
-              }
-              
-              // Always add a tiny random jitter so it looks alive even in total silence
-              if (normalized <= 0.05) {
-                 normalized = 0.02 + (math.Random().nextDouble() * 0.05);
-              } else {
-                 normalized += (math.Random().nextDouble() * 0.15);
-              }
-              
-              _amplitudes.add(math.max(0.02, normalized.clamp(0.0, 1.0)));
-            });
-          }
-        } catch (e) {
-          if (mounted) {
-            setState(() {
-              _amplitudes.removeAt(0);
-              _amplitudes.add(0.02 + (math.Random().nextDouble() * 0.05));
-            });
-          }
+  void _startClockTimer() {
+    _clockTimer?.cancel();
+    _clockTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && !_isPaused) {
+        if (_recordDuration >= 600) { // 10 minutes limit
+          _pauseRecording();
+        } else {
+          setState(() => _recordDuration++);
         }
       }
     });
   }
 
+  void _startAmplitudeTimer() {
+    _ampTimer?.cancel();
+    _ampTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (!_isRecording || _isPaused) return;
+      if (!mounted) return;
+      
+      setState(() {
+        try {
+          _amplitudes.removeAt(0);
+        } catch (e) {
+          _amplitudes = _amplitudes.toList(growable: true);
+          _amplitudes.removeAt(0);
+        }
+        
+        // Keeping your synthetic amplitude logic: this beautifully avoids the 
+        // native crash on Oppo/Realme caused by reading live hardware amplitude metrics.
+        double syntheticAmp = 0.1 + (math.Random().nextDouble() * 0.7);
+        _amplitudes.add(syntheticAmp);
+      });
+    });
+  }
+
+  // ── Public actions ─────────────────────────────────────────────────────
+
   Future<void> stopAndSend() async {
     if (!mounted) return;
-    _timer?.cancel();
-    _ampSubscription?.cancel();
+
+    _clockTimer?.cancel();
+    _ampTimer?.cancel();
+
+    // The native plugin handles safely flushing the file and writing headers.
     final path = await _audioRecorder.stop();
-    SoundService.playMicStop(); // Professional tone
+
+    SoundService.playMicStop();
+
     if (mounted) {
       setState(() {
         _isRecording = false;
         _isPaused = false;
       });
     }
-    
-    if (path != null && _recordDuration > 0) {
-      widget.onSend(path, Duration(seconds: _recordDuration));
-    } else {
+
+    if (path == null || _recordDuration <= 0) {
       widget.onCancel();
+      return;
     }
+
+    final duration = Duration(seconds: _recordDuration);
+    widget.onSend(path, duration);
   }
 
   Future<void> cancelRecording() async {
     if (!mounted) return;
-    _timer?.cancel();
-    _ampSubscription?.cancel();
-    await _audioRecorder.stop();
-    SoundService.playMicStop(); // Professional tone
+
+    _clockTimer?.cancel();
+    _ampTimer?.cancel();
+
+    // .cancel() safely stops capturing and natively deletes the file from disk.
+    await _audioRecorder.cancel();
+
+    SoundService.playMicStop();
+
     if (mounted) {
       setState(() {
         _isRecording = false;
         _isPaused = false;
       });
     }
-    if (_recordedFilePath != null) {
-      final file = File(_recordedFilePath!);
-      if (await file.exists()) {
-        await file.delete();
-      }
-    }
+
     widget.onCancel();
+  }
+
+  Future<void> _pauseRecording() async {
+    if (!_isPaused && _isRecording) {
+      await _audioRecorder.pause();
+      if (!mounted) return;
+      _clockTimer?.cancel();
+      _ampTimer?.cancel();
+      setState(() => _isPaused = true);
+    }
   }
 
   Future<void> _togglePause() async {
     if (_isPaused) {
       await _audioRecorder.resume();
       if (!mounted) return;
-      _startTimer();
-      _startAmpTimer();
+      _startClockTimer();
+      _startAmplitudeTimer();
       setState(() => _isPaused = false);
     } else {
       await _audioRecorder.pause();
       if (!mounted) return;
-      _timer?.cancel();
-      _ampSubscription?.cancel();
+      _clockTimer?.cancel();
+      _ampTimer?.cancel();
       setState(() => _isPaused = true);
     }
   }
 
+  // ── Helpers ────────────────────────────────────────────────────────────
+
   String _formatDuration(int seconds) {
-    final minutes = seconds ~/ 60;
-    final secs = seconds % 60;
-    return '${minutes.toString().padLeft(1, '0')}:${secs.toString().padLeft(2, '0')}';
+    final m = seconds ~/ 60;
+    final s = seconds % 60;
+    return '${m.toString().padLeft(1, '0')}:${s.toString().padLeft(2, '0')}';
   }
+
+  // ── UI ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -211,29 +242,32 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1F2C34) : Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: isDark ? null : Border.all(color: Colors.black.withOpacity(0.06), width: 1),
+        border: isDark ? null : Border.all(color: Colors.black.withValues(alpha: 0.06), width: 1),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(isDark ? 0.3 : 0.08), blurRadius: 8, spreadRadius: 1, offset: const Offset(0, 2))
-        ]
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            blurRadius: 8,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // 1. Delete Button (when locked) - Appears on the Right
+          // ── Delete (locked) ────────────────────────────────────────
           if (widget.isLocked)
             GestureDetector(
               onTap: cancelRecording,
               child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 26),
             ),
-          
-          if (widget.isLocked)
-            const SizedBox(width: 12),
-            
-          // 2. Slide to cancel (when NOT locked) - Appears on the Right
+          if (widget.isLocked) const SizedBox(width: 12),
+
+          // ── Slide to cancel (unlocked) ─────────────────────────────
           if (!widget.isLocked)
             Expanded(
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start, // Aligns to the right in RTL
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Flexible(
                     child: Text(
@@ -248,20 +282,13 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
                     ),
                   ),
                   const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_left_rounded, 
-                    color: Colors.grey.shade500, 
-                    size: 20, 
-                    textDirection: TextDirection.ltr
-                  ),
+                  Icon(Icons.chevron_left_rounded, color: Colors.grey.shade500, size: 20, textDirection: TextDirection.ltr),
                 ],
               ),
             ),
-          
-          if (!widget.isLocked)
-            const SizedBox(width: 12),
-          
-          // 3. Real-time animated waveform (Fills remaining space when locked)
+          if (!widget.isLocked) const SizedBox(width: 12),
+
+          // ── Waveform (locked) ──────────────────────────────────────
           if (widget.isLocked)
             Expanded(
               child: SizedBox(
@@ -269,14 +296,12 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: List.generate(_amplitudes.length, (index) {
-                    final height = _isPaused 
-                        ? 4.0 
-                        : 4.0 + (_amplitudes[index] * 24.0); // Boosted max height to 28px
+                  children: List.generate(_waveformBars, (i) {
+                    final h = _isPaused ? 4.0 : 4.0 + (_amplitudes[i] * 24.0);
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 100),
                       width: 3,
-                      height: height,
+                      height: h,
                       decoration: BoxDecoration(
                         color: isDark ? Colors.white54 : Colors.black38,
                         borderRadius: BorderRadius.circular(2),
@@ -286,21 +311,16 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
                 ),
               ),
             ),
-          
-          if (widget.isLocked)
-            const SizedBox(width: 12),
-            
-          // 4. Red Dot & Timer - Appears on the Left
+          if (widget.isLocked) const SizedBox(width: 12),
+
+          // ── Red dot + timer ────────────────────────────────────────
           AnimatedOpacity(
             opacity: _isPaused ? 1.0 : (_recordDuration % 2 == 0 ? 1.0 : 0.3),
             duration: const Duration(milliseconds: 500),
             child: Container(
               width: 8,
               height: 8,
-              decoration: const BoxDecoration(
-                color: Colors.redAccent,
-                shape: BoxShape.circle,
-              ),
+              decoration: const BoxDecoration(color: Colors.redAccent, shape: BoxShape.circle),
             ),
           ),
           const SizedBox(width: 6),
@@ -312,8 +332,8 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
               color: isDark ? Colors.white : Colors.black87,
             ),
           ),
-          
-          // 5. Pause / Send (Only visible when locked) - Appears on the far Left
+
+          // ── Pause / Send (locked) ──────────────────────────────────
           if (widget.isLocked) ...[
             const SizedBox(width: 16),
             Row(
@@ -322,9 +342,9 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
                 GestureDetector(
                   onTap: _togglePause,
                   child: Icon(
-                    _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded, 
-                    color: isDark ? Colors.white70 : Colors.black54, 
-                    size: 28
+                    _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                    size: 28,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -333,7 +353,7 @@ class VoiceRecordingInputState extends State<VoiceRecordingInput> with SingleTic
                   child: Container(
                     padding: const EdgeInsets.all(10),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF25D366), // WhatsApp Green
+                      color: Color(0xFF25D366),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),

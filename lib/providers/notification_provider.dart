@@ -51,7 +51,11 @@ class NotificationProvider with ChangeNotifier {
       wsUrl = wsUrl.substring(0, wsUrl.length - 4);
     }
     
-    final wsUri = '$wsUrl/api/notifications/ws/$userId';
+    // Retrieve JWT Token
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('jwt_token') ?? '';
+    
+    final wsUri = '$wsUrl/api/notifications/ws/$userId?token=$token';
     
     try {
       _channel = IOWebSocketChannel.connect(

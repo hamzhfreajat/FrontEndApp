@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:just_audio/just_audio.dart';
 
 class AudioMessagePlayer extends StatefulWidget {
   final String audioUrl;
@@ -23,17 +26,20 @@ class AudioMessagePlayer extends StatefulWidget {
 
 class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
   late AudioPlayer _audioPlayer;
+
+  bool _isInit = false;
+  bool _isLoading = false;
   bool _isPlaying = false;
+  bool _hasError = false;
+
   Duration _duration = Duration.zero;
   Duration _position = Duration.zero;
   double _playbackRate = 1.0;
 
-  StreamSubscription? _durationSubscription;
-  StreamSubscription? _positionSubscription;
-  StreamSubscription? _playerStateSubscription;
+  StreamSubscription? _durationSub;
+  StreamSubscription? _positionSub;
+  StreamSubscription? _stateSub;
 
-  bool _isInit = false;
-  bool _isLoading = false;
   List<double>? _waveformHeights;
 
   @override
@@ -41,123 +47,165 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
     super.initState();
     _audioPlayer = AudioPlayer();
 
+    // Use passed-in duration as a fallback if available
     if (widget.recordedDuration != null) {
       _duration = widget.recordedDuration!;
     }
-
-    _initAudioPlayer();
-  }
-
-  void _initAudioPlayer() {
-    _durationSubscription = _audioPlayer.durationStream.listen((duration) {
-      if (mounted && duration != null) setState(() => _duration = duration);
-    });
-
-    _positionSubscription = _audioPlayer.positionStream.listen((p) {
-      if (mounted) setState(() => _position = p);
-    });
-
-    _playerStateSubscription = _audioPlayer.playerStateStream.listen((state) {
-      if (mounted) {
-        setState(() {
-          _isPlaying = state.playing;
-        });
-        // Handle completion
-        if (state.processingState == ProcessingState.completed) {
-          setState(() {
-            _isPlaying = false;
-            _position = Duration.zero;
-          });
-          _audioPlayer.seek(Duration.zero);
-          _audioPlayer.pause();
-        }
-      }
-    });
   }
 
   @override
   void dispose() {
-    _durationSubscription?.cancel();
-    _positionSubscription?.cancel();
-    _playerStateSubscription?.cancel();
+    _durationSub?.cancel();
+    _positionSub?.cancel();
+    _stateSub?.cancel();
     _audioPlayer.dispose();
     super.dispose();
   }
 
-  Future<void> _togglePlay() async {
+  Future<void> _initAndPlay() async {
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+
     try {
-      if (_isPlaying) {
-        await _audioPlayer.pause();
+      // 1. Download/Cache the audio file FIRST
+      // This solves ALL streaming/codec/byte-range issues on ExoPlayer.
+      final String uriToPlay;
+      if (widget.audioUrl.startsWith('http')) {
+        final file = await DefaultCacheManager().getSingleFile(widget.audioUrl);
+        uriToPlay = file.path;
       } else {
-        if (!_isInit) {
-          setState(() => _isLoading = true);
-          try {
-            if (widget.audioUrl.startsWith('http')) {
-              await _audioPlayer.setUrl(widget.audioUrl);
-            } else {
-              await _audioPlayer.setFilePath(widget.audioUrl);
-            }
-          } catch (e) {
-            debugPrint("Error setting audio source: $e");
-            if (mounted) setState(() => _isLoading = false);
-            return;
-          }
-          if (mounted) setState(() => _isLoading = false);
-
-          _isInit = true;
-          await _audioPlayer.setSpeed(_playbackRate);
-        }
-
-        await _audioPlayer.play();
+        uriToPlay = widget.audioUrl;
       }
+
+      // 2. Load the local file into the player
+      await _audioPlayer.setFilePath(uriToPlay);
+
+      // 3. Setup listeners
+      _durationSub?.cancel();
+      _durationSub = _audioPlayer.durationStream.listen((d) {
+        if (mounted && d != null && d.inMilliseconds > 0) {
+          setState(() => _duration = d);
+        }
+      });
+
+      _positionSub?.cancel();
+      _positionSub = _audioPlayer.positionStream.listen((p) {
+        if (mounted) setState(() => _position = p);
+      });
+
+      _stateSub?.cancel();
+      _stateSub = _audioPlayer.playerStateStream.listen((state) {
+        if (!mounted) return;
+        
+        setState(() => _isPlaying = state.playing);
+
+        if (state.processingState == ProcessingState.completed) {
+          // Playback finished -> reset
+          setState(() {
+            _isPlaying = false;
+            _position = Duration.zero;
+          });
+          _audioPlayer.pause();
+          _audioPlayer.seek(Duration.zero);
+        }
+      });
+
+      _isInit = true;
+      if (mounted) setState(() => _isLoading = false);
+
+      // 4. Set playback rate and play
+      await _audioPlayer.setSpeed(_playbackRate);
+      await _audioPlayer.play();
+
     } catch (e) {
-      debugPrint("Error playing audio: $e");
+      debugPrint('[AudioPlayer] Error initializing/playing: $e');
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
+    }
+  }
+
+  Future<void> _togglePlay() async {
+    if (_hasError) {
+      // Retry
+      await _initAndPlay();
+      return;
+    }
+
+    if (!_isInit) {
+      await _initAndPlay();
+      return;
+    }
+
+    if (_isPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.play();
     }
   }
 
   void _togglePlaybackRate() {
     setState(() {
-      if (_playbackRate == 1.0) {
-        _playbackRate = 1.5;
-      } else if (_playbackRate == 1.5) {
-        _playbackRate = 2.0;
-      } else {
-        _playbackRate = 1.0;
-      }
+      if (_playbackRate == 1.0) _playbackRate = 1.5;
+      else if (_playbackRate == 1.5) _playbackRate = 2.0;
+      else _playbackRate = 1.0;
     });
+    
     if (_isInit) {
       _audioPlayer.setSpeed(_playbackRate);
     }
   }
 
+  void _onSeek(double value) {
+    if (_duration.inMilliseconds == 0) return;
+    
+    final newPosition = Duration(milliseconds: value.toInt());
+    if (_isInit) {
+      _audioPlayer.seek(newPosition);
+    }
+  }
+
   String _formatDuration(Duration d) {
-    final minutes = d.inMinutes;
-    final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
+    int totalSeconds = (d.inMilliseconds / 1000).ceil();
+    if (totalSeconds == 0 && d.inMilliseconds > 0) {
+      totalSeconds = 1;
+    }
+    final minutes = totalSeconds ~/ 60;
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
+    // Generate a fixed but random-looking waveform based on the URL
     if (_waveformHeights == null) {
       final random = Random(widget.audioUrl.hashCode);
-      _waveformHeights = List.generate(35, (index) => 3.0 + random.nextDouble() * 20.0);
+      _waveformHeights = List.generate(35, (index) => 4.0 + random.nextDouble() * 20.0);
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final displayDuration = _position.inMilliseconds > 0 ? _position : _duration;
+    
+    // Fallback logic for duration text
+    final displayDuration = _position.inMilliseconds > 0 
+        ? _position 
+        : (_duration.inMilliseconds > 0 ? _duration : (widget.recordedDuration ?? Duration.zero));
 
-    // Premium Colors
-    Color activeColor = widget.isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF1A73E8));
-    Color inactiveColor = widget.isMe ? Colors.white.withValues(alpha: 0.3) : (isDark ? Colors.white30 : Colors.grey.shade400);
-    Color thumbColor = widget.isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF1A73E8));
-    Color speedBgColor = widget.isMe ? Colors.black.withValues(alpha: 0.15) : (isDark ? Colors.white10 : Colors.grey.shade200);
-    Color speedTextColor = widget.isMe ? Colors.white : (isDark ? Colors.white : Colors.black87);
+    // Colors
+    final Color activeColor = widget.isMe ? Colors.white : (isDark ? Colors.white : const Color(0xFF1A73E8));
+    final Color inactiveColor = widget.isMe ? Colors.white.withValues(alpha: 0.3) : (isDark ? Colors.white30 : Colors.grey.shade400);
+    final Color speedBgColor = widget.isMe ? Colors.black.withValues(alpha: 0.15) : (isDark ? Colors.white10 : Colors.grey.shade200);
+    final Color speedTextColor = widget.isMe ? Colors.white : (isDark ? Colors.white : Colors.black87);
 
     return Container(
-      width: 230,
-      padding: const EdgeInsets.only(top: 4, bottom: 0, left: 4, right: 4),
+      width: 240, // Slightly wider for comfort
+      padding: const EdgeInsets.only(top: 8, bottom: 4, left: 6, right: 6),
       child: Directionality(
-        textDirection: TextDirection.ltr, // Force LTR: [1x -> Play -> Waveform]
+        textDirection: TextDirection.ltr, // Force LTR for audio player elements
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -165,135 +213,135 @@ class _AudioMessagePlayerState extends State<AudioMessagePlayer> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 1. Playback Speed Button (Left)
-              GestureDetector(
-                onTap: _togglePlaybackRate,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: speedBgColor,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Text(
-                    '${_playbackRate == 1.0 ? 1 : _playbackRate}x',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: speedTextColor,
+                // 1. Playback Speed
+                GestureDetector(
+                  onTap: _togglePlaybackRate,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: speedBgColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      '${_playbackRate == 1.0 ? 1 : _playbackRate}x',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: speedTextColor,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              
-              const SizedBox(width: 12),
+                
+                const SizedBox(width: 8),
 
-              // 2. Play/Pause Button
-              GestureDetector(
-                onTap: _isLoading ? null : _togglePlay,
-                child: _isLoading 
-                  ? SizedBox(
-                      width: 34,
-                      height: 34,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: activeColor,
+                // 2. Play / Pause / Loading / Error
+                GestureDetector(
+                  onTap: _isLoading ? null : _togglePlay,
+                  child: _isLoading 
+                    ? SizedBox(
+                        width: 36,
+                        height: 36,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: activeColor,
+                          ),
                         ),
+                      )
+                    : Icon(
+                        _hasError ? Icons.error_outline_rounded
+                        : (_isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded),
+                        size: 36,
+                        color: _hasError ? Colors.redAccent : activeColor,
                       ),
-                    )
-                  : Icon(
-                      _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      size: 34,
-                      color: activeColor,
+                ),
+                
+                const SizedBox(width: 8),
+                
+                // 3. Waveform + Slider
+                Expanded(
+                  child: SizedBox(
+                    height: 32,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Background Waveform Bars
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: List.generate(_waveformHeights!.length, (index) {
+                              final progress = _duration.inMilliseconds > 0 
+                                  ? _position.inMilliseconds / _duration.inMilliseconds 
+                                  : 0.0;
+                              
+                              final isPlayed = progress > 0.0 && (index / _waveformHeights!.length) <= progress;
+                              
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 100),
+                                width: 3,
+                                height: _waveformHeights![index],
+                                decoration: BoxDecoration(
+                                  color: isPlayed ? activeColor : inactiveColor,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+                        
+                        // Invisible Slider for seeking
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 32, // Thick track makes dragging easy
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 7),
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                            activeTrackColor: Colors.transparent,
+                            inactiveTrackColor: Colors.transparent,
+                            thumbColor: activeColor,
+                            trackShape: const RectangularSliderTrackShape(),
+                          ),
+                          child: Slider(
+                            value: _position.inMilliseconds.toDouble(),
+                            min: 0.0,
+                            max: _duration.inMilliseconds > 0 
+                                ? _duration.inMilliseconds.toDouble() 
+                                : 100.0, // Fallback max to prevent crash
+                            onChanged: _onSeek,
+                          ),
+                        ),
+                      ],
                     ),
-              ),
-              
-              const SizedBox(width: 8),
-              
-              // 3. Waveform with overlay slider
-              Expanded(
-                child: SizedBox(
-                  height: 30,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Background Waveform
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14), // Push bars inward so thumb stays before them at 0.0
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: List.generate(_waveformHeights!.length, (index) {
-                            final progress = _duration.inMilliseconds > 0 
-                                ? _position.inMilliseconds / _duration.inMilliseconds 
-                                : 0.0;
-                            // Ensure nothing is colored at 0.0
-                            final isPlayed = progress > 0.0 && (index / _waveformHeights!.length) < progress;
-                            
-                            return Container(
-                              width: 3,
-                              height: _waveformHeights![index],
-                              decoration: BoxDecoration(
-                                color: isPlayed ? activeColor : inactiveColor,
-                                borderRadius: BorderRadius.circular(2),
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-                      
-                      // Overlay Slider for dragging and thumb
-                      SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 30, // Covers the waveform area for easy dragging
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-                          activeTrackColor: Colors.transparent,
-                          inactiveTrackColor: Colors.transparent,
-                          thumbColor: thumbColor,
-                          trackShape: const RectangularSliderTrackShape(),
-                        ),
-                        child: Slider(
-                          value: _position.inMilliseconds.toDouble(),
-                          min: 0.0,
-                          max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 100.0,
-                          onChanged: (val) {
-                            if (_duration.inMilliseconds > 0) {
-                              _audioPlayer.seek(Duration(milliseconds: val.toInt()));
-                            }
-                          },
-                        ),
-                      ),
-                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          
-          // Duration text and optional trailing widget
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 56),
-                child: Text(
-                  _formatDuration(displayDuration),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: widget.isMe ? Colors.white.withValues(alpha: 0.8) : Colors.grey.shade600,
+              ],
+            ),
+            
+            // 4. Bottom Row: Duration & Read Receipts
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 60),
+                  child: Text(
+                    _formatDuration(displayDuration),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: widget.isMe ? Colors.white.withValues(alpha: 0.8) : Colors.grey.shade600,
+                    ),
                   ),
                 ),
-              ),
-              if (widget.trailingWidget != null) widget.trailingWidget!,
-            ],
-          ),
-        ],
+                if (widget.trailingWidget != null) widget.trailingWidget!,
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
