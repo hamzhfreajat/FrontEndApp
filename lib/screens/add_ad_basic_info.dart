@@ -477,6 +477,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                           textDirection: TextDirection.ltr,
+                          textAlign: TextAlign.center,
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
                               return 'مطلوب إدخال رقم الموبايل';
