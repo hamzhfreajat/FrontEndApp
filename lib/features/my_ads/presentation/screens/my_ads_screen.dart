@@ -11,6 +11,7 @@ import '../../../../providers/app_provider.dart';
 import '../../../../screens/add_ad_city.dart';
 import '../widgets/my_ads_skeleton.dart';
 import '../../domain/entities/my_ad_entities.dart';
+import '../../../../services/analytics_engine.dart';
 
 class MyAdsScreen extends StatefulWidget {
   final bool isStandalone;
@@ -64,6 +65,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
       status: currentStatus,
       onActionSelected: (action) {
         if (action == 'edit') {
+          AnalyticsEngine().logButtonTapped(buttonName: 'edit_ad', location: 'my_ads_screen');
           // Navigate to edit screen starting from City
           final state = context.read<MyAdsBloc>().state;
           final adToEdit = state.ads.firstWhere((a) => a.baseAd.id == adId).baseAd;
@@ -94,6 +96,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             }
           });
         } else {
+          AnalyticsEngine().logButtonTapped(buttonName: 'single_$action', location: 'my_ads_screen');
           context.read<MyAdsBloc>().add(PerformSingleAction(adId, action));
         }
       },
@@ -238,6 +241,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                             },
                             onActionTap: () => _handleAction(ad.baseAd.id, ad.baseAd.title, ad.status),
                             onRepublishTap: () {
+                              AnalyticsEngine().logButtonTapped(buttonName: 'single_republish', location: 'my_ads_screen');
                               context.read<MyAdsBloc>().add(PerformSingleAction(ad.baseAd.id, 'republish'));
                             },
                           ),
@@ -318,23 +322,35 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             _SelectionAction(
               icon: Icons.pause_circle_outline, 
               label: 'إيقاف',
-              onTap: () => context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'pause')),
+              onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'bulk_pause', location: 'my_ads_screen');
+                context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'pause'));
+              },
             ),
             _SelectionAction(
               icon: Icons.play_circle_outline, 
               label: 'تفعيل',
-              onTap: () => context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'resume')),
+              onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'bulk_resume', location: 'my_ads_screen');
+                context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'resume'));
+              },
             ),
             _SelectionAction(
               icon: Icons.sell_outlined, 
               label: 'تم بيعه',
-              onTap: () => context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'sold')),
+              onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'bulk_sold', location: 'my_ads_screen');
+                context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'sold'));
+              },
             ),
             _SelectionAction(
               icon: Icons.delete_outline, 
               label: 'حذف',
               color: Colors.redAccent,
-              onTap: () => context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'delete')),
+              onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'bulk_delete', location: 'my_ads_screen');
+                context.read<MyAdsBloc>().add(PerformBulkAction(state.selectedAdIds.toList(), 'delete'));
+              },
             ),
           ] else
             const Text('لم يتم تحديد أي إعلان', style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold)),

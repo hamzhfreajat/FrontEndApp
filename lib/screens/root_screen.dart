@@ -1,4 +1,5 @@
 import 'dart:async';
+import '../services/analytics_engine.dart';
 import '../l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,6 +36,7 @@ class RootScreen extends StatefulWidget {
 
 class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  int _lastTabIndex = 0;
 
   static const _accent = Color(0xFF1A73E8);
   static const _accentDark = Color(0xFF1557B0);
@@ -44,6 +46,17 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialIndex);
+    _lastTabIndex = widget.initialIndex;
+    
+    _tabController.addListener(() {
+      if (_tabController.index != _lastTabIndex) {
+        _lastTabIndex = _tabController.index;
+        final tabNames = ['home', 'categories_tab', 'my_ads', 'my_account'];
+        if (_tabController.index >= 0 && _tabController.index < tabNames.length) {
+          AnalyticsEngine().logScreenViewed(screenName: tabNames[_tabController.index]);
+        }
+      }
+    });
   }
 
   @override
