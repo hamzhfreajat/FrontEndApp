@@ -121,6 +121,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
 
     _minPriceController.addListener(_triggerCountUpdate);
     _maxPriceController.addListener(_triggerCountUpdate);
+    _minAreaController.addListener(_triggerCountUpdate);
+    _maxAreaController.addListener(_triggerCountUpdate);
 
     // Try to extract known tags into UI segments
     _extractTagsToUIState();
@@ -144,6 +146,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   void dispose() {
     _minPriceController.removeListener(_triggerCountUpdate);
     _maxPriceController.removeListener(_triggerCountUpdate);
+    _minAreaController.removeListener(_triggerCountUpdate);
+    _maxAreaController.removeListener(_triggerCountUpdate);
     _minPriceController.dispose();
     _maxPriceController.dispose();
     _minAreaController.dispose();
@@ -313,7 +317,6 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.9,
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       decoration: const BoxDecoration(
         color: Color(0xFFF3F4F9),
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
@@ -1102,9 +1105,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   void _showUnifiedLocationPickerBottomSheet(BuildContext context) {
     final appProvider = Provider.of<AppProvider>(context, listen: false);
     City? selectedCityForFilter;
-    if (_selectedCityId != null) {
-      selectedCityForFilter = appProvider.dbCities?.firstWhere((c) => c.id == _selectedCityId, orElse: () => appProvider.dbCities!.first);
-    }
+    // Initialize to null to always show city list first when opened
     Set<Region> selectedRegionsForFilter = {};
     if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
       for (var c in appProvider.dbCities!) {
@@ -1224,6 +1225,16 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                                         setModalState(() {
                                           selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
                                         });
+                                        setState(() {
+                                          if (selectedRegionsForFilter.isEmpty) {
+                                            _selectedCityId = selectedCityForFilter?.id;
+                                            _selectedRegionIds.clear();
+                                          } else {
+                                            _selectedCityId = selectedCityForFilter?.id ?? selectedRegionsForFilter.first.cityId;
+                                            _selectedRegionIds = selectedRegionsForFilter.map((r) => r.id).toSet();
+                                          }
+                                        });
+                                        _triggerCountUpdate();
                                       },
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),

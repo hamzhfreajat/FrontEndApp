@@ -21,8 +21,11 @@ import 'widgets/connectivity_wrapper.dart';
 import 'services/api_service.dart';
 import 'screens/ad_details_page.dart';
 import 'features/chat/presentation/screens/premium_inbox_screen.dart';
+import 'services/analytics_engine.dart';
+import 'utils/analytics_route_observer.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+final AnalyticsRouteObserver analyticsRouteObserver = AnalyticsRouteObserver();
 
 // Ignore SSL handshake warnings for development and R2 dev bucket URLs on older/restricted emulators
 class MyHttpOverrides extends HttpOverrides {
@@ -106,6 +109,8 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  AnalyticsEngine().initialize();
   
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // transparent status bar
@@ -192,6 +197,7 @@ class OpenSooqApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey,
+      navigatorObservers: [analyticsRouteObserver],
       title: 'سوقكم',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

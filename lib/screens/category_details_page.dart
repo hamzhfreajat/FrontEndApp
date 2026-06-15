@@ -191,7 +191,16 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     // Only load if user hasn't opened page with active initial filters
     if (_minPrice != null || _maxPrice != null || _selectedTags.isNotEmpty) return;
     
-    final filters = await _apiService.getCategoryFilters(widget.category.id);
+    Map<String, dynamic>? filters = await _apiService.getCategoryFilters(widget.category.id);
+    
+    // Fallback to parent category if no saved filters exist for this specific subcategory
+    if ((filters == null || (filters['min_price'] == null && filters['max_price'] == null && (filters['tags'] == null || (filters['tags'] as List).isEmpty))) && widget.category.parentId != null) {
+      final parentFilters = await _apiService.getCategoryFilters(widget.category.parentId!);
+      if (parentFilters != null) {
+        filters = parentFilters;
+      }
+    }
+
     if (filters != null && mounted) {
       // Don't show if it's completely empty
       if (filters['min_price'] == null && filters['max_price'] == null && (filters['tags'] == null || (filters['tags'] as List).isEmpty)) {
@@ -253,6 +262,16 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       if (mounted) setState(() => _isLoadingAds = false);
     }
   }
+  void _saveCurrentFilters() {
+    try {
+      ApiService().saveCategoryFilters(
+        widget.category.id,
+        _minPrice,
+        _maxPrice,
+        _selectedTags,
+      );
+    } catch (_) {}
+  }
 
   Future<void> _fetchAds() async {
     if (!mounted) return;
@@ -274,10 +293,23 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
       final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('كل المدن') || _locationsFilter!.contains('كل الأردن'))) ? null : _locationsFilter;
 
-      // Execute all 3 Ngrok requests instantly via concurrent futures 
-      // since the database is much faster now!
+      // Execute loadSubCategories without blocking the ads fetching
+      Provider.of<AppProvider>(context, listen: false)
+          .loadSubCategories(widget.category.id, locations: cleanedLocations)
+          .then((_) {
+            if (mounted && thisGeneration == _fetchGeneration) {
+              setState(() => _isSubcategoriesLoaded = true);
+            }
+          })
+          .catchError((_) {
+            if (mounted && thisGeneration == _fetchGeneration) {
+              setState(() => _isSubcategoriesLoaded = true);
+            }
+            return false;
+          });
+
+      // Execute all 2 requests via concurrent futures 
       final results = await Future.wait([
-        Provider.of<AppProvider>(context, listen: false).loadSubCategories(widget.category.id, locations: cleanedLocations),
         _apiService.fetchAdsCount(
           categoryId: widget.category.id, 
           tags: tags,
@@ -305,11 +337,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       
       if (!mounted || thisGeneration != _fetchGeneration) return;
 
-      final count = results[1] as int;
-      final fetchedAds = results[2] as List<Ad>;
+      final count = results[0] as int;
+      final fetchedAds = results[1] as List<Ad>;
       
       setState(() {
-        _isSubcategoriesLoaded = true;
         _ads = fetchedAds;
         if (widget.highlightedAd != null) {
           _ads.removeWhere((a) => a.id == widget.highlightedAd!.id);
@@ -1018,8 +1049,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   }
 
   void _showLocationBottomSheet(Color brandColor) {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
     City? selectedCityForFilter;
-    List<Region> selectedRegionsForFilter = [];
+    List<Region> selectedRegionsForFilter = List.from(appProvider.selectedRegions ?? []);
     String searchQuery = '';
     final TextEditingController searchController = TextEditingController();
     
@@ -1136,10 +1168,25 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                       label: Text(r.nameAr, style: TextStyle(color: brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
                                       backgroundColor: brandColor.withOpacity(0.1),
                                       deleteIcon: Icon(Icons.close, size: 16, color: brandColor),
-                                      onDeleted: () {
+                                      onDeleted: () async {
                                         setModalState(() {
                                           selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
                                         });
+                                        final appProvider = Provider.of<AppProvider>(context, listen: false);
+                                        if (selectedRegionsForFilter.isEmpty) {
+                                          await appProvider.setLocation(selectedCityForFilter, null, null);
+                                          setState(() { _locationsFilter = selectedCityForFilter != null ? [selectedCityForFilter!.nameAr] : null; });
+                                        } else {
+                                          Set<City> involvedCities = {};
+                                          if (appProvider.dbCities != null) {
+                                            for (var reg in selectedRegionsForFilter) {
+                                              try { involvedCities.add(appProvider.dbCities!.firstWhere((c) => c.id == reg.cityId)); } catch (_) {}
+                                            }
+                                          }
+                                          await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : null, selectedRegionsForFilter.toList(), null);
+                                          setState(() { _locationsFilter = selectedRegionsForFilter.map((r) => r.nameAr).toList(); });
+                                        }
+                                        _fetchAds();
                                       },
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
@@ -1377,6 +1424,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         _isHot = null;
                         _locationsFilter = null;
                       });
+                      _saveCurrentFilters();
                       _fetchAds();
                     }, 
                     child: Container(
@@ -1944,6 +1992,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           _hasMoreAds = true;
                           _isLoadingAds = true;
                         });
+                        _saveCurrentFilters();
                         _fetchAds();
                       },
                       child: Text('مسح الكل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red.shade500)),
@@ -1988,6 +2037,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       _hasMoreAds = true;
                       _isLoadingAds = true;
                     });
+                    _saveCurrentFilters();
                     _fetchAds();
                   },
                   child: Container(
@@ -2124,6 +2174,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           _hasMoreAds = true;
           _isLoadingAds = true;
         });
+        _saveCurrentFilters();
         _fetchAds();
       },
       child: AnimatedContainer(
@@ -2227,6 +2278,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       _hasMoreAds = true;
                       _isLoadingAds = true;
                     });
+                    _saveCurrentFilters();
                     _fetchAds();
                   },
                   child: AnimatedContainer(

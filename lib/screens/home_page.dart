@@ -134,12 +134,17 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  int _refreshKey = 0;
+
   @override
   void initState() {
     super.initState();
   }
 
   Future<void> _refreshData() async {
+    setState(() {
+      _refreshKey++;
+    });
     await Provider.of<AppProvider>(context, listen: false).refreshAll();
   }
 
@@ -152,10 +157,7 @@ class _HomePageState extends State<HomePage> {
         child: Consumer<AppProvider>(
           builder: (context, provider, child) {
             
-            // Show shimmer during any load (initial or refresh)
-            if (provider.isLoading) {
-               return const ShimmerHomeScreen();
-            }
+            // Removed global shimmer block to allow independent component loading
             
               return CustomScrollView(
               physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
@@ -169,15 +171,15 @@ class _HomePageState extends State<HomePage> {
                       const _SavedActivityBanner(),
                       // _StoriesRow(stories: provider.stories), // Hidden for now
                       const SizedBox(height: 16),
-                      const _PremiumHorizontalList(title: 'الأكثر بحث', sortBy: 'popular'),
+                      _PremiumHorizontalList(key: ValueKey('slider_1_$_refreshKey'), title: 'الأكثر بحث', sortBy: 'popular'),
                       const SizedBox(height: 20),
-                      const _PremiumHorizontalList(title: 'الأكثر مشاهدة', sortBy: 'views'),
+                      _PremiumHorizontalList(key: ValueKey('slider_2_$_refreshKey'), title: 'الأكثر مشاهدة', sortBy: 'views'),
                       const SizedBox(height: 20),
-                      _PremiumHorizontalList(title: 'شقق ملائمة', categoryId: 301, showViewAll: false, allCategories: provider.categories),
+                      _PremiumHorizontalList(key: ValueKey('slider_3_$_refreshKey'), title: 'شقق ملائمة', categoryId: 301, showViewAll: false, allCategories: provider.categories),
                       const SizedBox(height: 20),
-                      _PremiumHorizontalList(title: 'شقق للايجار', subtitle: 'أحدث الإعلانات من شقق للايجار', sortBy: 'newest', categoryId: 301, showViewAll: true, allCategories: provider.categories),
+                      _PremiumHorizontalList(key: ValueKey('slider_4_$_refreshKey'), title: 'شقق للايجار', subtitle: 'أحدث الإعلانات من شقق للايجار', sortBy: 'newest', categoryId: 301, showViewAll: true, allCategories: provider.categories),
                       const SizedBox(height: 20),
-                      _PremiumHorizontalList(title: 'شقق للبيع', subtitle: 'أحدث الإعلانات من شقق للبيع', sortBy: 'newest', categoryId: 10301, showViewAll: true, allCategories: provider.categories),
+                      _PremiumHorizontalList(key: ValueKey('slider_5_$_refreshKey'), title: 'شقق للبيع', subtitle: 'أحدث الإعلانات من شقق للبيع', sortBy: 'newest', categoryId: 10301, showViewAll: true, allCategories: provider.categories),
                       const SizedBox(height: 30),
                       const _HomeFooter(),
                     ],
@@ -664,6 +666,7 @@ class _PremiumHorizontalList extends StatefulWidget {
   final List<Category>? allCategories;
 
   const _PremiumHorizontalList({
+    super.key,
     required this.title,
     this.subtitle,
     this.categoryId,
@@ -782,7 +785,25 @@ class _PremiumHorizontalListState extends State<_PremiumHorizontalList> {
         ConstrainedBox(
           constraints: BoxConstraints(maxHeight: cardHeight),
           child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: 4,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                    child: SizedBox(
+                      width: cardWidth,
+                      child: ShimmerLoading(
+                        child: Container(
+                          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                        )
+                      ),
+                    ),
+                  );
+                },
+              )
             : ListView.builder(
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
