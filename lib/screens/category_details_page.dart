@@ -183,8 +183,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     
     // Track as the latest category viewed by the user
     _apiService.updateLatestCategory(widget.category.id);
-    AnalyticsEngine.instance.logCategoryViewed(
-      categoryId: widget.category.id.toString(),
+    AnalyticsEngine().logCategoryViewed(
       categoryName: widget.category.name,
     );
     
