@@ -5,6 +5,8 @@ import '../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'category_details_page.dart';
 
+import '../services/analytics_engine.dart';
+
 class GlobalSearchPage extends StatefulWidget {
   const GlobalSearchPage({super.key});
 
@@ -46,6 +48,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'Search');
     _loadInitialData();
   }
 

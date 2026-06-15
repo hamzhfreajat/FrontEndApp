@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 import 'root_screen.dart';
+import '../services/analytics_engine.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -16,6 +17,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'Login');
+  }
+
   bool _isLoadingGoogle = false;
   bool _isLoadingFacebook = false;
   bool _isLoadingApple = false;

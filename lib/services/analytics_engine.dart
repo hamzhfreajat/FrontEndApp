@@ -20,6 +20,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
   late final String _platform;
   final String _appVersion = '1.0.1+2';
   bool _isFlushing = false;
+  String? _lastScreenName;
 
   void initialize() async {
     _sessionId = const Uuid().v4();
@@ -141,9 +142,11 @@ class AnalyticsEngine with WidgetsBindingObserver {
   }
   
   void logScreenViewed({required String screenName, String? previousScreen}) {
+    final prev = previousScreen ?? _lastScreenName;
     _enqueueEvent('screen_viewed', {
       'screen_name': screenName,
-      if (previousScreen != null) 'previous_screen': previousScreen,
+      if (prev != null) 'previous_screen': prev,
     });
+    _lastScreenName = screenName;
   }
 }

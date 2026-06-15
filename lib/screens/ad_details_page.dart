@@ -67,6 +67,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
     Future.microtask(() {
       if (mounted && !widget.isPreview) {
         Provider.of<AppProvider>(context, listen: false).addToRecentlyViewed(widget.ad);
+        AnalyticsEngine().logScreenViewed(screenName: 'Ad Details');
         AnalyticsEngine().logPropertyViewed(
           propertyId: widget.ad.id.toString(),
           price: widget.ad.price,

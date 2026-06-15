@@ -7,6 +7,8 @@ import '../services/api_service.dart';
 import 'category_details_page.dart';
 import '../widgets/emoji_category_icon.dart';
 
+import '../services/analytics_engine.dart';
+
 class CategoriesPage extends StatefulWidget {
   final int? parentId;
   final List<Category>? allCategories;
@@ -31,6 +33,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'Categories');
     if (widget.parentId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Provider.of<AppProvider>(context, listen: false)
