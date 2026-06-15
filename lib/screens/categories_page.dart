@@ -33,7 +33,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
   @override
   void initState() {
     super.initState();
-    AnalyticsEngine().logScreenViewed(screenName: 'Categories');
+    AnalyticsEngine().logScreenViewed(screenName: widget.category?.id.toString() ?? widget.parentId?.toString() ?? 'Categories');
     if (widget.parentId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Provider.of<AppProvider>(context, listen: false)
