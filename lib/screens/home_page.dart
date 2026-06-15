@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    AnalyticsEngine().logScreenViewed(screenName: 'Home');
+    AnalyticsEngine().logScreenViewed(screenName: 'home');
   }
 
   Future<void> _refreshData() async {

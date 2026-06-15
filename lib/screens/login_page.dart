@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    AnalyticsEngine().logScreenViewed(screenName: 'Login');
+    AnalyticsEngine().logScreenViewed(screenName: 'login');
   }
 
   bool _isLoadingGoogle = false;

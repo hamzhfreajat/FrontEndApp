@@ -48,7 +48,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
   @override
   void initState() {
     super.initState();
-    AnalyticsEngine().logScreenViewed(screenName: 'Search');
+    AnalyticsEngine().logScreenViewed(screenName: 'search');
     _loadInitialData();
   }
 
