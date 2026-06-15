@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../config.dart';
+import 'api_service.dart';
 
 class AnalyticsEngine with WidgetsBindingObserver {
   static final AnalyticsEngine _instance = AnalyticsEngine._internal();
@@ -70,7 +70,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
     _queue.clear();
     
     try {
-      final url = Uri.parse('${Config.apiUrl}/telemetry/batch');
+      final url = Uri.parse('${ApiService.baseUrl}/telemetry/batch');
       
       http.post(
         url,
