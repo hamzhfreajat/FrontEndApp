@@ -14,6 +14,7 @@ import '../providers/app_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/premium_video_player.dart';
 import '../widgets/full_screen_media_gallery.dart';
+import '../services/analytics_engine.dart';
 
 import '../features/profile/presentation/screens/public_profile_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -66,6 +67,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
     Future.microtask(() {
       if (mounted && !widget.isPreview) {
         Provider.of<AppProvider>(context, listen: false).addToRecentlyViewed(widget.ad);
+        AnalyticsEngine.instance.logPropertyViewed(
+          adId: widget.ad.id.toString(),
+          categoryId: widget.ad.categoryId.toString(),
+        );
       }
     });
 
@@ -1602,6 +1607,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                 String waPhone = phone;
                 // Record interaction
                 ApiService().recordAdInteractionChat(ad.id);
+                AnalyticsEngine.instance.logContactAgentInitiated(
+                  adId: ad.id.toString(),
+                  contactMethod: 'whatsapp',
+                );
                 if (waPhone.startsWith('0')) {
                   waPhone = '962' + waPhone.substring(1);
                 } else if (waPhone.startsWith('+')) {
@@ -1642,6 +1651,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
 
                   // Record interaction
                   ApiService().recordAdInteractionChat(ad.id);
+                  AnalyticsEngine.instance.logContactAgentInitiated(
+                    adId: ad.id.toString(),
+                    contactMethod: 'chat',
+                  );
 
                   Navigator.push(context, MaterialPageRoute(
                     builder: (_) => PremiumChatScreen(
@@ -1684,11 +1697,19 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                     setState(() => _showPhone = true);
                     // Record interaction when they reveal the number
                     ApiService().recordAdInteractionPhone(ad.id);
+                    AnalyticsEngine.instance.logContactAgentInitiated(
+                      adId: ad.id.toString(),
+                      contactMethod: 'phone_reveal',
+                    );
                     return;
                   }
                   
                   // Also record interaction when they actually dial
                   ApiService().recordAdInteractionPhone(ad.id);
+                  AnalyticsEngine.instance.logContactAgentInitiated(
+                    adId: ad.id.toString(),
+                    contactMethod: 'phone_dial',
+                  );
                   
                   final Uri telUri = Uri.parse('tel:$phone');
                   try {

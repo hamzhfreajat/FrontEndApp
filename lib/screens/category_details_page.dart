@@ -8,6 +8,7 @@ import '../models/saved_search.dart';
 import '../services/api_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
+import '../services/analytics_engine.dart';
 
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import '../features/chat/presentation/screens/premium_inbox_screen.dart';
@@ -182,6 +183,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     
     // Track as the latest category viewed by the user
     _apiService.updateLatestCategory(widget.category.id);
+    AnalyticsEngine.instance.logCategoryViewed(
+      categoryId: widget.category.id.toString(),
+      categoryName: widget.category.name,
+    );
     
     // Fetch saved filters for this category
     _loadSavedCategoryFilters();
