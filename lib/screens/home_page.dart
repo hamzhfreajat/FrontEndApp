@@ -18,6 +18,7 @@ import 'story_view_page.dart';
 import 'category_details_page.dart';
 import 'categories_page.dart';
 import 'ad_details_page.dart';
+import '../services/analytics_engine.dart';
 import 'add_ad_images.dart';
 import 'global_search_page.dart';
 import 'saved_ads_page.dart';
