@@ -66,5 +66,23 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to allow you to take photos and easily list your items for sale. نحتاج إلى صلاحية الكاميرا لتتمكن من التقاط الصور وإضافة إعلاناتك بسهولة.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to allow you to upload images and showcase your items. نحتاج إلى صلاحية مكتبة الصور لتتمكن من رفع الصور وعرض إعلاناتك.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access to allow you to record audio and video for your ads. نحتاج إلى صلاحية الميكروفون لتتمكن من تسجيل مقاطع الصوت والفيديو لإعلاناتك.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need location access to show you relevant local ads and listings nearby. نحتاج إلى صلاحية الموقع لعرض الإعلانات المحلية القريبة منك.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>tel</string>
+		<string>mailto</string>
+		<string>whatsapp</string>
+		<string>sms</string>
+		<string>https</string>
+		<string>fbapi</string>
+		<string>fb-messenger-share-api</string>
+	</array>
 </dict>
 </plist>
