@@ -52,6 +52,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
     final event = {
       'event_name': eventName,
       'user_id': _userId,
+      'screen': _lastScreenName, // Add top-level screen field
       'session_id': _sessionId,
       'platform': _platform,
       'app_version': _appVersion,
@@ -96,24 +97,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
   }
 
   void logButtonTapped({required String buttonName, required String location}) {
-    final now = DateTime.now();
-    final key = '${buttonName}_$location';
-    
-    _tapHistory.putIfAbsent(key, () => []);
-    _tapHistory[key]!.add(now);
-    
-    // Prune taps older than 1000ms
-    _tapHistory[key]!.removeWhere((timestamp) => now.difference(timestamp).inMilliseconds > 1000);
-    
-    if (_tapHistory[key]!.length >= 3) {
-      _enqueueEvent('rage_tap', {
-        'target_name': buttonName,
-        'location': location,
-        'tap_count': _tapHistory[key]!.length,
-      });
-      // Debounce: clear history to prevent firing repeatedly for the same burst
-      _tapHistory[key]!.clear();
-    }
+  // Removed old rage tap tracking as it is now handled globally in DeadClickDetector
 
     _enqueueEvent('button_tapped', {
       'button_name': buttonName,
