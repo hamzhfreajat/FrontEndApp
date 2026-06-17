@@ -121,7 +121,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   @override
   void initState() {
     super.initState();
-    AnalyticsEngine().logScreenViewed(screenName: widget.category.id.toString());
+    AnalyticsEngine().logScreenViewed(screenName: widget.category.name);
     _searchQuery = widget.initialSearchQuery ?? '';
     _searchController = TextEditingController(text: _searchQuery);
     _scrollController.addListener(_onScroll);
