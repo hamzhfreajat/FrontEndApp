@@ -18,6 +18,7 @@ import '../../../../services/api_service.dart';
 import '../../../../services/sound_service.dart';
 import '../../../../screens/ad_details_page.dart';
 import 'premium_inbox_screen.dart';
+import '../../../../services/analytics_engine.dart';
 
 class PremiumChatScreen extends StatefulWidget {
   static String? activeChatAdId;
@@ -60,6 +61,7 @@ class _PremiumChatScreenState extends State<PremiumChatScreen> {
   void initState() {
     super.initState();
     PremiumChatScreen.activeChatAdId = widget.adId;
+    AnalyticsEngine().logScreenViewed(screenName: 'premium_chat_screen');
   }
 
   @override
@@ -134,6 +136,7 @@ class _ChatViewState extends State<_ChatView> {
 
   void _sendMessage(BuildContext context) {
     if (_msgController.text.trim().isEmpty) return;
+    AnalyticsEngine().logButtonTapped(buttonName: 'send_chat_message', location: 'premium_chat_screen');
     context.read<ChatBloc>().add(SendMessage(text: _msgController.text.trim()));
     SoundService.playMessageSent();
     _msgController.clear();

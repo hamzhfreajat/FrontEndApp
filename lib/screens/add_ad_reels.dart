@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import '../models/category.dart';
@@ -20,6 +21,13 @@ class AddAdReelsPage extends StatefulWidget {
 }
 
 class _AddAdReelsPageState extends State<AddAdReelsPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_reels');
+  }
+
   XFile? _reelVideo;
   VideoPlayerController? _videoController;
   final ImagePicker _picker = ImagePicker();
@@ -76,7 +84,8 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
 
   void _nextStep() {
     _videoController?.pause();
-    Navigator.push(
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_reels');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdWizardPage(

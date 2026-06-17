@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
 import 'package:image_picker/image_picker.dart';
@@ -47,6 +48,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_subcategories');
     _currentCategoryPath = widget.categoryPath ?? [];
     _loadData();
   }
@@ -79,7 +81,8 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
     final hasChildren = currentCategories.any((c) => c.parentId == widget.parentCategory.id);
     
     if (!hasChildren) {
-      Navigator.pushReplacement(
+      AnalyticsEngine().logButtonTapped(buttonName: 'select_category', location: 'add_ad_subcategories');
+                              Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => AddAdCityPage(
@@ -440,6 +443,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
                               final newPath = List<int>.from(_currentCategoryPath)..add(widget.parentCategory.id);
+                              AnalyticsEngine().logButtonTapped(buttonName: 'select_category', location: 'add_ad_subcategories');
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(

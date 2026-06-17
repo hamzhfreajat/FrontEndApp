@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
 import 'add_ad_preview.dart';
+import '../utils/form_analytics_tracker.dart';
 
 class AddAdBasicInfoPage extends StatefulWidget {
   final Category selectedLeafCategory;
@@ -41,6 +43,14 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _downPaymentController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+
+  final FocusNode _titleFocus = FocusNode();
+  final FocusNode _descriptionFocus = FocusNode();
+  final FocusNode _priceFocus = FocusNode();
+  final FocusNode _downPaymentFocus = FocusNode();
+  final FocusNode _phoneFocus = FocusNode();
+
+  late final FormAnalyticsTracker _formTracker;
   
   String? _paymentMethod = 'كاش';
   
@@ -80,12 +90,31 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
     _priceController.dispose();
     _downPaymentController.dispose();
     _phoneController.dispose();
+    _formTracker.dispose();
+    _titleFocus.dispose();
+    _descriptionFocus.dispose();
+    _priceFocus.dispose();
+    _downPaymentFocus.dispose();
+    _phoneFocus.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_basic_info');
+    
+    _formTracker = FormAnalyticsTracker(
+      formName: 'add_ad_basic_info',
+      fields: {
+        'title': _titleFocus,
+        'description': _descriptionFocus,
+        'price': _priceFocus,
+        'down_payment': _downPaymentFocus,
+        'phone_number': _phoneFocus,
+      },
+    );
+
     final sourceData = widget.editingAdData;
     if (sourceData != null && sourceData.isNotEmpty) {
       if (sourceData['title'] != null) _titleController.text = sourceData['title'].toString();
@@ -205,7 +234,9 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
 
     debugPrint('Gathered Data for Preview: $finalAdData');
     
-    Navigator.push(
+    _formTracker.markSubmitted();
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_basic_info');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdPreviewPage(
@@ -340,6 +371,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _priceController,
+                            focusNode: _priceFocus,
                             keyboardType: TextInputType.number,
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.center,
@@ -364,6 +396,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                           const SizedBox(height: 8),
                           TextFormField(
                             controller: _downPaymentController,
+                            focusNode: _downPaymentFocus,
                             keyboardType: TextInputType.number,
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.center,
@@ -437,6 +470,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _titleController,
+                          focusNode: _titleFocus,
                           validator: (val) => val == null || val.trim().length < 10 ? 'أدخل عنواناً لا يقل عن 10 أحرف' : null,
                           minLines: 1,
                           maxLines: null,
@@ -456,6 +490,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _descriptionController,
+                          focusNode: _descriptionFocus,
                           validator: (val) => val == null || val.trim().length < 20 ? 'أدخل تفاصيل لا تقل عن 20 حرفاً' : null,
                           minLines: 5,
                           maxLines: null,
@@ -475,6 +510,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                         const SizedBox(height: 8),
                         TextFormField(
                           controller: _phoneController,
+                          focusNode: _phoneFocus,
                           keyboardType: TextInputType.phone,
                           textDirection: TextDirection.ltr,
                           textAlign: TextAlign.center,

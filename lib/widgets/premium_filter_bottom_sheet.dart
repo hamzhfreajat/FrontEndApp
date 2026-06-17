@@ -5,6 +5,7 @@ import '../models/category.dart';
 import '../services/api_service.dart';
 import '../providers/app_provider.dart';
 import '../models/location.dart';
+import '../services/analytics_engine.dart';
 
 class PremiumFilterData {
   final double? minPrice;
@@ -587,6 +588,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                       
                       final finalLocs = locs.where((s) => s.isNotEmpty && s != 'كل الأردن' && s != 'الكل').toList();
 
+                      AnalyticsEngine().logButtonTapped(buttonName: 'save_search_from_filters', location: 'premium_filter_bottom_sheet');
                       Navigator.pop(context, PremiumFilterData(
                         minPrice: double.tryParse(_minPriceController.text),
                         maxPrice: double.tryParse(_maxPriceController.text),
@@ -656,6 +658,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                       
                       final finalLocs = locs.where((s) => s.isNotEmpty && s != 'كل الأردن' && s != 'الكل').toList();
 
+                      AnalyticsEngine().logButtonTapped(buttonName: 'apply_filters', location: 'premium_filter_bottom_sheet');
                       Navigator.pop(context, PremiumFilterData(
                         minPrice: double.tryParse(_minPriceController.text),
                         maxPrice: double.tryParse(_maxPriceController.text),
@@ -825,7 +828,10 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
             showCheckmark: true,
             checkmarkColor: widget.brandColor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: isSelected ? widget.brandColor.withOpacity(0.5) : Colors.transparent)),
-            onSelected: (_) => onToggle(opt),
+            onSelected: (_) {
+               AnalyticsEngine().logButtonTapped(buttonName: 'filter_toggle_${title}_$opt', location: 'premium_filter_bottom_sheet');
+               onToggle(opt);
+            },
           );
         }).toList(),
       )

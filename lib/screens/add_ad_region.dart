@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
 import '../widgets/shimmer_loading.dart';
@@ -76,6 +77,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_region');
     final List<String> cityList = _cityRegions[widget.selectedCity] ?? [];
     _allRegions = cityList.isEmpty ? [widget.selectedCity] : List.from(cityList);
     
@@ -190,7 +192,8 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
 
     if (!mounted) return;
 
-    Navigator.push(
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_region');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdDetailsPage(

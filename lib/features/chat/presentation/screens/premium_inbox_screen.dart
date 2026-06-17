@@ -13,6 +13,7 @@ import '../../../../providers/auth_provider.dart';
 import '../../data/repositories/firebase_chat_repository.dart';
 import '../../domain/entities/inbox_thread.dart';
 import 'premium_chat_screen.dart';
+import '../../../../services/analytics_engine.dart';
 
 class PremiumInboxScreen extends StatelessWidget {
   const PremiumInboxScreen({Key? key}) : super(key: key);
@@ -40,6 +41,12 @@ class _InboxView extends StatefulWidget {
 }
 
 class _InboxViewState extends State<_InboxView> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'premium_inbox_screen');
+  }
+
   String _searchQuery = '';
   String _activeTab = 'الكل';
   Set<String> _selectedThreadIds = {};

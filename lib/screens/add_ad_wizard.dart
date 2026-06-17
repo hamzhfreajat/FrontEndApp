@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
 import '../widgets/shimmer_loading.dart';
@@ -39,6 +40,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_wizard');
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _isPageTransitioning = false);
     });
@@ -271,7 +273,8 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                           GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: () {
-                               Navigator.push(
+                               AnalyticsEngine().logButtonTapped(buttonName: 'select_category', location: 'add_ad_wizard');
+                              Navigator.push(
                                  context,
                                  MaterialPageRoute(
                                    builder: (context) => AddAdSubcategoriesPage(
@@ -392,7 +395,8 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                         return GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
-                             Navigator.push(
+                             AnalyticsEngine().logButtonTapped(buttonName: 'select_category', location: 'add_ad_wizard');
+                              Navigator.push(
                                context,
                                MaterialPageRoute(
                                  builder: (context) => AddAdSubcategoriesPage(

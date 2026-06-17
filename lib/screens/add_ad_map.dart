@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,6 +41,7 @@ class _AddAdMapPageState extends State<AddAdMapPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_map');
     _fetchLandmarks();
   }
 
@@ -65,7 +67,8 @@ class _AddAdMapPageState extends State<AddAdMapPage> {
   }
 
   void _nextStep(BuildContext context, {bool skipped = false}) {
-    Navigator.push(
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_map');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdDetailsPage(

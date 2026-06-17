@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -90,6 +91,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_details');
     if (widget.editingAdData != null && widget.editingAdData!.containsKey('attributes')) {
       final existingDynamic = widget.editingAdData!['attributes']['dynamic_data'];
       if (existingDynamic != null && existingDynamic is Map) {
@@ -264,7 +266,8 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
 
     if (!mounted) return;
 
-    Navigator.push(
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_details');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdBasicInfoPage(

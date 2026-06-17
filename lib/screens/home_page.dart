@@ -53,7 +53,10 @@ class _SavedActivityBanner extends StatelessWidget {
               if (savedSearches > 0)
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage(initialIndex: 1))),
+                    onTap: () {
+                      AnalyticsEngine().logButtonTapped(buttonName: 'saved_searches_banner', location: 'home');
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage(initialIndex: 1)));
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -87,7 +90,10 @@ class _SavedActivityBanner extends StatelessWidget {
               if (favorites > 0)
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage())),
+                    onTap: () {
+                      AnalyticsEngine().logButtonTapped(buttonName: 'favorites_banner', location: 'home');
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage()));
+                    },
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -833,6 +839,7 @@ class _PremiumHorizontalListState extends State<_PremiumHorizontalList> {
 
     return GestureDetector(
       onTap: () {
+        AnalyticsEngine().logPropertyViewed(propertyId: ad.id.toString(), price: ad.price ?? 0.0, propertyType: 'premium_horizontal_list');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)),
@@ -1004,6 +1011,7 @@ class _QuickActionsGateways extends StatelessWidget {
               imagePath: 'assets/images/real_estate/house_sale.png',
               gradientColors: const [Color(0xFF0075FF), Color(0xFF0052B4)],
               onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'quick_action_buy', location: 'home');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1025,6 +1033,7 @@ class _QuickActionsGateways extends StatelessWidget {
               imagePath: 'assets/images/real_estate/rent_apt.png',
               gradientColors: const [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
               onTap: () {
+                AnalyticsEngine().logButtonTapped(buttonName: 'quick_action_rent', location: 'home');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -1239,7 +1248,10 @@ class _PromotionalBanner extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 12),
       child: GestureDetector(
-        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage())),
+        onTap: () {
+          AnalyticsEngine().logButtonTapped(buttonName: 'promotional_add_ad_banner', location: 'home');
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
+        },
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -1493,6 +1505,7 @@ class _AdListHorizontal extends StatelessWidget {
                       child: GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
+                          AnalyticsEngine().logPropertyViewed(propertyId: ad.id.toString(), price: ad.price ?? 0.0, propertyType: 'horizontal_ad_list');
                           Navigator.push(
                               context,
                               MaterialPageRoute(

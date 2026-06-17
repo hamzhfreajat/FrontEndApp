@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/ad.dart';
 import '../models/category.dart';
@@ -38,6 +39,7 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
   @override
   void initState() {
     super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_preview');
     _fetchEvaluation();
   }
 

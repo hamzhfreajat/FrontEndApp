@@ -23,6 +23,7 @@ import 'screens/ad_details_page.dart';
 import 'features/chat/presentation/screens/premium_inbox_screen.dart';
 import 'services/analytics_engine.dart';
 import 'utils/analytics_route_observer.dart';
+import 'widgets/dead_click_detector.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final AnalyticsRouteObserver analyticsRouteObserver = AnalyticsRouteObserver();
@@ -185,7 +186,9 @@ void main() async {
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => SavedSearchProvider()),
       ],
-      child: const OpenSooqApp(),
+      child: DeadClickDetector(
+        child: const OpenSooqApp(),
+      ),
     ),
   );
 }

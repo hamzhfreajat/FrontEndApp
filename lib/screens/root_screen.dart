@@ -108,7 +108,10 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
               ),
               actions: [
                 GestureDetector(
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalSearchPage())),
+                  onTap: () {
+                    AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_search', location: 'root_screen');
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalSearchPage()));
+                  },
                   child: _headerBtn(Icons.search_rounded),
                 ),
                 const SizedBox(width: 6),
@@ -117,7 +120,10 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                   builder: (context, provider, child) {
                     final int count = provider.metrics?.savedItems ?? 0;
                     return GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage())),
+                      onTap: () {
+                        AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_saved_ads', location: 'root_screen');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage()));
+                      },
                       child: _headerBtnWithBadge(Icons.favorite_border_rounded, count > 0 ? count.toString() : null),
                     );
                   },
@@ -128,7 +134,10 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                   builder: (context, notifProvider, child) {
                     final count = notifProvider.unreadCount;
                     return GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage())),
+                      onTap: () {
+                        AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_notifications', location: 'root_screen');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
+                      },
                       child: _headerBtnWithBadge(
                         Icons.notifications_none_rounded, 
                         count > 0 ? (count > 99 ? '+99' : count.toString()) : null
@@ -141,7 +150,10 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                   builder: (context, authProvider, child) {
                     final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
                     return GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen())),
+                      onTap: () {
+                        AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_inbox', location: 'root_screen');
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
+                      },
                       child: StreamBuilder<int>(
                         stream: FirebaseChatRepository().getTotalUnreadCount(currentUserId),
                         builder: (context, snapshot) {
@@ -169,7 +181,10 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                   child: Row(
                     children: [
                       GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage())),
+                        onTap: () {
+                          AnalyticsEngine().logButtonTapped(buttonName: 'bottom_nav_add_ad', location: 'root_screen');
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
+                        },
                         child: Container(
                           margin: const EdgeInsets.only(right: 12, left: 8),
                           child: Column(

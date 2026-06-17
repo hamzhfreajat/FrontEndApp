@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
 import 'add_ad_reels.dart';
@@ -13,6 +14,13 @@ class AddAdImagesPage extends StatefulWidget {
 }
 
 class _AddAdImagesPageState extends State<AddAdImagesPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_images');
+  }
+
   final List<XFile> _images = [];
   final ImagePicker _picker = ImagePicker();
 
@@ -121,6 +129,7 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
         
         if (_failedImages.isEmpty) {
           setState(() => _isAnalyzing = false);
+          AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_images');
           Navigator.push(
             context,
             MaterialPageRoute(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
 import 'add_ad_region.dart';
@@ -24,6 +25,13 @@ class AddAdCityPage extends StatefulWidget {
 }
 
 class _AddAdCityPageState extends State<AddAdCityPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsEngine().logScreenViewed(screenName: 'add_ad_city');
+  }
+
   final List<String> _allCities = [
     'عمان',
     'إربد',
@@ -47,7 +55,8 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
   }
 
   void _selectCity(String city) {
-    Navigator.push(
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_city');
+          Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdRegionPage(
