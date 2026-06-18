@@ -473,21 +473,21 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _images.isNotEmpty ? _nextStep : null,
+              onPressed: _images.length >= 3 ? _nextStep : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                backgroundColor: _images.isNotEmpty ? const Color(0xFF0075FF) : Colors.grey.shade300,
+                backgroundColor: _images.length >= 3 ? const Color(0xFF0075FF) : Colors.grey.shade300,
               ),
               child: Text(
-                _images.isEmpty
-                    ? 'الرجاء إضافة صور' 
+                _images.length < 3
+                    ? 'الرجاء إضافة 3 صور على الأقل' 
                     : 'متابعة لإضافة فيديو',
                 style: TextStyle(
                   fontSize: 16, 
                   fontWeight: FontWeight.w800, 
-                  color: _images.isNotEmpty ? Colors.white : Colors.grey.shade600
+                  color: _images.length >= 3 ? Colors.white : Colors.grey.shade600
                 ),
               ),
             ),

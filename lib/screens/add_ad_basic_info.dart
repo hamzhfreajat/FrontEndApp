@@ -61,9 +61,11 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
   
   final ApiService _apiService = ApiService();
 
+  late Map<String, dynamic> _adData;
+
   @override
   void dispose() {
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('id')) {
+    if (_adData.containsKey('id')) {
       final attributes = {
         ...widget.attributes,
         'payment_method': _paymentMethod,
@@ -81,9 +83,9 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
       }
       
       // Fire-and-forget update
-      ApiService().updateDraft(widget.editingAdData!['id'], updateData).catchError((_) => null);
+      ApiService().updateDraft(_adData['id'], updateData).catchError((_) => null);
       
-      widget.editingAdData!.addAll(updateData);
+      _adData.addAll(updateData);
     }
     _titleController.dispose();
     _descriptionController.dispose();
@@ -115,7 +117,9 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
       },
     );
 
-    final sourceData = widget.editingAdData;
+    _adData = widget.editingAdData ?? {};
+
+    final sourceData = _adData;
     if (sourceData != null && sourceData.isNotEmpty) {
       if (sourceData['title'] != null) _titleController.text = sourceData['title'].toString();
       if (sourceData['description'] != null) _descriptionController.text = sourceData['description'].toString();
@@ -194,10 +198,10 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
     }
 
     final finalAdData = {
-      if (widget.editingAdData != null && widget.editingAdData!.containsKey('id'))
-        'id': widget.editingAdData!['id'],
-      if (widget.editingAdData != null && widget.editingAdData!.containsKey('image_urls'))
-        'image_urls': widget.editingAdData!['image_urls'],
+      if (_adData.containsKey('id'))
+        'id': _adData['id'],
+      if (_adData.containsKey('image_urls'))
+        'image_urls': _adData['image_urls'],
       'title': _titleController.text.isNotEmpty 
           ? _titleController.text 
           : '${widget.selectedLeafCategory.name} - ${widget.transactionType}',
@@ -222,9 +226,9 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
       'phone_number': _phoneController.text.trim(),
     };
 
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('id')) {
+    if (_adData.containsKey('id')) {
       try {
-        await ApiService().updateDraft(widget.editingAdData!['id'], finalAdData);
+        await ApiService().updateDraft(_adData['id'], finalAdData);
       } catch (e) {
         debugPrint('Failed to update draft: $e');
       }
@@ -236,7 +240,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
     
     _formTracker.markSubmitted();
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_basic_info');
-          Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdPreviewPage(
@@ -246,6 +250,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
         ),
       ),
     );
+    if (mounted) setState(() {});
   }
 
   @override

@@ -73,10 +73,12 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
   late final List<String> _allRegions;
   bool _isLoadingRegions = true;
   bool _isCreatingDraft = false;
+  late Map<String, dynamic> _adData;
 
   @override
   void initState() {
     super.initState();
+    _adData = widget.editingAdData ?? {};
     AnalyticsEngine().logScreenViewed(screenName: 'add_ad_region');
     final List<String> cityList = _cityRegions[widget.selectedCity] ?? [];
     _allRegions = cityList.isEmpty ? [widget.selectedCity] : List.from(cityList);
@@ -161,9 +163,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
   void _selectRegion(String region) async {
     if (_isCreatingDraft) return;
 
-    Map<String, dynamic>? updatedAdData = widget.editingAdData;
-
-    if (updatedAdData == null || !updatedAdData.containsKey('id')) {
+    if (!_adData.containsKey('id')) {
       setState(() => _isCreatingDraft = true);
       try {
         final apiService = ApiService();
@@ -176,7 +176,8 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
             'leaf_category_name': widget.selectedLeafCategory.name,
           }
         });
-        updatedAdData = newDraft.toJson();
+        _adData.clear();
+        _adData.addAll(newDraft.toJson());
       } catch (e) {
         debugPrint('Failed to create draft: $e');
       } finally {
@@ -186,14 +187,14 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
       }
     } else {
       // It already exists, update region locally
-      updatedAdData['attributes'] ??= {};
-      updatedAdData['attributes']['region'] = region;
+      _adData['attributes'] ??= {};
+      _adData['attributes']['region'] = region;
     }
 
     if (!mounted) return;
 
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_region');
-          Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdDetailsPage(
@@ -205,10 +206,11 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
           selectedRegion: region,
           mapLocation: null,
           selectedLandmarks: const [],
-          editingAdData: updatedAdData,
+          editingAdData: _adData,
         ),
       ),
     );
+    if (mounted) setState(() {});
   }
 
   @override
@@ -342,7 +344,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
                           spacing: 12,
                           runSpacing: 12,
                           children: _popularRegions.map((region) {
-                            final bool isSelected = widget.editingAdData != null && widget.editingAdData!['attributes']?['region'] == region;
+                            final bool isSelected = _adData['attributes']?['region'] == region;
 
                             return InkWell(
                               onTap: () => _selectRegion(region),
@@ -403,7 +405,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
                           spacing: 8,
                           runSpacing: 8,
                           children: _filteredRegions.map((region) {
-                            final bool isSelected = widget.editingAdData != null && widget.editingAdData!['attributes']?['region'] == region;
+                            final bool isSelected = _adData['attributes']?['region'] == region;
 
                             return InkWell(
                               onTap: () => _selectRegion(region),
@@ -445,7 +447,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: widget.editingAdData != null && widget.editingAdData!['attributes']?['region'] != null
+      floatingActionButton: _adData['attributes']?['region'] != null
         ? Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -463,9 +465,9 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _selectRegion(widget.editingAdData!['attributes']['region']),
+                  onPressed: () => _selectRegion(_adData['attributes']['region']),
                   icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                  label: Text('متابعة بنفس الحي (${widget.editingAdData!['attributes']['region']})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  label: Text('متابعة بنفس الحي (${_adData['attributes']['region']})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0xFF10B981),

@@ -25,10 +25,12 @@ class AddAdCityPage extends StatefulWidget {
 }
 
 class _AddAdCityPageState extends State<AddAdCityPage> {
+  late Map<String, dynamic> _adData;
 
   @override
   void initState() {
     super.initState();
+    _adData = widget.editingAdData ?? {};
     AnalyticsEngine().logScreenViewed(screenName: 'add_ad_city');
   }
 
@@ -54,9 +56,9 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
     return _allCities.where((city) => city.contains(_searchQuery)).toList();
   }
 
-  void _selectCity(String city) {
+  void _selectCity(String city) async {
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_city');
-          Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdRegionPage(
@@ -65,10 +67,11 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
           images: widget.images,
           reelVideo: widget.reelVideo,
           selectedCity: city,
-          editingAdData: widget.editingAdData,
+          editingAdData: _adData,
         ),
       ),
     );
+    if (mounted) setState(() {});
   }
 
   @override
@@ -179,7 +182,7 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: widget.editingAdData != null && widget.editingAdData!['location'] != null
+      floatingActionButton: _adData['location'] != null || _adData['attributes']?['city'] != null
         ? Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
@@ -197,9 +200,9 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => _selectCity(widget.editingAdData!['location']),
+                  onPressed: () => _selectCity(_adData['attributes']?['city'] ?? _adData['location']),
                   icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                  label: Text('متابعة بنفس المحافظة (${widget.editingAdData!['location']})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  label: Text('متابعة بنفس المحافظة (${_adData['attributes']?['city'] ?? _adData['location']})', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color(0xFF0075FF),
@@ -236,7 +239,8 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
       default: icon = Icons.map_rounded; color = const Color(0xFF64748B); break;
     }
 
-    final bool isSelected = widget.editingAdData != null && widget.editingAdData!['location'] == city;
+    final String? savedCity = _adData['attributes']?['city'] ?? _adData['location'];
+    final bool isSelected = savedCity == city;
 
     return InkWell(
       onTap: () => _selectCity(city),

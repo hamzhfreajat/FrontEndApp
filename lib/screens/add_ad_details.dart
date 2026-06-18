@@ -88,12 +88,15 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
     }
   }
 
+  late Map<String, dynamic> _adData;
+
   @override
   void initState() {
     super.initState();
+    _adData = widget.editingAdData ?? {};
     AnalyticsEngine().logScreenViewed(screenName: 'add_ad_details');
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('attributes')) {
-      final existingDynamic = widget.editingAdData!['attributes']['dynamic_data'];
+    if (_adData.containsKey('attributes')) {
+      final existingDynamic = _adData['attributes']['dynamic_data'];
       if (existingDynamic != null && existingDynamic is Map) {
         existingDynamic.forEach((key, value) {
           if (value is List) {
@@ -112,7 +115,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
 
   @override
   void dispose() {
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('id')) {
+    if (_adData.containsKey('id')) {
       final attributes = {
         'transaction_type': widget.transactionType,
         'leaf_category_name': widget.selectedLeafCategory.name,
@@ -120,10 +123,10 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
         if (_commercialSubCategory != null) 'commercial_sub': _commercialSubCategory,
       };
       // Fire-and-forget update
-      ApiService().updateDraft(widget.editingAdData!['id'], {'attributes': attributes}).catchError((_) => null);
+      ApiService().updateDraft(_adData['id'], {'attributes': attributes}).catchError((_) => null);
       
-      widget.editingAdData!['attributes'] ??= {};
-      widget.editingAdData!['attributes'].addAll(attributes);
+      _adData['attributes'] ??= {};
+      _adData['attributes'].addAll(attributes);
     }
     
     _areaController.dispose();
@@ -134,8 +137,8 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
   }
 
   String _getFormType() {
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('attributes')) {
-      final savedFormType = widget.editingAdData!['attributes']['form_type'];
+    if (_adData.containsKey('attributes')) {
+      final savedFormType = _adData['attributes']['form_type'];
       if (savedFormType != null && savedFormType.toString().isNotEmpty) {
         return savedFormType.toString();
       }
@@ -254,11 +257,11 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
         'commercial_sub': _commercialSubCategory,
     };
 
-    if (widget.editingAdData != null && widget.editingAdData!.containsKey('id')) {
+    if (_adData.containsKey('id')) {
       try {
-        await ApiService().updateDraft(widget.editingAdData!['id'], {'attributes': attributes});
-        widget.editingAdData!['attributes'] ??= {};
-        widget.editingAdData!['attributes'].addAll(attributes);
+        await ApiService().updateDraft(_adData['id'], {'attributes': attributes});
+        _adData['attributes'] ??= {};
+        _adData['attributes'].addAll(attributes);
       } catch (e) {
         debugPrint('Failed to update draft: $e');
       }
@@ -267,7 +270,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
     if (!mounted) return;
 
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_details');
-          Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdBasicInfoPage(
@@ -275,15 +278,16 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
           transactionType: widget.transactionType,
           selectedCity: widget.selectedCity,
           selectedRegion: widget.selectedRegion,
-          attributes: attributes,
+          attributes: Map<String, dynamic>.from(_adData['attributes'] ?? {}),
           images: widget.images,
           reelVideo: widget.reelVideo,
           mapLocation: widget.mapLocation,
           selectedLandmarks: widget.selectedLandmarks,
-          editingAdData: widget.editingAdData,
+          editingAdData: _adData,
         ),
       ),
     );
+    if (mounted) setState(() {});
   }
 
   // --- Premium UI Builders ---
