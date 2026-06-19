@@ -189,6 +189,16 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
       // It already exists, update region locally
       _adData['attributes'] ??= {};
       _adData['attributes']['region'] = region;
+      _adData['attributes']['city'] = widget.selectedCity;
+      
+      try {
+        final apiService = ApiService();
+        await apiService.updateDraft(_adData['id'], {
+          'attributes': _adData['attributes'],
+        });
+      } catch (e) {
+        debugPrint('Failed to update draft region: $e');
+      }
     }
 
     if (!mounted) return;

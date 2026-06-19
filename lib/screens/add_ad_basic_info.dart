@@ -69,6 +69,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
       final attributes = {
         ...widget.attributes,
         'payment_method': _paymentMethod,
+        'phone_number': _phoneController.text.trim(),
         if (_downPaymentController.text.isNotEmpty) 'down_payment': _downPaymentController.text,
       };
       
@@ -76,6 +77,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
         'attributes': attributes,
+        'phone_number': _phoneController.text.trim(),
       };
       
       if (_priceController.text.isNotEmpty) {
@@ -134,6 +136,8 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
       }
       if (sourceData['phone_number'] != null) {
         _phoneController.text = sourceData['phone_number'].toString();
+      } else if (sourceData['attributes']?['phone_number'] != null) {
+        _phoneController.text = sourceData['attributes']['phone_number'].toString();
       }
     }
     

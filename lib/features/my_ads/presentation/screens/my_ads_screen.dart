@@ -84,11 +84,17 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
              'location': adToEdit.location,
              'attributes': adToEdit.attributes ?? {},
              'image_urls': adToEdit.images,
+             'phone_number': adToEdit.phoneNumber,
           };
           
-          Navigator.push(context, MaterialPageRoute(builder: (_) => AddAdCityPage(
+          final String city = adToEdit.attributes?['city']?.toString() ?? 'O1U.O U+';
+          final String region = adToEdit.attributes?['region']?.toString() ?? '';
+          
+          Navigator.push(context, MaterialPageRoute(builder: (_) => AddAdDetailsPage(
              selectedLeafCategory: category,
              transactionType: adToEdit.attributes?['transaction_type']?.toString() ?? '',
+             selectedCity: city,
+             selectedRegion: region,
              editingAdData: editingAdData,
           ))).then((_) {
             if (context.mounted) {

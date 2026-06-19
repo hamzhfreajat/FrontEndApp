@@ -59,6 +59,8 @@ class Ad {
     List<String> parsedImages = [];
     if (json['image_urls'] != null && json['image_urls'] is List && (json['image_urls'] as List).isNotEmpty) {
       parsedImages = (json['image_urls'] as List).map((e) => e.toString()).toList();
+    } else if (json['attributes'] != null && json['attributes']['image_urls'] != null && json['attributes']['image_urls'] is List && (json['attributes']['image_urls'] as List).isNotEmpty) {
+      parsedImages = (json['attributes']['image_urls'] as List).map((e) => e.toString()).toList();
     } else {
       String? mainImageUrl = json['image_url'];
       if (mainImageUrl != null && mainImageUrl.isNotEmpty) {
@@ -136,7 +138,10 @@ class Ad {
       id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
       title: json['title']?.toString() ?? 'بدون عنوان',
       description: json['description']?.toString() ?? '',
-      phoneNumber: extractFirstPhone(json['phone_number']?.toString()),
+      phoneNumber: extractFirstPhone(
+        json['phone_number']?.toString() ?? 
+        (json['attributes'] != null && json['attributes'] is Map ? json['attributes']['phone_number']?.toString() : null)
+      ),
       price: json['price'] != null ? (double.tryParse(json['price'].toString()) ?? 0.0) : 0.0,
       location: json['location']?.toString() ?? 'غير محدد',
       imageUrl: parsedImages.isNotEmpty ? parsedImages.first : null,

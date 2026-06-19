@@ -125,7 +125,14 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       price: double.tryParse(widget.adData['price']?.toString() ?? '0') ?? 0,
       location: '${widget.adData['region']}، ${widget.adData['location']}',
       categoryId: widget.adData['category_id'] ?? 1,
-      images: widget.images?.map((m) => 'file://${m.path}').toList() ?? [], // Added file:// prefix for ApiService.networkImage
+      images: (widget.images != null && widget.images!.isNotEmpty)
+          ? widget.images!.map((m) => 'file://${m.path}').toList()
+          : (widget.adData['image_urls'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [],
+      imageUrl: (widget.images != null && widget.images!.isNotEmpty)
+          ? 'file://${widget.images!.first.path}'
+          : ((widget.adData['image_urls'] as List<dynamic>?)?.isNotEmpty == true 
+              ? widget.adData['image_urls'][0].toString() 
+              : widget.adData['image_url']?.toString()),
       createdAt: DateTime.now(),
       isHot: false,
       views: 0,
@@ -139,6 +146,18 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
 
   Future<void> _publishAd() async {
     if (_isPublishing) return;
+
+    final existingImagesCount = (widget.adData['image_urls'] as List<dynamic>?)?.length ?? 0;
+    final newImagesCount = widget.images?.length ?? 0;
+    if (existingImagesCount + newImagesCount < 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("U,OO\"O_ U.U+ OO OU?O_ 3 OU^O O1U,U% O U,OU,U, U,U+O'O O U,OO1U,O U+"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     if (mounted) {
       setState(() => _isPublishing = true);
