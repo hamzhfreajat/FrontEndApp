@@ -12,6 +12,7 @@ import '../../../../screens/add_ad_city.dart';
 import '../widgets/my_ads_skeleton.dart';
 import '../../domain/entities/my_ad_entities.dart';
 import '../../../../services/analytics_engine.dart';
+import '../../../../screens/add_ad_details.dart';
 
 class MyAdsScreen extends StatefulWidget {
   final bool isStandalone;
