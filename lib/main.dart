@@ -20,6 +20,7 @@ import 'l10n/app_localizations.dart';
 import 'widgets/connectivity_wrapper.dart';
 import 'services/api_service.dart';
 import 'screens/ad_details_page.dart';
+import 'screens/category_details_page.dart';
 import 'features/chat/presentation/screens/premium_inbox_screen.dart';
 import 'services/analytics_engine.dart';
 import 'utils/analytics_route_observer.dart';
@@ -165,6 +166,37 @@ void main() async {
     }
 
     if (message.data.containsKey('reference_id')) {
+      if (message.data['type'] == 'saved_search_batch') {
+        try {
+          final filterId = message.data['reference_id'].toString();
+          final savedSearches = await ApiService().fetchSavedSearches();
+          final savedSearch = savedSearches.firstWhere((s) => s.id == filterId);
+          
+          final appProvider = Provider.of<AppProvider>(navigatorKey.currentContext!, listen: false);
+          final categories = appProvider.categories ?? [];
+          final category = categories.isNotEmpty 
+              ? categories.firstWhere((c) => c.id == savedSearch.categoryId, orElse: () => categories.first)
+              : null;
+          
+          if (category != null) {
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(builder: (_) => CategoryDetailsPage(
+                category: category,
+                initialSearchQuery: savedSearch.searchQuery,
+                initialMinPrice: savedSearch.minPrice,
+                initialMaxPrice: savedSearch.maxPrice,
+                initialTags: savedSearch.tags,
+                initialLocations: savedSearch.locations,
+                initialShowSaveSearch: false,
+              )),
+            );
+          }
+        } catch (e) {
+          print('Error navigating to saved search: $e');
+        }
+        return;
+      }
+      
       try {
         final adId = int.parse(message.data['reference_id']);
         final ad = await ApiService().fetchAdById(adId);

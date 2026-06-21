@@ -917,6 +917,16 @@ class ApiService {
     }
   }
 
+  Future<void> deleteAccount() async {
+    final response = await _client.delete(
+      Uri.parse('$baseUrl/auth/account'),
+      headers: await _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete account: ${response.statusCode}');
+    }
+  }
+
   Future<void> reportAd(int adId, String reason, {String? comments}) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/ads/$adId/report'),

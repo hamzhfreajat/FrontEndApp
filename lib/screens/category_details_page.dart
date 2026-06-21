@@ -172,7 +172,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     if (widget.initialShowSaveSearch) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          _showSaveSearchBottomSheet(context, widget.parentBrandColor ?? Colors.blue);
+          _saveCurrentSearch('batch_100');
         }
       });
     }
@@ -818,51 +818,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     );
   }
 
-  void _showSaveSearchBottomSheet(BuildContext context, Color brandColor) {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (ctx) {
-        return Container(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.notifications_active, color: brandColor, size: 28),
-                  const SizedBox(width: 12),
-                  const Text('حفظ البحث وتخصيص التنبيهات', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Text('سجل للحصول على تنبيهات عند إضافة عقارات تطابق بحثك:', style: TextStyle(color: Colors.black54)),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.flash_on, color: Colors.orange),
-                title: const Text('تنبيه فوري'),
-                subtitle: const Text('أرسل لي إشعاراً فور توفر عقار جديد'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _saveCurrentSearch('instant');
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.calendar_today, color: Colors.blue),
-                title: const Text('ملخص يومي'),
-                subtitle: const Text('أرسل لي ملخصاً بأفضل العقارات المضافة اليوم'),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _saveCurrentSearch('daily');
-                },
-              ),
-            ],
-          ),
-        );
-      }
-    );
-  }
 
   Widget _buildSortOption(BuildContext ctx, String value, String label, IconData iconData, Color iconColor) {
     final bool isActive = _sortBy == value;
@@ -1038,7 +993,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
            });
            _fetchAds();
            if (result.saveSearchRequested) {
-             _showSaveSearchBottomSheet(context, brandColor);
+             _saveCurrentSearch('batch_100');
            }
         }
       }

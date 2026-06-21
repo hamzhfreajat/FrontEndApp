@@ -6,6 +6,7 @@ import '../../../../../providers/auth_provider.dart';
 import '../../../../../screens/root_screen.dart';
 import '../../../../../screens/login_page.dart';
 import '../../../../chat/presentation/screens/premium_chat_screen.dart';
+import '../../../../../services/api_service.dart';
 
 class SettingsSection extends StatelessWidget {
   const SettingsSection({Key? key}) : super(key: key);
@@ -187,6 +188,57 @@ class SettingsSection extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const LoginPage()),
                     (route) => false,
                   );
+                }),
+                _buildDivider(),
+                _buildSettingsTile(Icons.delete_forever_rounded, 'حذف الحساب', 'إجراء لا يمكن التراجع عنه', context, true, () async {
+                  bool? confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (BuildContext dialogContext) {
+                      return AlertDialog(
+                        title: const Text('تأكيد حذف الحساب', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                        content: const Text('هل أنت متأكد أنك تريد حذف حسابك؟ سيتم حذف جميع إعلاناتك ورسائلك وبياناتك بشكل دائم ولا يمكن استرجاعها.'),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('إلغاء'),
+                            onPressed: () => Navigator.of(dialogContext).pop(false),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                            child: const Text('حذف نهائي', style: TextStyle(color: Colors.white)),
+                            onPressed: () => Navigator.of(dialogContext).pop(true),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirm == true && context.mounted) {
+                    try {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (_) => const Center(child: CircularProgressIndicator()),
+                      );
+                      
+                      await ApiService().deleteAccount();
+                      
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close progress
+                      
+                      await context.read<AuthProvider>().logout();
+                      if (!context.mounted) return;
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                        (route) => false,
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حذف الحساب بنجاح')));
+                    } catch (e) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context); // close progress
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ: $e')));
+                    }
+                  }
                 }),
               ]),
             ],
