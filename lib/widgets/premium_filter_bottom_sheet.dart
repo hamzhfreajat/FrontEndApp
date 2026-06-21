@@ -168,10 +168,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
         if (_dynamicDataLoc[key] != null) locs.add(_dynamicDataLoc[key]);
       }
       
-      if (_isLands()) {
-        // Lands already added governorate, directorate, etc from _dynamicDataLoc above
-        // Do not add the global city/region to avoid conflicting locations
-      } else if (_isRealEstate() && mounted) {
+      if (_isRealEstate() && mounted) {
         final appProvider = Provider.of<AppProvider>(context, listen: false);
         if (_selectedCityId != null) {
           final city = appProvider.dbCities?.firstWhere((c) => c.id == _selectedCityId, orElse: () => appProvider.dbCities!.first);
@@ -406,61 +403,16 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                     }
                   ),
 
-                // Location Selector is restricted to Lands only
-                if (_isLands()) ...[
+
+                if (_isRealEstate()) ...[
                   _buildSectionCard('الموقع الجغرافي', Column(
                     children: [
-                      _buildDynamicLocationSelector('المحافظة', _selectedGovernorateId, [
-                        {'id': 5, 'name_ar': 'محافظة العاصمة'}, {'id': 6, 'name_ar': 'محافظة إربد'}, {'id': 7, 'name_ar': 'محافظة الزرقاء'}, 
-                        {'id': 8, 'name_ar': 'محافظة البلقاء'}, {'id': 16, 'name_ar': 'محافظة الطفيلة'}, {'id': 10, 'name_ar': 'محافظة العقبة'}, 
-                        {'id': 13, 'name_ar': 'محافظة الكرك'}, {'id': 11, 'name_ar': 'محافظة المفرق'}, {'id': 12, 'name_ar': 'محافظة جرش'}, 
-                        {'id': 14, 'name_ar': 'محافظة عجلون'}, {'id': 9, 'name_ar': 'محافظة مادبا'}, {'id': 15, 'name_ar': 'محافظة معان'}
-                      ], false, (id, name) async {
-                        setState(() {
-                          _selectedGovernorateId = id; _dynamicDataLoc['governorate'] = name;
-                          _selectedDirectorateId = null; _selectedVillageId = null; _selectedBasinId = null;
-                          _directorates = []; _villages = []; _basins = []; _isLoadingLoc = true;
-                        });
-                        _triggerCountUpdate();
-                        if (id != null) {
-                           final res = await _apiService.fetchDirectorates(id);
-                           setState(() { _directorates = res; _isLoadingLoc = false; });
-                        } else { setState(() { _isLoadingLoc = false; }); }
-                      }, icon: Icons.map_rounded),
-                      _buildDynamicLocationSelector('المديرية', _selectedDirectorateId, _directorates, _isLoadingLoc, (id, name) async {
-                        setState(() {
-                          _selectedDirectorateId = id; _dynamicDataLoc['directorate'] = name;
-                          _selectedVillageId = null; _selectedBasinId = null;
-                          _villages = []; _basins = []; _isLoadingLoc = true;
-                        });
-                        _triggerCountUpdate();
-                        if (id != null) {
-                           final res = await _apiService.fetchVillages(id);
-                           setState(() { _villages = res; _isLoadingLoc = false; });
-                        } else { setState(() { _isLoadingLoc = false; }); }
-                      }, icon: Icons.account_balance_rounded),
-                      _buildDynamicLocationSelector('القرية', _selectedVillageId, _villages, _isLoadingLoc, (id, name) async {
-                        setState(() {
-                          _selectedVillageId = id; _dynamicDataLoc['village'] = name;
-                          _selectedBasinId = null; _basins = []; _isLoadingLoc = true;
-                        });
-                        _triggerCountUpdate();
-                        if (id != null) {
-                           final res = await _apiService.fetchBasins(id);
-                           setState(() { _basins = res; _isLoadingLoc = false; });
-                        } else { setState(() { _isLoadingLoc = false; }); }
-                      }, icon: Icons.holiday_village_rounded),
-                      _buildDynamicLocationSelector('الحوض', _selectedBasinId, _basins, _isLoadingLoc, (id, name) async {
-                        setState(() {
-                          _selectedBasinId = id; _dynamicDataLoc['basin'] = name;
-                        });
-                        _triggerCountUpdate();
-                      }, icon: Icons.water_rounded),
+                      _buildUnifiedLocationSelector(),
                     ],
-                  ), showReset: _dynamicDataLoc.isNotEmpty, onReset: () {
+                  ), showReset: _dynamicDataLoc.containsKey('city') || _dynamicDataLoc.containsKey('regions'), onReset: () {
                     setState(() {
-                      _selectedGovernorateId = null; _selectedDirectorateId = null; _selectedVillageId = null; _selectedBasinId = null;
-                      _dynamicDataLoc.clear();
+                      _selectedCityId = null; _selectedRegionIds.clear();
+                      _dynamicDataLoc.remove('city'); _dynamicDataLoc.remove('regions');
                     });
                     _triggerCountUpdate();
                   }),
@@ -480,18 +432,6 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   _buildMultiSelectSection('تخضع للرهن؟', ['نعم', 'لا'], _selectedIsMortgaged, (val) { setState(() { _selectedIsMortgaged.contains(val) ? _selectedIsMortgaged.remove(val) : _selectedIsMortgaged.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedIsMortgaged.clear()); _triggerCountUpdate(); }),
                   _buildMultiSelectSection('متاح بالأقساط؟', ['نعم', 'لا'], _selectedInstallmentPossible, (val) { setState(() { _selectedInstallmentPossible.contains(val) ? _selectedInstallmentPossible.remove(val) : _selectedInstallmentPossible.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedInstallmentPossible.clear()); _triggerCountUpdate(); }),
                 ] else if (_isRealEstate()) ...[
-                  _buildSectionCard('الموقع الجغرافي', Column(
-                    children: [
-                      _buildUnifiedLocationSelector(),
-                    ],
-                  ), showReset: _dynamicDataLoc.containsKey('city') || _dynamicDataLoc.containsKey('regions'), onReset: () {
-                    setState(() {
-                      _selectedCityId = null; _selectedRegionIds.clear();
-                      _dynamicDataLoc.remove('city'); _dynamicDataLoc.remove('regions');
-                    });
-                    _triggerCountUpdate();
-                  }),
-
                   _buildInputsRow('مساحة البناء', 'أدنى مساحة', 'أعلى مساحة', _minAreaController, _maxAreaController),
                   _buildInputsRow('السعر (دينار)', 'أدنى سعر', 'أعلى سعر', _minPriceController, _maxPriceController),
                   
@@ -551,9 +491,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                         if (_dynamicDataLoc[key] != null) locs.add(_dynamicDataLoc[key]);
                       }
                       
-                      if (_isLands()) {
-                        // Lands already added governorate, directorate, etc from _dynamicDataLoc
-                      } else if (_isRealEstate()) {
+                      if (_isRealEstate()) {
                         final appProvider = Provider.of<AppProvider>(context, listen: false);
                         if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
                           List<Region> selectedRegionsList = [];
@@ -621,9 +559,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                         if (_dynamicDataLoc[key] != null) locs.add(_dynamicDataLoc[key]);
                       }
                       
-                      if (_isLands()) {
-                        // Lands already added governorate, directorate, etc from _dynamicDataLoc
-                      } else if (_isRealEstate()) {
+                      if (_isRealEstate()) {
                         final appProvider = Provider.of<AppProvider>(context, listen: false);
                         if (_selectedRegionIds.isNotEmpty && appProvider.dbCities != null) {
                           List<Region> selectedRegionsList = [];

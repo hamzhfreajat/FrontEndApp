@@ -1861,62 +1861,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                 ],
               ),
               _buildRadioChips('الشكل الهندسي', 'geometric_shape', ['مستطيل', 'مربع', 'غير منتظم', 'زاوية / شارعَين']),
-              _buildDynamicLocationSelector('المحافظة', 'governorate_id', _selectedGovernorateId, [
-                {'id': 5, 'name_ar': 'محافظة العاصمة'}, {'id': 6, 'name_ar': 'محافظة إربد'}, {'id': 7, 'name_ar': 'محافظة الزرقاء'}, 
-                {'id': 8, 'name_ar': 'محافظة البلقاء'}, {'id': 16, 'name_ar': 'محافظة الطفيلة'}, {'id': 10, 'name_ar': 'محافظة العقبة'}, 
-                {'id': 13, 'name_ar': 'محافظة الكرك'}, {'id': 11, 'name_ar': 'محافظة المفرق'}, {'id': 12, 'name_ar': 'محافظة جرش'}, 
-                {'id': 14, 'name_ar': 'محافظة عجلون'}, {'id': 9, 'name_ar': 'محافظة مادبا'}, {'id': 15, 'name_ar': 'محافظة معان'}
-              ], false, (id, name) async {
-                setState(() {
-                  _selectedGovernorateId = id;
-                  _dynamicData['governorate'] = name;
-                  _selectedDirectorateId = null; _selectedVillageId = null; _selectedBasinId = null;
-                  _directorates = []; _villages = []; _basins = []; _neighborhoods = [];
-                  _isLoadingLoc = true;
-                });
-                try {
-                  // Removed faulty AppProvider.ngrokUrl logic
-                } catch(e) {}
-                final apiService = ApiService();
-                if (id != null) {
-                   final res = await apiService.fetchDirectorates(id);
-                   setState(() { _directorates = res; _isLoadingLoc = false; });
-                } else {
-                   setState(() { _isLoadingLoc = false; });
-                }
-              }, icon: Icons.map_rounded),
-              
-              _buildDynamicLocationSelector('المديرية', 'directorate_id', _selectedDirectorateId, _directorates, _isLoadingLoc, (id, name) async {
-                setState(() {
-                  _selectedDirectorateId = id; _dynamicData['directorate'] = name;
-                  _selectedVillageId = null; _selectedBasinId = null;
-                  _villages = []; _basins = []; _neighborhoods = []; _isLoadingLoc = true;
-                });
-                final apiService = ApiService();
-                if (id != null) {
-                   final res = await apiService.fetchVillages(id);
-                   setState(() { _villages = res; _isLoadingLoc = false; });
-                } else { setState(() { _isLoadingLoc = false; }); }
-              }, icon: Icons.account_balance_rounded),
 
-              _buildDynamicLocationSelector('القرية', 'village_id', _selectedVillageId, _villages, _isLoadingLoc, (id, name) async {
-                setState(() {
-                  _selectedVillageId = id; _dynamicData['village'] = name;
-                  _selectedBasinId = null; _basins = []; _neighborhoods = []; _isLoadingLoc = true;
-                });
-                final apiService = ApiService();
-                if (id != null) {
-                   final res = await apiService.fetchBasins(id);
-                   setState(() { _basins = res; _isLoadingLoc = false; });
-                } else { setState(() { _isLoadingLoc = false; }); }
-              }, icon: Icons.holiday_village_rounded),
-
-              _buildDynamicLocationSelector('الحوض', 'basin_id', _selectedBasinId, _basins, _isLoadingLoc, (id, name) async {
-                setState(() {
-                  _selectedBasinId = id; 
-                  _dynamicData['basin'] = name;
-                });
-              }, icon: Icons.water_rounded),
 
                 
               _buildTextField('رقم القطعة', 'plot_number', keyboardType: TextInputType.number),
