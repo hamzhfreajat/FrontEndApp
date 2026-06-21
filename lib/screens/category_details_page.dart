@@ -1825,7 +1825,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     List<String> priorityTags = [];
     final catName = widget.category.name;
-    if (catName.contains('أراضي') || catName.contains('اراضي')) {
+    if (catName.contains('أراضي') || catName.contains('أرض ') || catName.endsWith(' أرض') || catName == 'أرض' || catName.contains('مزرعة')) {
       priorityTags = ['واصل خدمات', 'قوشان مستقل', 'على شارعين', 'أرض للاسثمار', 'من المالك مباشرة', 'أرض سكنية', 'أرض تجارية', 'جاهزة للبناء', 'داخل التنظيم', 'مفروزة', 'على شارع رئيسي', 'مطلة', 'أقساط'];
     } else if (catName.contains('تجاري')) {
       priorityTags = ['موقع حيوي', 'غرفة استقبال', 'بدون خلو', 'غرفتين مكتبيتين', 'مطبخ وحمام'];

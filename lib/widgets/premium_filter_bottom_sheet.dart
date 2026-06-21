@@ -311,7 +311,12 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   bool _isLands() {
     final catName = widget.category.name;
     final subName = _selectedSubCategory?.name ?? '';
-    return catName.contains('أراضي') || subName.contains('أراضي');
+    
+    bool isLandMatch(String name) {
+      return name.contains('أراضي') || name.contains('أرض ') || name.endsWith(' أرض') || name == 'أرض';
+    }
+    
+    return isLandMatch(catName) || isLandMatch(subName);
   }
 
   @override

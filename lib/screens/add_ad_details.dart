@@ -155,7 +155,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
     ];
 
     final combinedName = '$parentName $name';
-    if (combinedName.contains('أراضي')) return 'Land';
+    if (combinedName.contains('أراضي') || combinedName.contains('أرض ') || combinedName.endsWith(' أرض') || combinedName == 'أرض') return 'Land';
 
     try {
       final appProvider = Provider.of<AppProvider>(context, listen: false);
@@ -168,7 +168,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
           if (catList.isEmpty) break;
           final cat = catList.first;
           
-          if (cat.name.contains('أراضي')) return 'Land';
+          if (cat.name.contains('أراضي') || cat.name.contains('أرض ') || cat.name.endsWith(' أرض') || cat.name == 'أرض') return 'Land';
           if (commercialKeywords.any((kw) => cat.name.contains(kw))) return 'Commercial';
           if (cat.name.contains('دراج') || cat.name.contains('دباب')) return 'Motorcycle';
           if (cat.name.contains('قطع غيار') || cat.name.contains('إكسسوارات')) return 'AutoParts';
