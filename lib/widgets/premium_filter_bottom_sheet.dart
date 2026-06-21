@@ -268,6 +268,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   }
 
   bool _isRealEstate() {
+    if (_isLands()) return true;
     final catName = widget.category.name;
     final subName = _selectedSubCategory?.name ?? '';
     return catName.contains('عقارات') || catName.contains('شقق') || catName.contains('سكني') || catName.contains('تجاري') || catName.contains('محلات') || catName.contains('مكاتب') || catName.contains('مخازن') || catName.contains('عيادات') || catName.contains('معارض') || catName.contains('مستودع') || catName.contains('صناعي') || catName.contains('مبنى') || catName.contains('مباني') || catName.contains('مجمع') || catName.contains('ستوديو') || catName.contains('شاليه') || catName.contains('فلل') || catName.contains('رووف') || catName.contains('بيوت') || catName.contains('طابق') || catName.contains('أخرى') ||
