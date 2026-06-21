@@ -1866,7 +1866,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                 
               _buildTextField('رقم القطعة', 'plot_number', keyboardType: TextInputType.number),
               _buildCheckboxGroup('الواجهة', 'facade', ['شمالية', 'جنوبية', 'شرقية', 'غربية', 'شمالية شرقية', 'شمالية غربية', 'جنوبية شرقية', 'جنوبية غربية']),
-              _buildRadioChips('نوع الأرض', 'land_type', ['سكنية', 'تجارية', 'زراعية', 'صناعية', 'استثمارية', 'سياحية', 'مختلطة', 'أخرى']),
+
             ],
           ),
         ),
