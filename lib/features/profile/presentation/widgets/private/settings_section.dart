@@ -189,62 +189,75 @@ class SettingsSection extends StatelessWidget {
                     (route) => false,
                   );
                 }),
-                _buildDivider(),
-                _buildSettingsTile(Icons.delete_forever_rounded, 'حذف الحساب', 'إجراء لا يمكن التراجع عنه', context, true, () async {
-                  bool? confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (BuildContext dialogContext) {
-                      return AlertDialog(
-                        title: const Text('تأكيد حذف الحساب', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                        content: const Text('هل أنت متأكد أنك تريد حذف حسابك؟ سيتم حذف جميع إعلاناتك ورسائلك وبياناتك بشكل دائم ولا يمكن استرجاعها.'),
-                        actions: <Widget>[
-                          TextButton(
-                            child: const Text('إلغاء'),
-                            onPressed: () => Navigator.of(dialogContext).pop(false),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                            child: const Text('حذف نهائي', style: TextStyle(color: Colors.white)),
-                            onPressed: () => Navigator.of(dialogContext).pop(true),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-
-                  if (confirm == true && context.mounted) {
-                    try {
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (_) => const Center(child: CircularProgressIndicator()),
-                      );
-                      
-                      await ApiService().deleteAccount();
-                      
-                      if (!context.mounted) return;
-                      Navigator.pop(context); // close progress
-                      
-                      await context.read<AuthProvider>().logout();
-                      if (!context.mounted) return;
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginPage()),
-                        (route) => false,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حذف الحساب بنجاح')));
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      Navigator.pop(context); // close progress
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ: $e')));
-                    }
-                  }
-                }),
               ]),
+              const SizedBox(height: 32),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => _handleDeleteAccount(context),
+                  icon: const Icon(Icons.delete_forever_rounded, color: Colors.red, size: 20),
+                  label: const Text('حذف الحساب نهائياً', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14)),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         );
       },
     );
+  }
+
+  Future<void> _handleDeleteAccount(BuildContext context) async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('تأكيد حذف الحساب', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          content: const Text('هل أنت متأكد أنك تريد حذف حسابك؟ سيتم حذف جميع إعلاناتك ورسائلك وبياناتك بشكل دائم ولا يمكن استرجاعها.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('إلغاء'),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text('حذف نهائي', style: TextStyle(color: Colors.white)),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true && context.mounted) {
+      try {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        );
+        
+        await ApiService().deleteAccount();
+        
+        if (!context.mounted) return;
+        Navigator.pop(context); // close progress
+        
+        await context.read<AuthProvider>().logout();
+        if (!context.mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginPage()),
+          (route) => false,
+        );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حذف الحساب بنجاح')));
+      } catch (e) {
+        if (!context.mounted) return;
+        Navigator.pop(context); // close progress
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ: $e')));
+      }
+    }
   }
 }
