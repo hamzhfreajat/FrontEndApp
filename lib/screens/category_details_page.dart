@@ -3090,6 +3090,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                currentUserId: currentUserId,
                                currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
                                otherUserId: ad.userId.toString(),
+                               otherUserName: ad.ownerName ?? 'مستخدم',
+                               otherUserPhone: ad.phoneNumber,
                              )
                            ));
                         },
