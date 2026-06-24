@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,8 +14,9 @@ class PremiumShareBottomSheet extends StatelessWidget {
   final Ad? ad;
   final String? customTitle;
   final String? customUrl;
+  final List<String>? previewImages;
 
-  const PremiumShareBottomSheet({Key? key, this.ad, this.customTitle, this.customUrl}) : super(key: key);
+  const PremiumShareBottomSheet({Key? key, this.ad, this.customTitle, this.customUrl, this.previewImages}) : super(key: key);
 
   static void show(BuildContext context, Ad ad) {
     showModalBottomSheet(
@@ -23,12 +27,12 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  static void showForLink(BuildContext context, {required String title, required String url}) {
+  static void showForLink(BuildContext context, {required String title, required String url, List<String>? previewImages}) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => PremiumShareBottomSheet(customTitle: title, customUrl: url),
+      builder: (context) => PremiumShareBottomSheet(customTitle: title, customUrl: url, previewImages: previewImages),
     );
   }
 
@@ -47,6 +51,63 @@ class PremiumShareBottomSheet extends StatelessWidget {
     }
   }
 
+  Future<String?> _createCollage(List<String> urls) async {
+    if (urls.isEmpty) return null;
+    
+    // Download all images
+    List<File> imageFiles = [];
+    for (var url in urls) {
+      try {
+        final file = await DefaultCacheManager().getSingleFile(url);
+        imageFiles.add(file);
+      } catch (e) {
+        // ignore
+      }
+    }
+    
+    if (imageFiles.isEmpty) return null;
+    if (imageFiles.length == 1) return imageFiles.first.path;
+
+    // Decode images
+    List<img.Image> images = [];
+    for (var file in imageFiles) {
+      final bytes = await file.readAsBytes();
+      final decoded = img.decodeImage(bytes);
+      if (decoded != null) {
+        images.add(decoded);
+      }
+    }
+
+    if (images.isEmpty) return null;
+    if (images.length == 1) return imageFiles.first.path;
+
+    // Create a 2x2 canvas. Let's say 800x800 total (400x400 each)
+    int size = 800;
+    int halfSize = size ~/ 2;
+    img.Image collage = img.Image(width: size, height: size);
+    
+    // Fill background with white
+    img.fill(collage, color: img.ColorRgb8(255, 255, 255));
+
+    for (int i = 0; i < images.length && i < 4; i++) {
+      int x = (i % 2) * halfSize;
+      int y = (i ~/ 2) * halfSize;
+      
+      // Resize and crop to fit 400x400
+      img.Image resized = img.copyResizeCropSquare(images[i], size: halfSize);
+      
+      // Draw onto collage
+      img.compositeImage(collage, resized, dstX: x, dstY: y);
+    }
+
+    // Save to temp directory
+    final tempDir = await getTemporaryDirectory();
+    final file = File('${tempDir.path}/collage_${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await file.writeAsBytes(img.encodeJpg(collage, quality: 90));
+    
+    return file.path;
+  }
+
   void _copyLink(BuildContext context) {
     Clipboard.setData(ClipboardData(text: _shareUrl));
     _showSnack(context, 'تم نسخ الرابط بنجاح');
@@ -54,8 +115,26 @@ class PremiumShareBottomSheet extends StatelessWidget {
   }
 
   void _shareNative(BuildContext context) async {
-    Navigator.pop(context);
-    final imagePath = await _getLocalImagePath();
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      showDialog(
+        context: context, 
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    String? imagePath;
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      imagePath = await _createCollage(previewImages!);
+    } else {
+      imagePath = await _getLocalImagePath();
+    }
+
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      Navigator.pop(context); // Close loading dialog
+    }
+    Navigator.pop(context); // Close bottom sheet
+
     if (imagePath != null) {
       await Share.shareXFiles([XFile(imagePath)], text: _shareText);
     } else {
@@ -127,12 +206,26 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
-                    if (imageUrl != null)
+                    if (previewImages != null && previewImages!.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Wrap(
+                          spacing: 2,
+                          runSpacing: 2,
+                          children: previewImages!.take(4).map((url) => CachedNetworkImage(
+                            imageUrl: url, 
+                            height: 70, 
+                            width: 70, 
+                            fit: BoxFit.cover
+                          )).toList(),
+                        ),
+                      )
+                    else if (imageUrl != null)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: CachedNetworkImage(imageUrl: imageUrl, height: 140, width: double.infinity, fit: BoxFit.cover),
                       ),
-                    const SizedBox(height: 12),
+                    if (imageUrl != null || (previewImages != null && previewImages!.isNotEmpty)) const SizedBox(height: 12),
                     Text(
                       ad != null ? ad!.title : customTitle!,
                       maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,

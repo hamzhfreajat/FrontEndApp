@@ -141,7 +141,21 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     }
 
     String shareTitle = 'إعلانات قسم ${widget.category.name}';
-    PremiumShareBottomSheet.showForLink(context, title: shareTitle, url: finalUrl);
+    
+    List<String> previewImages = [];
+    for (var ad in _ads) {
+      if (ad.images.isNotEmpty) {
+        previewImages.add(ad.images.first);
+        if (previewImages.length >= 4) break;
+      }
+    }
+
+    PremiumShareBottomSheet.showForLink(
+      context, 
+      title: shareTitle, 
+      url: finalUrl,
+      previewImages: previewImages.isNotEmpty ? previewImages : null,
+    );
   }
 
   @override
