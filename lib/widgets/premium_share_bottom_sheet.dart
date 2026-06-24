@@ -211,19 +211,28 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
-                    if (previewImages != null && previewImages!.isNotEmpty)
+                    if (previewImages != null && previewImages!.isNotEmpty && previewImages!.length > 1)
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Wrap(
-                          spacing: 2,
-                          runSpacing: 2,
-                          children: previewImages!.take(4).map((url) => CachedNetworkImage(
-                            imageUrl: url, 
-                            height: 70, 
-                            width: 70, 
-                            fit: BoxFit.cover
-                          )).toList(),
+                        child: AspectRatio(
+                          aspectRatio: previewImages!.length <= 2 ? 2.0 : 1.0,
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 2,
+                            crossAxisSpacing: 2,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            children: previewImages!.take(4).map((url) => CachedNetworkImage(
+                              imageUrl: url, 
+                              fit: BoxFit.cover
+                            )).toList(),
+                          ),
                         ),
+                      )
+                    else if (previewImages != null && previewImages!.isNotEmpty)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: CachedNetworkImage(imageUrl: previewImages!.first, height: 140, width: double.infinity, fit: BoxFit.cover),
                       )
                     else if (imageUrl != null)
                       ClipRRect(
