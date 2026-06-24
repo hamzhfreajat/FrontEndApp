@@ -23,6 +23,7 @@ import '../providers/auth_provider.dart';
 import '../providers/saved_search_provider.dart';
 import '../models/saved_search.dart';
 import 'ad_details_page.dart';
+import '../widgets/premium_share_bottom_sheet.dart';
 import 'add_ad_images.dart';
 import 'root_screen.dart';
 import '../widgets/premium_real_estate_card.dart';
@@ -3131,7 +3132,22 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.grey.shade200),
                       ),
-                      child: Icon(Icons.share_outlined, color: Colors.grey.shade600, size: 20),
+                      child: Icon(Icons.favorite_border, color: Colors.grey.shade600, size: 20),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () {
+                        PremiumShareBottomSheet.show(context, ad);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Icon(Icons.share_outlined, color: Colors.grey.shade600, size: 20),
+                      ),
                     ),
                   ],
                 )
