@@ -325,8 +325,9 @@ class PremiumShareBottomSheet extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _smallIcon(Widget iconWidget, Color color) {
     return Container(
