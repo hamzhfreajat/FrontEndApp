@@ -88,7 +88,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 40),
-                  const Text('شارك هذا الإعلان', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
+                  const Text('شارك هذا الإعلان', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
@@ -123,7 +123,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     Text(
                       ad.title,
                       maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, fontFamily: 'Tajawal'),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 4),
                     Text('${ad.price.toStringAsFixed(0)} دينار', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 16)),
@@ -166,7 +166,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                           const SizedBox(width: 8),
                           _smallIcon(const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 12), const Color(0xFF00B2FF)),
                           const SizedBox(width: 8),
-                          Text('والمزيد...', style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontFamily: 'Tajawal')),
+                          Text('والمزيد...', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
                         ],
                       ),
                     ),
@@ -220,12 +220,12 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontFamily: 'Tajawal'),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   if (extraContent != null) extraContent,
                 ],
