@@ -24,6 +24,7 @@ import '../providers/saved_search_provider.dart';
 import '../models/saved_search.dart';
 import 'ad_details_page.dart';
 import '../widgets/premium_share_bottom_sheet.dart';
+import 'package:share_plus/share_plus.dart';
 import 'add_ad_images.dart';
 import 'root_screen.dart';
 import '../widgets/premium_real_estate_card.dart';
@@ -118,6 +119,30 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   double? _userLng;
   
   Map<String, dynamic>? _savedCategoryFilters;
+
+  void _shareCategory() {
+    String baseUrl = 'https://sooq-com.com/category/${widget.category.id}';
+    
+    List<String> queryParams = [];
+    if (_searchQuery.isNotEmpty) queryParams.add('query=${Uri.encodeComponent(_searchQuery)}');
+    if (_minPrice != null) queryParams.add('minPrice=$_minPrice');
+    if (_maxPrice != null) queryParams.add('maxPrice=$_maxPrice');
+    if (_isHot == true) queryParams.add('isHot=true');
+    if (_locationsFilter != null && _locationsFilter!.isNotEmpty) {
+      queryParams.add('locations=${Uri.encodeComponent(_locationsFilter!.join(','))}');
+    }
+    if (_selectedTags.isNotEmpty) {
+      queryParams.add('tags=${Uri.encodeComponent(_selectedTags.join(','))}');
+    }
+
+    String finalUrl = baseUrl;
+    if (queryParams.isNotEmpty) {
+      finalUrl += '?' + queryParams.join('&');
+    }
+
+    String shareText = 'شاهد إعلانات قسم ${widget.category.name} على سوقكم\n$finalUrl';
+    Share.share(shareText);
+  }
 
   @override
   void initState() {
@@ -750,50 +775,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             );
           },
         ),
-        // Notifications Action
-        Consumer<NotificationProvider>(
-          builder: (context, notificationProvider, child) {
-            final unreadCount = notificationProvider.unreadCount;
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.notifications_none_rounded, color: Colors.black87, size: 24),
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
-                  },
-                ),
-                if (unreadCount > 0)
-                  Positioned(
-                    right: 6,
-                    top: 6,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE91E63),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                      constraints: const BoxConstraints(
-                        minWidth: 18,
-                        minHeight: 18,
-                      ),
-                      child: Center(
-                        child: Text(
-                          unreadCount > 99 ? '99+' : unreadCount.toString(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  )
-              ],
-            );
-          }
+        // Share Action
+        IconButton(
+          icon: const Icon(Icons.share_outlined, color: Colors.black87, size: 24),
+          onPressed: _shareCategory,
         ),
         const SizedBox(width: 4),
       ],
