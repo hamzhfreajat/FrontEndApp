@@ -57,11 +57,52 @@ class PremiumChatScreen extends StatefulWidget {
 }
 
 class _PremiumChatScreenState extends State<PremiumChatScreen> {
+  String? _resolvedUserName;
+
   @override
   void initState() {
     super.initState();
     PremiumChatScreen.activeChatAdId = widget.adId;
     AnalyticsEngine().logScreenViewed(screenName: 'premium_chat_screen');
+    _resolvedUserName = widget.otherUserName;
+    _resolveUserNameIfNeeded();
+  }
+
+  void _resolveUserNameIfNeeded() async {
+    if (_resolvedUserName == null || _resolvedUserName == 'مستخدم' || _resolvedUserName == 'مستخدم غير معروف' || _resolvedUserName == '??????') {
+      if (widget.adId != 'support') {
+        int? parsedAdId = int.tryParse(widget.adId);
+        if (parsedAdId != null) {
+          if (mounted) {
+            setState(() {
+              _resolvedUserName = 'LOADING_NAME';
+            });
+          }
+          try {
+            final ad = await ApiService().fetchAdById(parsedAdId);
+            if (ad.ownerName != null && ad.ownerName != 'مستخدم' && ad.ownerName!.isNotEmpty) {
+              if (mounted) {
+                setState(() {
+                  _resolvedUserName = ad.ownerName;
+                });
+              }
+            } else {
+              if (mounted) {
+                setState(() {
+                  _resolvedUserName = 'مستخدم';
+                });
+              }
+            }
+          } catch (e) {
+            if (mounted) {
+              setState(() {
+                _resolvedUserName = 'مستخدم';
+              });
+            }
+          }
+        }
+      }
+    }
   }
 
   @override
@@ -80,7 +121,7 @@ class _PremiumChatScreenState extends State<PremiumChatScreen> {
         currentUserAvatar: '', // Current user avatar could be passed in the future, empty for now
         currentUserPhone: widget.currentUserPhone,
         otherUserId: widget.otherUserId,
-        otherUserName: widget.otherUserName ?? 'مستخدم',
+        otherUserName: _resolvedUserName ?? 'مستخدم',
         otherUserAvatar: widget.otherUserAvatar ?? '',
         otherUserPhone: widget.otherUserPhone,
         adTitle: widget.adTitle,
@@ -92,7 +133,7 @@ class _PremiumChatScreenState extends State<PremiumChatScreen> {
         adPrice: widget.adPrice,
         adImageUrl: widget.adImageUrl,
         isSeller: widget.isSeller,
-        userName: widget.otherUserName,
+        userName: _resolvedUserName ?? widget.otherUserName ?? 'مستخدم',
         userAvatar: widget.otherUserAvatar,
         userPhone: widget.otherUserPhone,
         adId: widget.adId,

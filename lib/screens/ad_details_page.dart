@@ -10,6 +10,10 @@ import '../services/api_service.dart';
 import '../widgets/shimmer_loading.dart';
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import '../utils/share_helper.dart';
+import '../utils/share_helper.dart';
+import '../utils/share_helper.dart';
 import '../providers/app_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/premium_video_player.dart';
@@ -229,8 +233,8 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
       _snack('هذه الميزة غير متاحة في وضع المعاينة');
       return;
     }
-    Clipboard.setData(ClipboardData(text: 'https://classifieds.app/ad/${ad.id}'));
-    _snack('تم نسخ رابط الإعلان 📋');
+    final String shareUrl = 'https://sooq-com.com/ad/${widget.ad.id}';
+    Share.share('${widget.ad.title}\nشاهد هذا الإعلان على السوق!\n$shareUrl');
   }
 
   void _submitReport(String reason, {String? comments}) async {
@@ -1859,3 +1863,4 @@ class _Spec {
   final String label;
   _Spec(this.icon, this.label);
 }
+

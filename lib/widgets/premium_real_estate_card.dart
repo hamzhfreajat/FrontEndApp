@@ -9,6 +9,9 @@ import '../providers/auth_provider.dart';
 import 'premium_video_player.dart';
 import 'full_screen_media_gallery.dart';
 import '../providers/app_provider.dart';
+import '../utils/share_helper.dart';
+import 'package:share_plus/share_plus.dart';
+import '../utils/share_helper.dart';
 
 class PremiumRealEstateCard extends StatefulWidget {
   final Ad ad;
@@ -271,7 +274,13 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        if (widget.isPreview) return;
+                        final imageUrl = (widget.ad.images != null && widget.ad.images!.isNotEmpty) 
+                            ? widget.ad.images!.first 
+                            : null;
+                        ShareHelper.shareAdWithImage(widget.ad.title, widget.ad.id.toString(), imageUrl);
+                      },
                       child: _buildBlurBadge(
                         padding: const EdgeInsets.all(8),
                         child: const Icon(Icons.share_rounded, color: Colors.white, size: 18),
@@ -934,3 +943,4 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
     );
   }
 }
+

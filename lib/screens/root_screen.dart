@@ -25,6 +25,8 @@ import '../features/profile/data/repositories/api_profile_repository.dart';
 import '../providers/app_provider.dart';
 import '../providers/saved_search_provider.dart';
 import '../providers/auth_provider.dart';
+import 'package:app_links/app_links.dart';
+import 'ad_details_page.dart';
 
 class RootScreen extends StatefulWidget {
   final int initialIndex;
@@ -42,6 +44,9 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
   static const _accentDark = Color(0xFF1557B0);
   static const _bg = Color(0xFFF4F6FA);
 
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -57,6 +62,42 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
         }
       }
     });
+
+    _initDeepLinks();
+  }
+
+  void _initDeepLinks() {
+    _appLinks = AppLinks();
+    
+    // Handle link when app is in warm state (front or background)
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+    
+    // Handle link when app is in cold state (terminated)
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _handleDeepLink(uri);
+    });
+  }
+
+  void _handleDeepLink(Uri uri) async {
+    // Example: https://sooq-com.com/ad/14032
+    if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'ad') {
+      if (uri.pathSegments.length > 1) {
+        final adIdStr = uri.pathSegments[1];
+        final adId = int.tryParse(adIdStr);
+        if (adId != null) {
+          try {
+            final ad = await ApiService().fetchAdById(adId);
+            if (mounted) {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)));
+            }
+          } catch (e) {
+            print('Failed to load ad from deep link: $e');
+          }
+        }
+      }
+    }
   }
 
   @override

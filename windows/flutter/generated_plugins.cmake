@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   audioplayers_windows
   cloud_firestore
   connectivity_plus
@@ -12,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_secure_storage_windows
   geolocator_windows
   record_windows
+  share_plus
   url_launcher_windows
 )
 

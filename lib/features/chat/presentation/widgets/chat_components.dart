@@ -8,6 +8,7 @@ import '../../domain/entities/chat_message.dart';
 import 'voice_recording_input.dart';
 import 'audio_message_player.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 
 /// A [TextInputFormatter] that acts as a firewall against Android IME bugs
 /// that corrupt emoji surrogate pairs when typing RTL text (Arabic) next to emojis.
@@ -80,12 +81,16 @@ class GlassProductHeader extends StatelessWidget {
     bool hasRealName = userName != null && 
                        userName!.trim().isNotEmpty && 
                        !userName!.toLowerCase().startsWith('user-') &&
-                       userName != 'مستخدم';
+                       userName != 'مستخدم' &&
+                       userName != 'LOADING_NAME';
     
-    String displayName = 'مستخدم';
+    bool isLoadingName = userName == 'LOADING_NAME';
+    String displayName = 'مستخدم غير معروف';
     String? subtitlePhone;
     
-    if (hasRealName) {
+    if (isLoadingName) {
+       displayName = ''; // Handled by shimmer
+    } else if (hasRealName) {
        displayName = userName!;
        if (userPhone != null && userPhone!.isNotEmpty) {
           subtitlePhone = userPhone;
@@ -130,6 +135,15 @@ class GlassProductHeader extends StatelessWidget {
                           errorBuilder: (_,__,___) => Container(color: Colors.grey.shade300, width: 46, height: 46, child: const Icon(Icons.person, color: Colors.white, size: 24)),
                         ),
                       )
+                    else if (isLoadingName)
+                      Shimmer.fromColors(
+                        baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+                        highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+                        child: Container(
+                          width: 46, height: 46, 
+                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                        ),
+                      )
                     else 
                       Container(
                         width: 46, height: 46, 
@@ -164,12 +178,26 @@ class GlassProductHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      displayName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: ChatTheme.font(context, size: 15, weight: FontWeight.w700, color: isDark ? Colors.white : Colors.black87),
-                    ),
+                    if (isLoadingName)
+                      Shimmer.fromColors(
+                        baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+                        highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+                        child: Container(
+                          height: 18,
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                      )
+                    else
+                      Text(
+                        displayName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: ChatTheme.font(context, size: 15, weight: FontWeight.w700, color: isDark ? Colors.white : Colors.black87),
+                      ),
                     if (subtitlePhone != null)
                       Text(
                         subtitlePhone,

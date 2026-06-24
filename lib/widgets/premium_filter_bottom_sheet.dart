@@ -319,12 +319,19 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.9,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF3F4F9),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final targetHeight = MediaQuery.of(context).size.height * 0.9;
+    // Prevent negative height in edge cases
+    final containerHeight = (targetHeight - bottomInset) > 100.0 ? (targetHeight - bottomInset) : 100.0;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        height: containerHeight,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF3F4F9),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
       child: Column(
         children: [
           // Header
@@ -619,7 +626,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildSectionCard(String title, Widget content, {VoidCallback? onReset, bool showReset = false}) {
