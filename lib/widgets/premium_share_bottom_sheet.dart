@@ -68,44 +68,49 @@ class PremiumShareBottomSheet extends StatelessWidget {
     if (imageFiles.isEmpty) return null;
     if (imageFiles.length == 1) return imageFiles.first.path;
 
-    // Decode images
-    List<img.Image> images = [];
-    for (var file in imageFiles) {
-      final bytes = await file.readAsBytes();
-      final decoded = img.decodeImage(bytes);
-      if (decoded != null) {
-        images.add(decoded);
+    try {
+      // Decode images
+      List<img.Image> images = [];
+      for (var file in imageFiles) {
+        final bytes = await file.readAsBytes();
+        final decoded = img.decodeImage(bytes);
+        if (decoded != null) {
+          images.add(decoded);
+        }
       }
-    }
 
-    if (images.isEmpty) return null;
-    if (images.length == 1) return imageFiles.first.path;
+      if (images.isEmpty) return imageFiles.first.path;
+      if (images.length == 1) return imageFiles.first.path;
 
-    // Create a 2x2 canvas. Let's say 800x800 total (400x400 each)
-    int size = 800;
-    int halfSize = size ~/ 2;
-    img.Image collage = img.Image(width: size, height: size);
-    
-    // Fill background with white
-    img.fill(collage, color: img.ColorRgb8(255, 255, 255));
-
-    for (int i = 0; i < images.length && i < 4; i++) {
-      int x = (i % 2) * halfSize;
-      int y = (i ~/ 2) * halfSize;
+      // Create a 2x2 canvas. Let's say 800x800 total (400x400 each)
+      int size = 800;
+      int halfSize = size ~/ 2;
+      img.Image collage = img.Image(width: size, height: size);
       
-      // Resize and crop to fit 400x400
-      img.Image resized = img.copyResizeCropSquare(images[i], size: halfSize);
-      
-      // Draw onto collage
-      img.compositeImage(collage, resized, dstX: x, dstY: y);
-    }
+      // Fill background with white
+      img.fill(collage, color: img.ColorRgb8(255, 255, 255));
 
-    // Save to temp directory
-    final tempDir = await getTemporaryDirectory();
-    final file = File('${tempDir.path}/collage_${DateTime.now().millisecondsSinceEpoch}.jpg');
-    await file.writeAsBytes(img.encodeJpg(collage, quality: 90));
-    
-    return file.path;
+      for (int i = 0; i < images.length && i < 4; i++) {
+        int x = (i % 2) * halfSize;
+        int y = (i ~/ 2) * halfSize;
+        
+        // Resize and crop to fit 400x400
+        img.Image resized = img.copyResizeCropSquare(images[i], size: halfSize);
+        
+        // Draw onto collage
+        img.compositeImage(collage, resized, dstX: x, dstY: y);
+      }
+
+      // Save to temp directory
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/collage_${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await file.writeAsBytes(img.encodeJpg(collage, quality: 90));
+      
+      return file.path;
+    } catch (e) {
+      // Fallback to first image on failure
+      return imageFiles.first.path;
+    }
   }
 
   void _copyLink(BuildContext context) {
@@ -136,7 +141,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
     Navigator.pop(context); // Close bottom sheet
 
     if (imagePath != null) {
-      await Share.shareXFiles([XFile(imagePath)], text: _shareText);
+      await Share.shareXFiles([XFile(imagePath, mimeType: 'image/jpeg')], text: _shareText);
     } else {
       Share.share(_shareText);
     }
