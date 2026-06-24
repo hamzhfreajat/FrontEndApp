@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_share_me/flutter_share_me.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/ad.dart';
@@ -44,27 +43,25 @@ class PremiumShareBottomSheet extends StatelessWidget {
 
   void _shareViaWhatsApp(BuildContext context) async {
     Navigator.pop(context);
-    final imagePath = await _getLocalImagePath();
-    if (imagePath != null) {
-      await FlutterShareMe().shareToWhatsApp(msg: _shareText, imagePath: imagePath);
+    final Uri url = Uri.parse('whatsapp://send?text=${Uri.encodeComponent(_shareText)}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
-      await FlutterShareMe().shareToWhatsApp(msg: _shareText);
+      _showSnack(context, 'تطبيق واتساب غير مثبت');
     }
   }
 
   void _shareViaFacebook(BuildContext context) async {
     Navigator.pop(context);
-    await FlutterShareMe().shareToFacebook(url: _shareUrl, msg: _shareText);
+    final Uri url = Uri.parse('https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(_shareUrl)}');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    }
   }
 
   void _shareViaInstagram(BuildContext context) async {
-    Navigator.pop(context);
-    final imagePath = await _getLocalImagePath();
-    if (imagePath != null) {
-      await FlutterShareMe().shareToInstagram(imagePath: imagePath); // Insta only accepts image/video
-    } else {
-      _showSnack(context, 'يجب أن يحتوي الإعلان على صورة للمشاركة عبر انستجرام');
-    }
+    // Instagram only accepts images via native share
+    _shareNative(context);
   }
 
   void _shareViaMessenger(BuildContext context) async {
