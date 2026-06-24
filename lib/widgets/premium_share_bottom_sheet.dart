@@ -2,8 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/ad.dart';
@@ -39,55 +37,6 @@ class PremiumShareBottomSheet extends StatelessWidget {
     Clipboard.setData(ClipboardData(text: _shareUrl));
     _showSnack(context, 'تم نسخ الرابط بنجاح');
     Navigator.pop(context);
-  }
-
-  void _shareViaWhatsApp(BuildContext context) async {
-    Navigator.pop(context);
-    final Uri url = Uri.parse('whatsapp://send?text=${Uri.encodeComponent(_shareText)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      _showSnack(context, 'تطبيق واتساب غير مثبت');
-    }
-  }
-
-  void _shareViaFacebook(BuildContext context) async {
-    Navigator.pop(context);
-    final Uri url = Uri.parse('https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(_shareUrl)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
-  }
-
-  void _shareViaInstagram(BuildContext context) async {
-    // Instagram only accepts images via native share
-    _shareNative(context);
-  }
-
-  void _shareViaMessenger(BuildContext context) async {
-    Navigator.pop(context);
-    final Uri url = Uri.parse('fb-messenger://share/?link=${Uri.encodeComponent(_shareUrl)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      _showSnack(context, 'تطبيق ماسنجر غير مثبت');
-    }
-  }
-
-  void _shareViaSMS(BuildContext context) async {
-    Navigator.pop(context);
-    final Uri url = Uri.parse('sms:?body=${Uri.encodeComponent(_shareText)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
-  }
-
-  void _shareViaEmail(BuildContext context) async {
-    Navigator.pop(context);
-    final Uri url = Uri.parse('mailto:?subject=${Uri.encodeComponent(ad.title)}&body=${Uri.encodeComponent(_shareText)}');
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    }
   }
 
   void _shareNative(BuildContext context) async {
@@ -183,22 +132,28 @@ class PremiumShareBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Horizontally Scrollable Icons
-            SizedBox(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                physics: const BouncingScrollPhysics(),
+            // Two Professional Options
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
                 children: [
-                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.facebook, color: Colors.white, size: 28), color: const Color(0xFF1877F2), label: 'Facebook', onTap: () => _shareViaFacebook(context)),
-                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Colors.white, size: 28), color: const Color(0xFFE4405F), label: 'Instagram', onTap: () => _shareViaInstagram(context)),
-                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 28), color: const Color(0xFF25D366), label: 'WhatsApp', onTap: () => _shareViaWhatsApp(context)),
-                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Colors.white, size: 28), color: const Color(0xFF00B2FF), label: 'Messenger', onTap: () => _shareViaMessenger(context)),
-                  _buildIcon(context, iconWidget: const Icon(Icons.email, color: Colors.white, size: 28), color: const Color(0xFFD44638), label: 'Email', onTap: () => _shareViaEmail(context)),
-                  _buildIcon(context, iconWidget: const Icon(Icons.sms, color: Colors.white, size: 28), color: Colors.amber.shade700, label: 'SMS', onTap: () => _shareViaSMS(context)),
-                  _buildIcon(context, iconWidget: const Icon(Icons.copy, color: Colors.white, size: 28), color: Colors.grey.shade700, label: 'Copy Link', onTap: () => _copyLink(context)),
-                  _buildIcon(context, iconWidget: const Icon(Icons.more_horiz, color: Colors.white, size: 28), color: Colors.blueGrey, label: 'More', onTap: () => _shareNative(context)),
+                  _buildOptionTile(
+                    context,
+                    icon: Icons.copy_rounded,
+                    title: 'نسخ الرابط',
+                    subtitle: 'نسخ رابط الإعلان لمشاركته في أي مكان',
+                    color: Colors.blueAccent,
+                    onTap: () => _copyLink(context),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildOptionTile(
+                    context,
+                    icon: Icons.share_rounded,
+                    title: 'مشاركة عبر وسائل التواصل',
+                    subtitle: 'مشاركة صورة الإعلان مع التطبيقات الأخرى',
+                    color: Colors.purpleAccent,
+                    onTap: () => _shareNative(context),
+                  ),
                 ],
               ),
             ),
@@ -209,34 +164,45 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon(BuildContext context, {required Widget iconWidget, required Color color, required String label, required VoidCallback onTap}) {
+  Widget _buildOptionTile(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color color, required VoidCallback onTap}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 80,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
+        ),
+        child: Row(
           children: [
             Container(
-              width: 56, height: 56,
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color,
+                color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
               ),
-              child: Center(
-                child: iconWidget,
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Tajawal'),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontFamily: 'Tajawal'),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, fontFamily: 'Tajawal', fontWeight: FontWeight.w600),
-            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.withOpacity(0.5)),
           ],
         ),
       ),
