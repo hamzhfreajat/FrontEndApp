@@ -27,6 +27,8 @@ import '../providers/saved_search_provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:app_links/app_links.dart';
 import 'ad_details_page.dart';
+import 'category_details_page.dart';
+import '../models/category.dart';
 
 class RootScreen extends StatefulWidget {
   final int initialIndex;
@@ -94,6 +96,46 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
             }
           } catch (e) {
             print('Failed to load ad from deep link: $e');
+          }
+        }
+      }
+    } else if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'category') {
+      if (uri.pathSegments.length > 1) {
+        final categoryIdStr = uri.pathSegments[1];
+        final categoryId = int.tryParse(categoryIdStr);
+        if (categoryId != null) {
+          final appProvider = Provider.of<AppProvider>(context, listen: false);
+          final categories = appProvider.categories ?? [];
+          Category? category;
+          try {
+            category = categories.firstWhere((c) => c.id == categoryId);
+          } catch (_) {}
+
+          if (category != null) {
+            final query = uri.queryParameters['query'];
+            final minPriceStr = uri.queryParameters['minPrice'];
+            final maxPriceStr = uri.queryParameters['maxPrice'];
+            final isHotStr = uri.queryParameters['isHot'];
+            final locationsStr = uri.queryParameters['locations'];
+            final tagsStr = uri.queryParameters['tags'];
+
+            final minPrice = minPriceStr != null ? double.tryParse(minPriceStr) : null;
+            final maxPrice = maxPriceStr != null ? double.tryParse(maxPriceStr) : null;
+            final isHot = isHotStr == 'true';
+            final locations = locationsStr != null && locationsStr.isNotEmpty ? locationsStr.split(',') : null;
+            final tags = tagsStr != null && tagsStr.isNotEmpty ? tagsStr.split(',') : null;
+
+            if (mounted) {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => CategoryDetailsPage(
+                category: category!,
+                initialSearchQuery: query,
+                initialMinPrice: minPrice,
+                initialMaxPrice: maxPrice,
+                initialIsHot: isHot,
+                initialLocations: locations,
+                initialTags: tags,
+              )));
+            }
           }
         }
       }
