@@ -158,13 +158,13 @@ class PremiumShareBottomSheet extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Row(
                         children: [
-                          _smallIcon(FontAwesomeIcons.whatsapp, const Color(0xFF25D366)),
+                          _smallIcon(const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 12), const Color(0xFF25D366)),
                           const SizedBox(width: 8),
-                          _smallIcon(FontAwesomeIcons.facebook, const Color(0xFF1877F2)),
+                          _smallIcon(const FaIcon(FontAwesomeIcons.facebook, color: Color(0xFF1877F2), size: 12), const Color(0xFF1877F2)),
                           const SizedBox(width: 8),
-                          _smallIcon(FontAwesomeIcons.instagram, const Color(0xFFE4405F)),
+                          _smallIcon(const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 12), const Color(0xFFE4405F)),
                           const SizedBox(width: 8),
-                          _smallIcon(FontAwesomeIcons.facebookMessenger, const Color(0xFF00B2FF)),
+                          _smallIcon(const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 12), const Color(0xFF00B2FF)),
                           const SizedBox(width: 8),
                           Text('والمزيد...', style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontFamily: 'Tajawal')),
                         ],
@@ -181,14 +181,14 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _smallIcon(IconData icon, Color color) {
+  Widget _smallIcon(Widget iconWidget, Color color) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         shape: BoxShape.circle,
       ),
-      child: FaIcon(icon, color: color, size: 12),
+      child: iconWidget,
     );
   }
 
