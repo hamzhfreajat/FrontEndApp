@@ -191,14 +191,14 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  _buildIcon(context, icon: FontAwesomeIcons.facebook, color: const Color(0xFF1877F2), label: 'Facebook', onTap: () => _shareViaFacebook(context)),
-                  _buildIcon(context, icon: FontAwesomeIcons.instagram, color: const Color(0xFFE4405F), label: 'Instagram', onTap: () => _shareViaInstagram(context)),
-                  _buildIcon(context, icon: FontAwesomeIcons.whatsapp, color: const Color(0xFF25D366), label: 'WhatsApp', onTap: () => _shareViaWhatsApp(context)),
-                  _buildIcon(context, icon: FontAwesomeIcons.facebookMessenger, color: const Color(0xFF00B2FF), label: 'Messenger', onTap: () => _shareViaMessenger(context)),
-                  _buildIcon(context, icon: Icons.email, color: const Color(0xFFD44638), label: 'Email', onTap: () => _shareViaEmail(context)),
-                  _buildIcon(context, icon: Icons.sms, color: Colors.amber.shade700, label: 'SMS', onTap: () => _shareViaSMS(context)),
-                  _buildIcon(context, icon: Icons.copy, color: Colors.grey.shade700, label: 'Copy Link', onTap: () => _copyLink(context)),
-                  _buildIcon(context, icon: Icons.more_horiz, color: Colors.blueGrey, label: 'More', onTap: () => _shareNative(context)),
+                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.facebook, color: Colors.white, size: 28), color: const Color(0xFF1877F2), label: 'Facebook', onTap: () => _shareViaFacebook(context)),
+                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Colors.white, size: 28), color: const Color(0xFFE4405F), label: 'Instagram', onTap: () => _shareViaInstagram(context)),
+                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 28), color: const Color(0xFF25D366), label: 'WhatsApp', onTap: () => _shareViaWhatsApp(context)),
+                  _buildIcon(context, iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Colors.white, size: 28), color: const Color(0xFF00B2FF), label: 'Messenger', onTap: () => _shareViaMessenger(context)),
+                  _buildIcon(context, iconWidget: const Icon(Icons.email, color: Colors.white, size: 28), color: const Color(0xFFD44638), label: 'Email', onTap: () => _shareViaEmail(context)),
+                  _buildIcon(context, iconWidget: const Icon(Icons.sms, color: Colors.white, size: 28), color: Colors.amber.shade700, label: 'SMS', onTap: () => _shareViaSMS(context)),
+                  _buildIcon(context, iconWidget: const Icon(Icons.copy, color: Colors.white, size: 28), color: Colors.grey.shade700, label: 'Copy Link', onTap: () => _copyLink(context)),
+                  _buildIcon(context, iconWidget: const Icon(Icons.more_horiz, color: Colors.white, size: 28), color: Colors.blueGrey, label: 'More', onTap: () => _shareNative(context)),
                 ],
               ),
             ),
@@ -209,7 +209,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildIcon(BuildContext context, {required IconData icon, required Color color, required String label, required VoidCallback onTap}) {
+  Widget _buildIcon(BuildContext context, {required Widget iconWidget, required Color color, required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -226,7 +226,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 boxShadow: [BoxShadow(color: color.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))],
               ),
               child: Center(
-                child: FaIcon(icon, color: Colors.white, size: 28),
+                child: iconWidget,
               ),
             ),
             const SizedBox(height: 8),
