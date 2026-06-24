@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/ad.dart';
@@ -153,6 +154,22 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     subtitle: 'مشاركة صورة الإعلان مع التطبيقات الأخرى',
                     color: Colors.purpleAccent,
                     onTap: () => _shareNative(context),
+                    extraContent: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          _smallIcon(FontAwesomeIcons.whatsapp, const Color(0xFF25D366)),
+                          const SizedBox(width: 8),
+                          _smallIcon(FontAwesomeIcons.facebook, const Color(0xFF1877F2)),
+                          const SizedBox(width: 8),
+                          _smallIcon(FontAwesomeIcons.instagram, const Color(0xFFE4405F)),
+                          const SizedBox(width: 8),
+                          _smallIcon(FontAwesomeIcons.facebookMessenger, const Color(0xFF00B2FF)),
+                          const SizedBox(width: 8),
+                          Text('والمزيد...', style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontFamily: 'Tajawal')),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -164,7 +181,18 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildOptionTile(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color color, required VoidCallback onTap}) {
+  Widget _smallIcon(IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        shape: BoxShape.circle,
+      ),
+      child: FaIcon(icon, color: color, size: 12),
+    );
+  }
+
+  Widget _buildOptionTile(BuildContext context, {required IconData icon, required String title, required String subtitle, required Color color, required VoidCallback onTap, Widget? extraContent}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
@@ -199,6 +227,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     subtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontFamily: 'Tajawal'),
                   ),
+                  if (extraContent != null) extraContent,
                 ],
               ),
             ),
