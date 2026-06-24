@@ -119,6 +119,11 @@ class PremiumShareBottomSheet extends StatelessWidget {
     Navigator.pop(context);
   }
 
+  void _shareLinkOnly(BuildContext context) {
+    Navigator.pop(context); // Close bottom sheet
+    Share.share(_shareText); // Share text only to allow Messenger/Insta to parse OG tags
+  }
+
   void _shareNative(BuildContext context) async {
     if (previewImages != null && previewImages!.isNotEmpty) {
       showDialog(
@@ -259,7 +264,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
             ),
             const SizedBox(height: 32),
 
-            // Two Professional Options
+            // Options List
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -272,13 +277,13 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     color: Colors.blueAccent,
                     onTap: () => _copyLink(context),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   _buildOptionTile(
                     context,
-                    icon: Icons.share_rounded,
-                    title: 'مشاركة عبر وسائل التواصل',
-                    subtitle: 'مشاركة الرابط مع التطبيقات الأخرى',
-                    color: Colors.purpleAccent,
+                    icon: Icons.image_rounded,
+                    title: 'مشاركة كصورة مجمعة',
+                    subtitle: 'مشاركة الصورة والرابط معاً (موصى به لواتساب)',
+                    color: Colors.green,
                     onTap: () => _shareNative(context),
                     extraContent: Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -286,13 +291,28 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         children: [
                           _smallIcon(const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 12), const Color(0xFF25D366)),
                           const SizedBox(width: 8),
-                          _smallIcon(const FaIcon(FontAwesomeIcons.facebook, color: Color(0xFF1877F2), size: 12), const Color(0xFF1877F2)),
+                          Text('يعمل بشكل ممتاز مع واتساب', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildOptionTile(
+                    context,
+                    icon: Icons.link_rounded,
+                    title: 'مشاركة كرابط ذكي',
+                    subtitle: 'مشاركة الرابط فقط (موصى به للماسنجر والانستغرام)',
+                    color: Colors.purpleAccent,
+                    onTap: () => _shareLinkOnly(context),
+                    extraContent: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Row(
+                        children: [
+                          _smallIcon(const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 12), const Color(0xFF00B2FF)),
                           const SizedBox(width: 8),
                           _smallIcon(const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 12), const Color(0xFFE4405F)),
                           const SizedBox(width: 8),
-                          _smallIcon(const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 12), const Color(0xFF00B2FF)),
-                          const SizedBox(width: 8),
-                          Text('والمزيد...', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                          Text('يظهر كبطاقة قابلة للنقر', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
                         ],
                       ),
                     ),
