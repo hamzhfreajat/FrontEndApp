@@ -12,8 +12,6 @@ import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/share_helper.dart';
-import '../utils/share_helper.dart';
-import '../utils/share_helper.dart';
 import '../providers/app_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/premium_video_player.dart';
@@ -233,8 +231,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
       _snack('هذه الميزة غير متاحة في وضع المعاينة');
       return;
     }
-    final String shareUrl = 'https://sooq-com.com/ad/${widget.ad.id}';
-    Share.share('${widget.ad.title}\nشاهد هذا الإعلان على السوق!\n$shareUrl');
+    final imageUrl = (widget.ad.images != null && widget.ad.images!.isNotEmpty) 
+        ? widget.ad.images!.first 
+        : null;
+    ShareHelper.shareAdWithImage(widget.ad.title, widget.ad.id.toString(), imageUrl);
   }
 
   void _submitReport(String reason, {String? comments}) async {

@@ -1,6 +1,4 @@
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
 
 class ShareHelper {
@@ -14,18 +12,11 @@ class ShareHelper {
     }
 
     try {
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        final directory = await getTemporaryDirectory();
-        final file = File('${directory.path}/shared_ad_image.png');
-        await file.writeAsBytes(response.bodyBytes);
-
-        await Share.shareXFiles([XFile(file.path)], text: text);
-      } else {
-        Share.share(text);
-      }
+      // Use cache manager to instantly get the image that's already loaded on screen
+      final file = await DefaultCacheManager().getSingleFile(imageUrl);
+      await Share.shareXFiles([XFile(file.path)], text: text);
     } catch (e) {
-      print('Error downloading image for share: $e');
+      print('Error getting image for share: $e');
       Share.share(text);
     }
   }
