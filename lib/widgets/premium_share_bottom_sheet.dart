@@ -138,6 +138,12 @@ class PremiumShareBottomSheet extends StatelessWidget {
     if (previewImages != null && previewImages!.isNotEmpty) {
       Navigator.pop(context); // Close loading dialog
     }
+    
+    // Some apps like Messenger/Instagram ignore text when sharing an image.
+    // We copy the text to clipboard so the user can easily paste it.
+    Clipboard.setData(ClipboardData(text: _shareText));
+    _showSnack(context, 'تم نسخ النص احتياطياً للصقه في المحادثة');
+    
     Navigator.pop(context); // Close bottom sheet
 
     if (imagePath != null) {
