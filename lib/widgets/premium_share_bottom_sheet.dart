@@ -179,8 +179,9 @@ class PremiumShareBottomSheet extends StatelessWidget {
             BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 20, spreadRadius: 5)
           ]
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
           children: [
             // Drag handle
             Container(
