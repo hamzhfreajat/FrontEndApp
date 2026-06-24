@@ -8,9 +8,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/ad.dart';
 
 class PremiumShareBottomSheet extends StatelessWidget {
-  final Ad ad;
+  final Ad? ad;
+  final String? customTitle;
+  final String? customUrl;
 
-  const PremiumShareBottomSheet({Key? key, required this.ad}) : super(key: key);
+  const PremiumShareBottomSheet({Key? key, this.ad, this.customTitle, this.customUrl}) : super(key: key);
 
   static void show(BuildContext context, Ad ad) {
     showModalBottomSheet(
@@ -21,13 +23,24 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  String get _shareUrl => 'https://sooq-com.com/ad/${ad.id}';
-  String get _shareText => '${ad.title}\nشاهد هذا الاعلان على سوقكم\n$_shareUrl';
+  static void showForLink(BuildContext context, {required String title, required String url}) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => PremiumShareBottomSheet(customTitle: title, customUrl: url),
+    );
+  }
+
+  String get _shareUrl => ad != null ? 'https://sooq-com.com/ad/${ad!.id}' : customUrl!;
+  String get _shareText => ad != null 
+    ? '${ad!.title}\nشاهد هذا الاعلان على سوقكم\n$_shareUrl'
+    : '${customTitle!}\n$_shareUrl';
 
   Future<String?> _getLocalImagePath() async {
-    if (ad.images.isEmpty) return null;
+    if (ad == null || ad!.images.isEmpty) return null;
     try {
-      final file = await DefaultCacheManager().getSingleFile(ad.images.first);
+      final file = await DefaultCacheManager().getSingleFile(ad!.images.first);
       return file.path;
     } catch (e) {
       return null;
@@ -57,7 +70,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final imageUrl = (ad.images.isNotEmpty) ? ad.images.first : null;
+    final imageUrl = (ad != null && ad!.images.isNotEmpty) ? ad!.images.first : null;
 
     return BackdropFilter(
       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -88,7 +101,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const SizedBox(width: 40),
-                  const Text('شارك هذا الإعلان', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text('شارك مع الأصدقاء', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
@@ -121,12 +134,12 @@ class PremiumShareBottomSheet extends StatelessWidget {
                       ),
                     const SizedBox(height: 12),
                     Text(
-                      ad.title,
+                      ad != null ? ad!.title : customTitle!,
                       maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    const SizedBox(height: 4),
-                    Text('${ad.price.toStringAsFixed(0)} دينار', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 16)),
+                    if (ad != null) const SizedBox(height: 4),
+                    if (ad != null) Text('${ad!.price.toStringAsFixed(0)} دينار', style: TextStyle(color: Theme.of(context).primaryColor, fontWeight: FontWeight.w800, fontSize: 16)),
                   ],
                 ),
               ),
@@ -151,7 +164,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     context,
                     icon: Icons.share_rounded,
                     title: 'مشاركة عبر وسائل التواصل',
-                    subtitle: 'مشاركة صورة الإعلان مع التطبيقات الأخرى',
+                    subtitle: 'مشاركة الرابط مع التطبيقات الأخرى',
                     color: Colors.purpleAccent,
                     onTap: () => _shareNative(context),
                     extraContent: Padding(

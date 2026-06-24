@@ -140,8 +140,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       finalUrl += '?' + queryParams.join('&');
     }
 
-    String shareText = 'شاهد إعلانات قسم ${widget.category.name} على سوقكم\n$finalUrl';
-    Share.share(shareText);
+    String shareTitle = 'إعلانات قسم ${widget.category.name}';
+    PremiumShareBottomSheet.showForLink(context, title: shareTitle, url: finalUrl);
   }
 
   @override
