@@ -16,6 +16,8 @@ class PremiumShareBottomSheet extends StatelessWidget {
   final String? customTitle;
   final String? customUrl;
   final List<String>? previewImages;
+  
+  static const _channel = MethodChannel('com.sooqcom.app/share');
 
   const PremiumShareBottomSheet({Key? key, this.ad, this.customTitle, this.customUrl, this.previewImages}) : super(key: key);
 
@@ -126,19 +128,42 @@ class PremiumShareBottomSheet extends StatelessWidget {
   }
 
   void _shareDirectWhatsApp(BuildContext context) async {
-    Navigator.pop(context);
-    final url = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(_shareText)}");
-    final webUrl = Uri.parse("https://api.whatsapp.com/send?text=${Uri.encodeComponent(_shareText)}");
-    
-    try {
-      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!launched) {
-        launched = await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      showDialog(
+        context: context, 
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    String? imagePath;
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      imagePath = await _createCollage(previewImages!);
+    } else {
+      imagePath = await _getLocalImagePath();
+    }
+
+    if (previewImages != null && previewImages!.isNotEmpty) {
+      Navigator.pop(context); // Close loading dialog
+    }
+    Navigator.pop(context); // Close bottom sheet
+
+    if (Platform.isAndroid && imagePath != null) {
+      try {
+        await _channel.invokeMethod('shareImageToWhatsApp', {
+          'text': _shareText,
+          'imagePath': imagePath,
+        });
+        return; // Success! It bypassed the share menu and went to WhatsApp!
+      } catch (e) {
+        // Fallback below
       }
-      if (!launched) {
-        Share.share(_shareText);
-      }
-    } catch (e) {
+    }
+
+    // iOS or generic fallback
+    if (imagePath != null) {
+      await Share.shareXFiles([XFile(imagePath, mimeType: 'image/jpeg')], text: _shareText);
+    } else {
       Share.share(_shareText);
     }
   }
@@ -343,7 +368,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
-                        onTap: () => _shareNative(context),
+                        onTap: () => _shareDirectWhatsApp(context),
                       ),
                       _buildSocialIconButton(
                         context,
