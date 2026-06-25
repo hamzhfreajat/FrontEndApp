@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import 'add_ad_subcategories.dart';
 import '../widgets/emoji_category_icon.dart';
+import '../widgets/support_action_button.dart';
 
 import 'package:image_picker/image_picker.dart';
 
@@ -172,6 +173,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
+              actions: const [SupportActionButton()],
             ),
             body: ShimmerList(itemCount: 8),
           );
@@ -208,6 +210,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       backgroundColor: Colors.grey.shade50,
       body: SingleChildScrollView(

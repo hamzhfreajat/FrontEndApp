@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
@@ -207,6 +208,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               centerTitle: true,
+        actions: const [SupportActionButton()],
             ),
             body: ShimmerList(itemCount: 8),
           );
@@ -282,6 +284,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       backgroundColor: Colors.grey.shade50,
       body: RefreshIndicator(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -96,6 +97,7 @@ class _AddAdMapPageState extends State<AddAdMapPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24), bottomRight: Radius.circular(24)),
         ),

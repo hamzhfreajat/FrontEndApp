@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
@@ -83,6 +84,7 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.grey.shade50,

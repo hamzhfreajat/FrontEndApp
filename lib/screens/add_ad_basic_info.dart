@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
@@ -267,6 +268,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       backgroundColor: Colors.grey.shade50,
       body: SingleChildScrollView(

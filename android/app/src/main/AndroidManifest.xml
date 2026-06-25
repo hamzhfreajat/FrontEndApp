@@ -40,7 +40,9 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="sooq-com.com" />
                 <data android:scheme="https" android:host="www.sooq-com.com" />
+                <data android:scheme="https" android:host="share.sooq-com.com" />
                 <data android:scheme="http" android:host="sooq-com.com" />
+                <data android:scheme="http" android:host="share.sooq-com.com" />
             </intent-filter>
         </activity>
 

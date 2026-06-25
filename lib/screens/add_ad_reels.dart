@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
@@ -107,6 +108,7 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       backgroundColor: Colors.grey.shade50,
       body: SingleChildScrollView(

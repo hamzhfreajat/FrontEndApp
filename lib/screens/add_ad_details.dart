@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/support_action_button.dart';
 import '../services/analytics_engine.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -3288,6 +3289,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
         foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
+        actions: const [SupportActionButton()],
       ),
       backgroundColor: Colors.grey.shade50,
       body: Form(
