@@ -127,7 +127,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
     Share.share(_shareText); // Share text only to allow Messenger/Insta to parse OG tags
   }
 
-  void _shareDirectWhatsApp(BuildContext context) async {
+  void _shareDirectToApp(BuildContext context, String packageId) async {
     if (previewImages != null && previewImages!.isNotEmpty) {
       showDialog(
         context: context, 
@@ -148,13 +148,19 @@ class PremiumShareBottomSheet extends StatelessWidget {
     }
     Navigator.pop(context); // Close bottom sheet
 
+    // Some apps (like Messenger) drop the text when an image is attached.
+    // We copy the text to clipboard just in case they want to paste it.
+    Clipboard.setData(ClipboardData(text: _shareText));
+    _showSnack(context, 'تم نسخ النص احتياطياً للصقه');
+
     if (Platform.isAndroid && imagePath != null) {
       try {
-        await _channel.invokeMethod('shareImageToWhatsApp', {
+        await _channel.invokeMethod('shareImageToApp', {
           'text': _shareText,
           'imagePath': imagePath,
+          'packageId': packageId,
         });
-        return; // Success! It bypassed the share menu and went to WhatsApp!
+        return; // Success! It bypassed the share menu and went to the target app!
       } catch (e) {
         // Fallback below
       }
@@ -164,20 +170,6 @@ class PremiumShareBottomSheet extends StatelessWidget {
     if (imagePath != null) {
       await Share.shareXFiles([XFile(imagePath, mimeType: 'image/jpeg')], text: _shareText);
     } else {
-      Share.share(_shareText);
-    }
-  }
-
-  void _shareDirectMessenger(BuildContext context) async {
-    Navigator.pop(context);
-    final url = Uri.parse("fb-messenger://share/?link=${Uri.encodeComponent(_shareUrl)}");
-    
-    try {
-      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!launched) {
-        Share.share(_shareText);
-      }
-    } catch (e) {
       Share.share(_shareText);
     }
   }
@@ -368,21 +360,21 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
-                        onTap: () => _shareDirectWhatsApp(context),
+                        onTap: () => _shareDirectToApp(context, 'com.whatsapp'),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 28),
                         color: const Color(0xFFE4405F),
                         label: 'انستغرام',
-                        onTap: () => _shareDirectInstagram(context),
+                        onTap: () => _shareDirectToApp(context, 'com.instagram.android'),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 28),
                         color: const Color(0xFF00B2FF),
                         label: 'ماسنجر',
-                        onTap: () => _shareDirectMessenger(context),
+                        onTap: () => _shareDirectToApp(context, 'com.facebook.orca'),
                       ),
                       _buildSocialIconButton(
                         context,

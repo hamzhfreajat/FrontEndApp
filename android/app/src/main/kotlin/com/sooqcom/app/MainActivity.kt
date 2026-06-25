@@ -13,14 +13,18 @@ class MainActivity: FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
-            if (call.method == "shareImageToWhatsApp") {
+            if (call.method == "shareImageToApp") {
                 try {
                     val text = call.argument<String>("text")
                     val imagePath = call.argument<String>("imagePath")
+                    val packageId = call.argument<String>("packageId")
                     
                     val intent = Intent(Intent.ACTION_SEND)
                     intent.type = "image/jpeg"
-                    intent.setPackage("com.whatsapp")
+                    
+                    if (packageId != null && packageId.isNotEmpty()) {
+                        intent.setPackage(packageId)
+                    }
                     
                     if (text != null) {
                         intent.putExtra(Intent.EXTRA_TEXT, text)
@@ -40,7 +44,7 @@ class MainActivity: FlutterActivity() {
                     startActivity(intent)
                     result.success(true)
                 } catch (e: Exception) {
-                    result.error("WHATSAPP_NOT_INSTALLED", "WhatsApp not installed or failed to launch", null)
+                    result.error("APP_NOT_INSTALLED", "App not installed or failed to launch", null)
                 }
             } else {
                 result.notImplemented()
