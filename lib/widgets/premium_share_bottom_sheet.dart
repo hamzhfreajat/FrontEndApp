@@ -285,28 +285,28 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     children: [
                       _buildSocialIconButton(
                         context,
-                        icon: FontAwesomeIcons.whatsapp,
+                        iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
                         onTap: () => _shareNative(context),
                       ),
                       _buildSocialIconButton(
                         context,
-                        icon: FontAwesomeIcons.instagram,
+                        iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 28),
                         color: const Color(0xFFE4405F),
                         label: 'انستغرام',
                         onTap: () => _shareLinkOnly(context),
                       ),
                       _buildSocialIconButton(
                         context,
-                        icon: FontAwesomeIcons.facebookMessenger,
+                        iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 28),
                         color: const Color(0xFF00B2FF),
                         label: 'ماسنجر',
                         onTap: () => _shareLinkOnly(context),
                       ),
                       _buildSocialIconButton(
                         context,
-                        icon: Icons.more_horiz_rounded,
+                        iconWidget: Icon(Icons.more_horiz_rounded, color: Colors.grey.shade600, size: 28),
                         color: Colors.grey.shade600,
                         label: 'المزيد',
                         onTap: () => _shareNative(context),
@@ -381,7 +381,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialIconButton(BuildContext context, {required IconData icon, required Color color, required String label, required VoidCallback onTap}) {
+  Widget _buildSocialIconButton(BuildContext context, {required Widget iconWidget, required Color color, required String label, required VoidCallback onTap}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
@@ -396,7 +396,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: FaIcon(icon, color: color, size: 28),
+              child: iconWidget,
             ),
           ),
           const SizedBox(height: 8),
