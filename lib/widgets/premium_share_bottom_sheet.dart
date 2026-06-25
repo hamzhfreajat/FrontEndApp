@@ -270,19 +270,19 @@ class PremiumShareBottomSheet extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  _buildOptionTile(
-                    context,
-                    icon: Icons.copy_rounded,
-                    title: 'نسخ الرابط',
-                    subtitle: 'نسخ رابط الإعلان لمشاركته في أي مكان',
-                    color: Colors.blueAccent,
-                    onTap: () => _copyLink(context),
-                  ),
-                  // Social Media Icons Row
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  // Social Media Icons Wrap
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 16,
+                    runSpacing: 16,
                     children: [
+                      _buildSocialIconButton(
+                        context,
+                        iconWidget: const Icon(Icons.copy_rounded, color: Colors.blueAccent, size: 28),
+                        color: Colors.blueAccent,
+                        label: 'نسخ الرابط',
+                        onTap: () => _copyLink(context),
+                      ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
@@ -309,7 +309,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: Icon(Icons.more_horiz_rounded, color: Colors.grey.shade600, size: 28),
                         color: Colors.grey.shade600,
                         label: 'المزيد',
-                        onTap: () => _shareNative(context),
+                        onTap: () => _shareLinkOnly(context), // Share link only as requested
                       ),
                     ],
                   ),
