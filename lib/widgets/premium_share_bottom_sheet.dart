@@ -131,17 +131,14 @@ class PremiumShareBottomSheet extends StatelessWidget {
     final webUrl = Uri.parse("https://api.whatsapp.com/send?text=${Uri.encodeComponent(_shareText)}");
     
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-      } else {
-        if (!context.mounted) return;
-        _showSnack(context, 'تطبيق واتساب غير مثبت');
+      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        launched = await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      }
+      if (!launched) {
         Share.share(_shareText);
       }
     } catch (e) {
-      if (!context.mounted) return;
       Share.share(_shareText);
     }
   }
@@ -151,15 +148,11 @@ class PremiumShareBottomSheet extends StatelessWidget {
     final url = Uri.parse("fb-messenger://share/?link=${Uri.encodeComponent(_shareUrl)}");
     
     try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else {
-        if (!context.mounted) return;
-        _showSnack(context, 'تطبيق ماسنجر غير مثبت');
+      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
         Share.share(_shareText);
       }
     } catch (e) {
-      if (!context.mounted) return;
       Share.share(_shareText);
     }
   }
@@ -172,12 +165,12 @@ class PremiumShareBottomSheet extends StatelessWidget {
     final webUrl = Uri.parse("https://www.instagram.com/");
     
     try {
-      if (await canLaunchUrl(url)) {
+      bool launched = await launchUrl(url, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        launched = await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      }
+      if (launched) {
         if (context.mounted) _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
-        await launchUrl(url, mode: LaunchMode.externalApplication);
-      } else if (await canLaunchUrl(webUrl)) {
-        if (context.mounted) _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
       } else {
         Share.share(_shareText);
       }
