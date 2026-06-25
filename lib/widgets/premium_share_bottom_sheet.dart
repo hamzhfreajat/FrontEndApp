@@ -128,10 +128,20 @@ class PremiumShareBottomSheet extends StatelessWidget {
   void _shareDirectWhatsApp(BuildContext context) async {
     Navigator.pop(context);
     final url = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(_shareText)}");
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      _showSnack(context, 'تطبيق واتساب غير مثبت');
+    final webUrl = Uri.parse("https://api.whatsapp.com/send?text=${Uri.encodeComponent(_shareText)}");
+    
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (!context.mounted) return;
+        _showSnack(context, 'تطبيق واتساب غير مثبت');
+        Share.share(_shareText);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
       Share.share(_shareText);
     }
   }
@@ -139,10 +149,17 @@ class PremiumShareBottomSheet extends StatelessWidget {
   void _shareDirectMessenger(BuildContext context) async {
     Navigator.pop(context);
     final url = Uri.parse("fb-messenger://share/?link=${Uri.encodeComponent(_shareUrl)}");
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      _showSnack(context, 'تطبيق ماسنجر غير مثبت');
+    
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        if (!context.mounted) return;
+        _showSnack(context, 'تطبيق ماسنجر غير مثبت');
+        Share.share(_shareText);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
       Share.share(_shareText);
     }
   }
@@ -150,12 +167,21 @@ class PremiumShareBottomSheet extends StatelessWidget {
   void _shareDirectInstagram(BuildContext context) async {
     Navigator.pop(context);
     Clipboard.setData(ClipboardData(text: _shareUrl));
-    _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
     
     final url = Uri.parse("instagram://");
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
+    final webUrl = Uri.parse("https://www.instagram.com/");
+    
+    try {
+      if (await canLaunchUrl(url)) {
+        if (context.mounted) _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else if (await canLaunchUrl(webUrl)) {
+        if (context.mounted) _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+      } else {
+        Share.share(_shareText);
+      }
+    } catch (e) {
       Share.share(_shareText);
     }
   }
