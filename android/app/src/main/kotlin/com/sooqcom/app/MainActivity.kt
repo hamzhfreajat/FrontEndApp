@@ -30,7 +30,7 @@ class MainActivity: FlutterActivity() {
                         val file = File(imagePath)
                         val uri = FileProvider.getUriForFile(
                             context,
-                            context.packageName + ".flutter.share_provider",
+                            context.packageName + ".custom_share_provider",
                             file
                         )
                         intent.putExtra(Intent.EXTRA_STREAM, uri)
