@@ -343,7 +343,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
-                        onTap: () => _shareDirectWhatsApp(context),
+                        onTap: () => _shareNative(context),
                       ),
                       _buildSocialIconButton(
                         context,
