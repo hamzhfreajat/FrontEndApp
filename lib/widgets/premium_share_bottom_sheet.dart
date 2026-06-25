@@ -39,7 +39,7 @@ class PremiumShareBottomSheet extends StatelessWidget {
     );
   }
 
-  String get _shareUrl => ad != null ? 'https://sooq-com.com/ad/${ad!.id}' : customUrl!;
+  String get _shareUrl => ad != null ? 'https://share.sooq-com.com/ad/${ad!.id}' : customUrl!;
   String get _shareText => ad != null 
     ? '${ad!.title}\nشاهد هذا الاعلان على سوقكم\n$_shareUrl'
     : '${customTitle!}\n$_shareUrl';

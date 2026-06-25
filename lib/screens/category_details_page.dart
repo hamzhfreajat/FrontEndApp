@@ -121,7 +121,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   Map<String, dynamic>? _savedCategoryFilters;
 
   void _shareCategory() {
-    String baseUrl = 'https://sooq-com.com/category/${widget.category.id}';
+    String baseUrl = 'https://share.sooq-com.com/category/${widget.category.id}';
     
     List<String> queryParams = [];
     if (_searchQuery.isNotEmpty) queryParams.add('query=${Uri.encodeComponent(_searchQuery)}');
