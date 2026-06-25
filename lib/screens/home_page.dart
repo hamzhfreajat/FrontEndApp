@@ -1975,36 +1975,7 @@ class __PromoBannerCarouselState extends State<_PromoBannerCarousel> {
             itemCount: _banners.length,
             itemBuilder: (context, index) {
               final banner = _banners[index];
-              return GestureDetector(
-                onTap: () {
-                  final targetCat = Category(id: banner['targetId'], name: banner['title'].replaceAll('\\n', ' '), adsCount: 0);
-                  final provider = Provider.of<AppProvider>(context, listen: false);
-
-                  if (provider.isLeafCategory(banner['targetId'])) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CategoryDetailsPage(
-                          category: targetCat,
-                          allCategories: [],
-                        ),
-                      ),
-                    );
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => CategoriesPage(
-                          parentId: banner['targetId'],
-                          title: banner['title'].replaceAll('\\n', ' '),
-                          category: targetCat,
-                          allCategories: [],
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: Container(
+              return Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     image: DecorationImage(
