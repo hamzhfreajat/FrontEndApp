@@ -278,45 +278,40 @@ class PremiumShareBottomSheet extends StatelessWidget {
                     color: Colors.blueAccent,
                     onTap: () => _copyLink(context),
                   ),
-                  const SizedBox(height: 12),
-                  _buildOptionTile(
-                    context,
-                    icon: Icons.image_rounded,
-                    title: 'مشاركة كصورة مجمعة',
-                    subtitle: 'مشاركة الصورة والرابط معاً (موصى به لواتساب)',
-                    color: Colors.green,
-                    onTap: () => _shareNative(context),
-                    extraContent: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        children: [
-                          _smallIcon(const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 12), const Color(0xFF25D366)),
-                          const SizedBox(width: 8),
-                          Text('يعمل بشكل ممتاز مع واتساب', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
-                        ],
+                  // Social Media Icons Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSocialIconButton(
+                        context,
+                        icon: FontAwesomeIcons.whatsapp,
+                        color: const Color(0xFF25D366),
+                        label: 'واتساب',
+                        onTap: () => _shareNative(context),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _buildOptionTile(
-                    context,
-                    icon: Icons.link_rounded,
-                    title: 'مشاركة كرابط ذكي',
-                    subtitle: 'مشاركة الرابط فقط (موصى به للماسنجر والانستغرام)',
-                    color: Colors.purpleAccent,
-                    onTap: () => _shareLinkOnly(context),
-                    extraContent: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Row(
-                        children: [
-                          _smallIcon(const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 12), const Color(0xFF00B2FF)),
-                          const SizedBox(width: 8),
-                          _smallIcon(const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 12), const Color(0xFFE4405F)),
-                          const SizedBox(width: 8),
-                          Text('يظهر كبطاقة قابلة للنقر', style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
-                        ],
+                      _buildSocialIconButton(
+                        context,
+                        icon: FontAwesomeIcons.instagram,
+                        color: const Color(0xFFE4405F),
+                        label: 'انستغرام',
+                        onTap: () => _shareLinkOnly(context),
                       ),
-                    ),
+                      _buildSocialIconButton(
+                        context,
+                        icon: FontAwesomeIcons.facebookMessenger,
+                        color: const Color(0xFF00B2FF),
+                        label: 'ماسنجر',
+                        onTap: () => _shareLinkOnly(context),
+                      ),
+                      _buildSocialIconButton(
+                        context,
+                        icon: Icons.more_horiz_rounded,
+                        color: Colors.grey.shade600,
+                        label: 'المزيد',
+                        onTap: () => _shareNative(context),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -382,6 +377,31 @@ class PremiumShareBottomSheet extends StatelessWidget {
             Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey.withOpacity(0.5)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSocialIconButton(BuildContext context, {required IconData icon, required Color color, required String label, required VoidCallback onTap}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: isDark ? color.withOpacity(0.15) : color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: FaIcon(icon, color: color, size: 28),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
