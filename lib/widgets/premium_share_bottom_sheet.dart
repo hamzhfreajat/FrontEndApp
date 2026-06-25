@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/ad.dart';
 
 class PremiumShareBottomSheet extends StatelessWidget {
@@ -122,6 +123,41 @@ class PremiumShareBottomSheet extends StatelessWidget {
   void _shareLinkOnly(BuildContext context) {
     Navigator.pop(context); // Close bottom sheet
     Share.share(_shareText); // Share text only to allow Messenger/Insta to parse OG tags
+  }
+
+  void _shareDirectWhatsApp(BuildContext context) async {
+    Navigator.pop(context);
+    final url = Uri.parse("whatsapp://send?text=${Uri.encodeComponent(_shareText)}");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      _showSnack(context, 'تطبيق واتساب غير مثبت');
+      Share.share(_shareText);
+    }
+  }
+
+  void _shareDirectMessenger(BuildContext context) async {
+    Navigator.pop(context);
+    final url = Uri.parse("fb-messenger://share/?link=${Uri.encodeComponent(_shareUrl)}");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      _showSnack(context, 'تطبيق ماسنجر غير مثبت');
+      Share.share(_shareText);
+    }
+  }
+
+  void _shareDirectInstagram(BuildContext context) async {
+    Navigator.pop(context);
+    Clipboard.setData(ClipboardData(text: _shareUrl));
+    _showSnack(context, 'تم نسخ الرابط! افتح المحادثة للصقه.');
+    
+    final url = Uri.parse("instagram://");
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      Share.share(_shareText);
+    }
   }
 
   void _shareNative(BuildContext context) async {
@@ -288,21 +324,21 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
-                        onTap: () => _shareNative(context),
+                        onTap: () => _shareDirectWhatsApp(context),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 28),
                         color: const Color(0xFFE4405F),
                         label: 'انستغرام',
-                        onTap: () => _shareLinkOnly(context),
+                        onTap: () => _shareDirectInstagram(context),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 28),
                         color: const Color(0xFF00B2FF),
                         label: 'ماسنجر',
-                        onTap: () => _shareLinkOnly(context),
+                        onTap: () => _shareDirectMessenger(context),
                       ),
                       _buildSocialIconButton(
                         context,
