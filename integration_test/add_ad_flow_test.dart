@@ -17,6 +17,21 @@ class MockImagePickerPlatform extends ImagePickerPlatform with MockPlatformInter
   Future<List<XFile>> getMultiImageWithOptions({MultiImagePickerOptions? options}) async {
     return paths.map((p) => XFile(p)).toList();
   }
+
+  @override
+  Future<List<XFile>?> getMultiImage({double? maxWidth, double? maxHeight, int? imageQuality}) async {
+    return paths.map((p) => XFile(p)).toList();
+  }
+
+  @override
+  Future<XFile?> getImageFromSource({required ImageSource source, ImagePickerOptions? options}) async {
+    return XFile(paths.first);
+  }
+
+  @override
+  Future<XFile?> getImage({required ImageSource source, double? maxWidth, double? maxHeight, int? imageQuality, CameraDevice preferredCameraDevice = CameraDevice.rear}) async {
+    return XFile(paths.first);
+  }
 }
 
 void main() {
@@ -38,7 +53,7 @@ void main() {
     
     app.main();
     // Wait for the app to finish loading
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
 
     // 0. Login using Google (if we are on the login page)
     final googleLogoFinder = find.byWidgetPredicate(
@@ -65,14 +80,14 @@ void main() {
       
       print('Login successful! Proceeding with Add Ad flow...');
       // Give it an extra second to settle
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      await tester.pump(const Duration(seconds: 3));
     }
 
     // 1. Start Add Ad Process
     final addAdIcon = find.byIcon(Icons.add_rounded);
     expect(addAdIcon, findsOneWidget, reason: 'Should find the Add Ad button in the bottom navigation bar');
     await tester.tap(addAdIcon);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // 2. AddAdImagesPage - Pick Images
     final addPhotosBtn = find.descendant(
@@ -81,20 +96,22 @@ void main() {
     );
     expect(addPhotosBtn, findsWidgets);
     await tester.tap(addPhotosBtn.first);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // Find Next button by Type and text length (to avoid Arabic string encoding issues in tests)
     // The next button is an ElevatedButton at the bottom that isn't the skip button.
     final nextBtnFinder = find.byWidgetPredicate((w) => w is ElevatedButton && w.child is Text);
     await tester.tap(nextBtnFinder.last);
-    await tester.pumpAndSettle();
+    
+    print('Waiting for backend to analyze images and check watermarks (15s)...');
+    await tester.pump(const Duration(seconds: 15));
 
     // 3. AddAdReelsPage (Optional) -> Skip
     // The skip button is usually a TextButton or outline button. We'll tap the first TextButton
     final skipBtnFinder = find.byType(TextButton);
     if (skipBtnFinder.evaluate().isNotEmpty) {
       await tester.tap(skipBtnFinder.first);
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 2));
     }
 
     // 4. AddAdWizardPage (Main Category)
@@ -108,25 +125,25 @@ void main() {
     // We'll look for a Card or Container that looks like a category
     final catCard = find.byType(Card).first;
     await tester.tap(catCard);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // 5. AddAdSubcategoriesPage
     // Select first subcategory
     final subCatCard = find.byType(ListTile).first;
     await tester.tap(subCatCard);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // 6. AddAdCityPage
     // Select first city
     final cityCard = find.byType(ListTile).first;
     await tester.tap(cityCard);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // 7. AddAdRegionPage
     // Select first region
     final regionCard = find.byType(ListTile).first;
     await tester.tap(regionCard);
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 2));
 
     // 8. AddAdDetailsPage
     // Fill in Ad Title, Price, Description
@@ -157,7 +174,7 @@ void main() {
     // Find the Publish button (last Elevated button)
     final publishBtn = find.byType(ElevatedButton).last;
     await tester.tap(publishBtn);
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
 
     print('✅ E2E Automation test completed the Add Ad flow successfully!');
   });
