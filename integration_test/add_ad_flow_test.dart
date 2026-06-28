@@ -6,6 +6,18 @@ import 'package:integration_test/integration_test.dart';
 import 'package:classifieds_frontend/main.dart' as app;
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+
+class MockImagePickerPlatform extends ImagePickerPlatform with MockPlatformInterfaceMixin {
+  final List<String> paths;
+  MockImagePickerPlatform(this.paths);
+
+  @override
+  Future<List<XFile>> getMultiImageWithOptions({MultiImagePickerOptions? options}) async {
+    return paths.map((p) => XFile(p)).toList();
+  }
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -21,19 +33,9 @@ void main() {
     File(dummyImagePath2).writeAsBytesSync(validPngBytes);
     File(dummyImagePath3).writeAsBytesSync(validPngBytes);
 
-    // Mock image_picker method channel
-    const MethodChannel channel = MethodChannel('plugins.flutter.io/image_picker');
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-      if (methodCall.method == 'pickMultiImage' || methodCall.method == 'getMultiImagePath') {
-        return [
-          {'path': dummyImagePath1},
-          {'path': dummyImagePath2},
-          {'path': dummyImagePath3},
-        ];
-      }
-      return null;
-    });
-
+    // Mock image_picker platform interface
+    ImagePickerPlatform.instance = MockImagePickerPlatform([dummyImagePath1, dummyImagePath2, dummyImagePath3]);
+    
     app.main();
     // Wait for the app to finish loading
     await tester.pumpAndSettle(const Duration(seconds: 5));
