@@ -125,24 +125,9 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
         intentLocs = [_searchIntent!['location']];
       }
       
-      if (categoryId == null) {
-        final dealType = _searchIntent!['deal_type'];
-        final propType = _searchIntent!['property_type'];
-        if (propType != null && propType != 'UNKNOWN') {
-          if (dealType == 'RENT') {
-            if (propType == 'APARTMENT') { categoryId = 301; section = 'شقق للايجار'; }
-            else if (propType == 'STUDIO') { categoryId = 302; section = 'ستوديوهات للايجار'; }
-            else if (propType == 'VILLA') { categoryId = 3101; section = 'فلل وقصور للايجار'; }
-            else if (propType == 'HOUSE') { categoryId = 3102; section = 'بيوت مستقلة للايجار'; }
-            else { categoryId = 3; section = 'عقارات للايجار'; }
-          } else if (dealType == 'SALE') {
-            if (propType == 'APARTMENT') { categoryId = 10301; section = 'شقق للبيع'; }
-            else if (propType == 'STUDIO') { categoryId = 10302; section = 'ستوديوهات للبيع'; }
-            else if (propType == 'VILLA') { categoryId = 10101; section = 'فلل وقصور للبيع'; }
-            else if (propType == 'HOUSE') { categoryId = 10102; section = 'بيوت مستقلة للبيع'; }
-            else { categoryId = 2; section = 'عقارات للبيع'; }
-          }
-        }
+      if (categoryId == null && _searchIntent!['category_id'] != null) {
+        categoryId = _searchIntent!['category_id'] as int?;
+        section = _searchIntent!['category_name'] as String?;
       }
     }
 
