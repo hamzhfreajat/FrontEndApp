@@ -107,10 +107,12 @@ void main() {
     await tester.pump(const Duration(seconds: 15));
 
     // 3. AddAdReelsPage (Optional) -> Skip
-    // The skip button is usually a TextButton or outline button. We'll tap the first TextButton
-    final skipBtnFinder = find.byType(TextButton);
-    if (skipBtnFinder.evaluate().isNotEmpty) {
-      await tester.tap(skipBtnFinder.first);
+    // Check if we are on the Reels page by looking for its specific icon
+    final reelsIconFinder = find.byIcon(Icons.video_library_rounded);
+    if (reelsIconFinder.evaluate().isNotEmpty) {
+      // The skip button is the ElevatedButton at the bottom of the screen
+      final reelsSkipBtn = find.byType(ElevatedButton);
+      await tester.tap(reelsSkipBtn.last);
       await tester.pump(const Duration(seconds: 2));
     }
 
