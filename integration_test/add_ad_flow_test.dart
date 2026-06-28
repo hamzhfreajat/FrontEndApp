@@ -181,23 +181,58 @@ void main() {
     await tester.tap(regionCard);
     await tester.pump(const Duration(seconds: 2));
 
-    // 8. AddAdDetailsPage
-    // Fill in Ad Title, Price, Description
-    for(int i=0; i<15; i++) { if (find.byType(TextFormField).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
-    final textFields = find.byType(TextFormField);
-    expect(textFields, findsAtLeastNWidgets(3));
+    // 8. AddAdDetailsPage (Dynamic Attributes)
+    for(int i=0; i<15; i++) { if (find.byType(ElevatedButton).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
     
-    await tester.enterText(textFields.at(0), 'Ad Title - E2E Test');
-    await tester.enterText(textFields.at(1), '150000');
-    await tester.enterText(textFields.at(2), 'This is an E2E test ad.');
-    
-    // Hide keyboard
+    final dynamicTextFields = find.byType(TextFormField);
+    for (int i = 0; i < dynamicTextFields.evaluate().length; i++) {
+      await tester.enterText(dynamicTextFields.at(i), '100');
+    }
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-
-    // Submit details page
+    
+    final wraps = find.byType(Wrap);
+    for (int i = 0; i < wraps.evaluate().length; i++) {
+      final chip = find.descendant(of: wraps.at(i), matching: find.byType(GestureDetector)).first;
+      if (chip.evaluate().isNotEmpty) {
+        await tester.tap(chip);
+        await tester.pump(const Duration(milliseconds: 500));
+      }
+    }
+    
+    final formFields = find.byType(FormField);
+    for (int i = 0; i < formFields.evaluate().length; i++) {
+      final inkWell = find.descendant(of: formFields.at(i), matching: find.byType(InkWell)).first;
+      if (inkWell.evaluate().isNotEmpty) {
+        await tester.tap(inkWell);
+        await tester.pumpAndSettle();
+        
+        final listTile = find.descendant(of: find.byType(BottomSheet), matching: find.byType(ListTile)).first;
+        if (listTile.evaluate().isNotEmpty) {
+          await tester.tap(listTile);
+          await tester.pumpAndSettle();
+        }
+      }
+    }
+    
     final detailsNextBtn = find.byType(ElevatedButton).last;
     await tester.tap(detailsNextBtn);
+    await tester.pump(const Duration(seconds: 2));
+
+    // 9. AddAdBasicInfoPage
+    for(int i=0; i<15; i++) { if (find.byType(TextFormField).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
+    final basicInfoFields = find.byType(TextFormField);
+    
+    await tester.enterText(basicInfoFields.at(0), '150000'); // Price
+    await tester.enterText(basicInfoFields.at(1), 'Ad Title - E2E Test'); // Title
+    await tester.enterText(basicInfoFields.at(2), 'This is an E2E test ad with more than 20 characters to pass validation.'); // Description
+    if (basicInfoFields.evaluate().length > 3) {
+      await tester.enterText(basicInfoFields.at(3), '0790000000'); // Phone
+    }
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    
+    final basicInfoNextBtn = find.byType(ElevatedButton).last;
+    await tester.tap(basicInfoNextBtn);
     await tester.pumpAndSettle();
 
     // 9. AddAdMapPage (Optional) -> Skip
