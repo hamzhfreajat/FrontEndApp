@@ -138,7 +138,7 @@ void main() {
     // Assuming the 5th valid GestureDetector is the first category card
     // Better to use Text, but to avoid encoding issues:
     // We'll look for a Card or Container that looks like a category
-    final catCard = find.byType(Card).first;
+    final catCard = find.descendant(of: find.byType(ListView), matching: find.byType(GestureDetector)).first;
     await tester.tap(catCard);
     await tester.pump(const Duration(seconds: 2));
 
@@ -150,13 +150,13 @@ void main() {
 
     // 6. AddAdCityPage
     // Select first city
-    final cityCard = find.byType(ListTile).first;
+    final cityCard = find.descendant(of: find.byType(GridView), matching: find.byType(GestureDetector)).first;
     await tester.tap(cityCard);
     await tester.pump(const Duration(seconds: 2));
 
     // 7. AddAdRegionPage
     // Select first region
-    final regionCard = find.byType(ListTile).first;
+    final regionCard = find.descendant(of: find.byType(Wrap), matching: find.byType(InkWell)).first;
     await tester.tap(regionCard);
     await tester.pump(const Duration(seconds: 2));
 
