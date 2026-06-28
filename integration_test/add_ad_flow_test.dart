@@ -16,9 +16,10 @@ void main() {
     final String dummyImagePath1 = '${extDir.path}/dummy1.png';
     final String dummyImagePath2 = '${extDir.path}/dummy2.png';
     final String dummyImagePath3 = '${extDir.path}/dummy3.png';
-    File(dummyImagePath1).writeAsBytesSync(List.filled(100, 0));
-    File(dummyImagePath2).writeAsBytesSync(List.filled(100, 0));
-    File(dummyImagePath3).writeAsBytesSync(List.filled(100, 0));
+    final List<int> validPngBytes = base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=');
+    File(dummyImagePath1).writeAsBytesSync(validPngBytes);
+    File(dummyImagePath2).writeAsBytesSync(validPngBytes);
+    File(dummyImagePath3).writeAsBytesSync(validPngBytes);
 
     // Mock image_picker method channel
     const MethodChannel channel = MethodChannel('plugins.flutter.io/image_picker');
