@@ -117,9 +117,7 @@ void main() {
     // The next button is an ElevatedButton at the bottom that isn't the skip button.
     final nextBtnFinder = find.byWidgetPredicate((w) => w is ElevatedButton && w.child is Text);
     await tester.tap(nextBtnFinder.last);
-    
-    print('Waiting for backend to analyze images and check watermarks (15s)...');
-    await tester.pump(const Duration(seconds: 15));
+    await tester.pump(const Duration(seconds: 2));
 
     // 3. AddAdReelsPage (Optional) -> Skip
     // Check if we are on the Reels page by looking for its specific icon

@@ -97,64 +97,16 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
   }
 
   Future<void> _nextStep() async {
-    setState(() {
-      _isAnalyzing = true;
-      _analysisError = null;
-      _analyzedCount = 0;
-      _totalToAnalyze = _images.length;
-      _failedImages.clear();
-      _successImages.clear();
-    });
-    try {
-      final failedPaths = await ApiService().checkWatermarks(
-        _images,
-        onProgress: (current, total) {
-          if (mounted) {
-            setState(() {
-              _analyzedCount = current;
-              _totalToAnalyze = total;
-            });
-          }
-        },
-      );
-      
-      if (mounted) {
-        setState(() {
-          _failedImages = failedPaths.toSet();
-          for (var img in _images) {
-            if (!_failedImages.contains(img.path)) {
-              _successImages.add(img.path);
-            }
-          }
-        });
-        
-        if (_failedImages.isEmpty) {
-          setState(() => _isAnalyzing = false);
-          AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_images');
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddAdReelsPage(
-                images: _images,
-                suggestedCategory: _suggestedCategory,
-              ),
-            ),
-          );
-        } else {
-          setState(() {
-            _isAnalyzing = true; // Keep popup open
-            _analysisError = 'عذراً، بعض الصور تحتوي على شعارات لتطبيقات أخرى أو نصوص إضافية تمنع نشرها.\n\nيرجى النقر على "حسناً" ثم إزالة الصور المظللة باللون الأحمر والمحاولة مرة أخرى.';
-          });
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isAnalyzing = false;
-          _analysisError = e.toString().replaceAll('Exception: ', '');
-        });
-      }
-    }
+    AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_images');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddAdReelsPage(
+          images: _images,
+          suggestedCategory: _suggestedCategory,
+        ),
+      ),
+    );
   }
 
   @override
@@ -896,3 +848,4 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
     );
   }
 }
+
