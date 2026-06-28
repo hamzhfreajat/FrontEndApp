@@ -52,8 +52,23 @@ void main() {
     ImagePickerPlatform.instance = MockImagePickerPlatform([dummyImagePath1, dummyImagePath2, dummyImagePath3]);
     
     app.main();
-    // Wait for the app to finish loading
-    await tester.pump(const Duration(seconds: 5));
+    
+    // Wait for the app to finish loading and show either Login Page or Root Screen
+    print('Waiting for app to initialize...');
+    int initWait = 0;
+    while (initWait < 30) {
+      await tester.pump(const Duration(seconds: 1));
+      
+      final googleLogo = find.byWidgetPredicate(
+        (widget) => widget is Image && widget.image is AssetImage && (widget.image as AssetImage).assetName == 'assets/images/google_logo.png'
+      );
+      final addAd = find.byIcon(Icons.add_rounded);
+      
+      if (googleLogo.evaluate().isNotEmpty || addAd.evaluate().isNotEmpty) {
+        break;
+      }
+      initWait++;
+    }
 
     // 0. Login using Google (if we are on the login page)
     final googleLogoFinder = find.byWidgetPredicate(
