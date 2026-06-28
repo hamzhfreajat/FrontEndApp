@@ -136,7 +136,9 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
             else if (propType == 'HOUSE') { categoryId = 3102; section = 'بيوت مستقلة للايجار'; }
             else { categoryId = 3; section = 'عقارات للايجار'; }
           } else if (dealType == 'SALE') {
-            if (propType == 'APARTMENT') { categoryId = 10101; section = 'شقق للبيع'; }
+            if (propType == 'APARTMENT') { categoryId = 10301; section = 'شقق للبيع'; }
+            else if (propType == 'STUDIO') { categoryId = 10302; section = 'ستوديوهات للبيع'; }
+            else if (propType == 'VILLA') { categoryId = 10101; section = 'فلل وقصور للبيع'; }
             else if (propType == 'HOUSE') { categoryId = 10102; section = 'بيوت مستقلة للبيع'; }
             else { categoryId = 2; section = 'عقارات للبيع'; }
           }
