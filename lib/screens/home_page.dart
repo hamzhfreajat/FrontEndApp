@@ -2065,7 +2065,6 @@ class __PromoBannerCarouselState extends State<_PromoBannerCarousel> {
                       ),
                     ],
                   ),
-                ),
               );
             },
           ),

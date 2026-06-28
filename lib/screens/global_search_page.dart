@@ -5,6 +5,9 @@ import '../services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'category_details_page.dart';
 
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
+
 import '../services/analytics_engine.dart';
 
 class GlobalSearchPage extends StatefulWidget {
@@ -131,22 +134,32 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
       }
     }
 
-    if (categoryId != null) {
-      Category targetCat;
-      try {
-        targetCat = _topCategories.firstWhere((c) => c.id == categoryId);
-      } catch (_) {
-        targetCat = Category(id: categoryId, name: section ?? '');
+      if (categoryId != null) {
+        Category? targetCat;
+        try {
+          final appProvider = Provider.of<AppProvider>(context, listen: false);
+          targetCat = appProvider.categories?.firstWhere((c) => c.id == categoryId);
+        } catch (_) {}
+        
+        if (targetCat == null) {
+          try {
+            targetCat = _topCategories.firstWhere((c) => c.id == categoryId);
+          } catch (_) {
+            targetCat = Category(id: categoryId, name: section ?? '');
+          }
+        }
+        
+        final allCats = Provider.of<AppProvider>(context, listen: false).categories ?? _topCategories;
+        
+        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailsPage(
+          category: targetCat!, 
+          allCategories: allCats,
+          initialSearchQuery: cleanSearchQuery,
+          initialTags: intentTags,
+          initialLocations: intentLocs,
+        )));
+        return;
       }
-      
-      Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailsPage(
-        category: targetCat, 
-        allCategories: _topCategories,
-        initialSearchQuery: cleanSearchQuery,
-        initialTags: intentTags,
-        initialLocations: intentLocs,
-      )));
-    } else {
       final cat = Category(id: 0, name: keyword.isNotEmpty ? keyword : 'نتائج البحث', iconName: '🔍');
       if (isTag && rawTag != null) {
         Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryDetailsPage(category: cat, allCategories: _topCategories, initialTags: [rawTag])));
@@ -160,7 +173,6 @@ class _GlobalSearchPageState extends State<GlobalSearchPage> {
         )));
       }
     }
-  }
 
   @override
   void dispose() {
