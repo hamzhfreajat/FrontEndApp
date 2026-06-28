@@ -2648,6 +2648,40 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     var displayAds = _ads;
 
     if (displayAds.isEmpty) {
+      if (widget.category.id == 0) {
+        final allCats = Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories;
+        Category? rentCat;
+        Category? saleCat;
+        try { rentCat = allCats.firstWhere((c) => c.id == 3); } catch(_) {}
+        try { saleCat = allCats.firstWhere((c) => c.id == 103); } catch(_) {}
+        
+        return SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(color: Colors.blue.shade50, shape: BoxShape.circle),
+                  child: Icon(Icons.search_off_rounded, size: 64, color: Colors.blue.shade300),
+                ),
+                const SizedBox(height: 24),
+                const Text('عذراً، لم نعثر على نتائج مطابقة لبحثك', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87), textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                const Text('لمساعدتك بشكل أفضل، يرجى اختيار أحد الأقسام التالية وتصفح الأقسام الفرعية:', style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.5), textAlign: TextAlign.center),
+                const SizedBox(height: 32),
+                if (rentCat != null)
+                  _buildFallbackCategoryCard(rentCat, Icons.key_rounded, const Color(0xFF00BFA5)),
+                if (rentCat != null) const SizedBox(height: 16),
+                if (saleCat != null)
+                  _buildFallbackCategoryCard(saleCat, Icons.home_work_rounded, const Color(0xFF1A73E8)),
+              ],
+            ),
+          ),
+        );
+      }
+
       return SliverToBoxAdapter(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 64.0),
@@ -3355,6 +3389,73 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     ),
     );
   }
+  Widget _buildFallbackCategoryCard(Category cat, IconData icon, Color brandColor) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CategoryDetailsPage(
+              category: cat,
+              allCategories: Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: brandColor.withOpacity(0.15)),
+          boxShadow: [
+            BoxShadow(
+              color: brandColor.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: brandColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: brandColor, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    cat.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'تصفح الأقسام الفرعية',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, size: 16, color: brandColor),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 
@@ -3443,6 +3544,5 @@ class _MultipleImagesHeroState extends State<MultipleImagesHero> {
       ),
     );
   }
-
 
 }
