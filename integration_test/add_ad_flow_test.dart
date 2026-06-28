@@ -144,11 +144,28 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     // 5. AddAdSubcategoriesPage
-    // Select first subcategory
-    for(int i=0; i<15; i++) { if (find.byType(ListTile).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
-    final subCatCard = find.byType(ListTile).first;
-    await tester.tap(subCatCard);
-    await tester.pump(const Duration(seconds: 2));
+    // Handle multi-level subcategories
+    bool reachedCityPage = false;
+    for (int depth = 0; depth < 5; depth++) {
+      bool foundCity = false;
+      bool foundSubcat = false;
+      for(int i=0; i<15; i++) {
+        if (find.descendant(of: find.byType(GridView), matching: find.byType(GestureDetector)).evaluate().isNotEmpty) { foundCity = true; break; }
+        if (find.byType(ListTile).evaluate().isNotEmpty) { foundSubcat = true; break; }
+        await tester.pump(const Duration(seconds: 1));
+      }
+      if (foundCity) {
+        reachedCityPage = true;
+        break;
+      }
+      if (foundSubcat) {
+        final subCatCard = find.byType(ListTile).first;
+        await tester.tap(subCatCard);
+        await tester.pump(const Duration(seconds: 2));
+      } else {
+        throw Exception('Neither CityPage nor SubcategoriesPage loaded');
+      }
+    }
 
     // 6. AddAdCityPage
     // Select first city
