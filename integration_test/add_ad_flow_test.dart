@@ -214,6 +214,15 @@ void main() {
       }
     }
     
+    
+    // 8.5. Fill any newly appeared TextFields (from dynamic choices)
+    final finalTextFields = find.byType(TextFormField);
+    for (int i = 0; i < finalTextFields.evaluate().length; i++) {
+      await Scrollable.ensureVisible(tester.element(finalTextFields.at(i)), alignment: 0.5); await tester.pumpAndSettle(); await tester.enterText(finalTextFields.at(i), '100');
+    }
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+
     final detailsNextBtn = find.byType(ElevatedButton).last;
     await Scrollable.ensureVisible(tester.element(detailsNextBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(detailsNextBtn);
     await tester.pump(const Duration(seconds: 2));
