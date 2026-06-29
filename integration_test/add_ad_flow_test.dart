@@ -98,7 +98,11 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
     }
 
-    // 1. Start Add Ad Process
+    int maxSubcatsToTest = 21; // Try to test up to 21 subcategories
+    for (int testLoop = 0; testLoop < maxSubcatsToTest; testLoop++) {
+      print('=== STARTING ADD AD FLOW ITERATION $testLoop ===');
+      
+      // 1. Start Add Ad Process
     final addAdIcon = find.byIcon(Icons.add_rounded);
     expect(addAdIcon, findsOneWidget, reason: 'Should find the Add Ad button in the bottom navigation bar');
     await tester.tap(addAdIcon);
@@ -159,7 +163,13 @@ void main() {
         break;
       }
       if (foundSubcat) {
-        final subCatCard = find.byType(ListTile).first;
+        final subCats = find.byType(ListTile);
+        final pickIndex = (depth == 0 && testLoop < subCats.evaluate().length) ? testLoop : 0;
+        if (pickIndex >= subCats.evaluate().length) {
+          print('No more subcategories. Breaking.');
+          break;
+        }
+        final subCatCard = subCats.at(pickIndex);
         await tester.tap(subCatCard);
         await tester.pump(const Duration(seconds: 2));
       } else {
@@ -254,13 +264,21 @@ void main() {
     if (skipMapBtn.evaluate().isNotEmpty) {
       await tester.tap(skipMapBtn.first);
       await tester.pumpAndSettle();
-    } else {
-      for(int i=0; i<15; i++) { if (find.byType(ElevatedButton).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
-      final publishBtn = find.byType(ElevatedButton).last;
-      await Scrollable.ensureVisible(tester.element(publishBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(publishBtn);
-      await tester.pump(const Duration(seconds: 2));
     }
 
-    print('✅ E2E Automation test completed the Add Ad flow successfully!');
+    // 11. AddAdPreviewPage
+    for(int i=0; i<15; i++) { if (find.byType(ElevatedButton).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
+    final publishBtn = find.byType(ElevatedButton).last;
+    await Scrollable.ensureVisible(tester.element(publishBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(publishBtn);
+    await tester.pump(const Duration(seconds: 4));
+    
+    // Navigate back to Root (Home)
+    final navState = tester.state<NavigatorState>(find.byType(Navigator).first);
+    navState.popUntil((route) => route.isFirst);
+    await tester.pumpAndSettle();
+
+      print('✅ Finished flow loop $testLoop');
+    }
+    print('✅ E2E Automation test completed ALL Add Ad flow loops successfully!');
   });
 }
