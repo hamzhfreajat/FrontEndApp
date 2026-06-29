@@ -102,6 +102,11 @@ void main() {
     for (int testLoop = 0; testLoop < maxSubcatsToTest; testLoop++) {
       print('=== STARTING ADD AD FLOW ITERATION $testLoop ===');
       
+      // Wait for any snackbars from previous iterations to disappear
+      if (testLoop > 0) {
+        await tester.pump(const Duration(seconds: 6));
+      }
+      
       // 1. Start Add Ad Process
     final addAdIcon = find.byIcon(Icons.add_rounded);
     expect(addAdIcon, findsOneWidget, reason: 'Should find the Add Ad button in the bottom navigation bar');
