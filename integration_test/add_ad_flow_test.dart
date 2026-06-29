@@ -98,9 +98,11 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
     }
 
-    int maxSubcatsToTest = 21; // Try to test up to 21 subcategories
+    int level0Index = 0;
+    int level1Index = 0;
+    int maxSubcatsToTest = 50; // Try to test up to 50 subcategories total across all branches
     for (int testLoop = 0; testLoop < maxSubcatsToTest; testLoop++) {
-      print('=== STARTING ADD AD FLOW ITERATION $testLoop ===');
+      print('=== STARTING ADD AD FLOW ITERATION $testLoop (Level0: $level0Index, Level1: $level1Index) ===');
       
       // Wait for any snackbars from previous iterations to disappear
       if (testLoop > 0) {
@@ -156,6 +158,7 @@ void main() {
     // Handle multi-level subcategories
     bool reachedCityPage = false;
     bool isFinishedAll = false;
+    bool skipToNextLevel0 = false;
     for (int depth = 0; depth < 5; depth++) {
       bool foundCity = false;
       bool foundSubcat = false;
@@ -170,23 +173,47 @@ void main() {
       }
       if (foundSubcat) {
         final subCats = find.byType(ListTile);
-        final pickIndex = (depth == 1) ? testLoop : 0;
-        if (depth == 1 && pickIndex >= subCats.evaluate().length) {
-          print('No more subcategories. Breaking.');
-          isFinishedAll = true;
-          break;
+        if (depth == 0) {
+          if (level0Index >= subCats.evaluate().length) {
+            print('Finished testing all level 0 categories!');
+            isFinishedAll = true;
+            break;
+          }
+          final subCatCard = subCats.at(level0Index);
+          await tester.tap(subCatCard);
+          await tester.pump(const Duration(seconds: 2));
+        } else if (depth == 1) {
+          if (level1Index >= subCats.evaluate().length) {
+            print('Finished all level 1 categories for level0Index $level0Index. Moving to next level 0.');
+            level0Index++;
+            level1Index = 0;
+            skipToNextLevel0 = true;
+            break;
+          }
+          final subCatCard = subCats.at(level1Index);
+          await tester.tap(subCatCard);
+          await tester.pump(const Duration(seconds: 2));
+        } else {
+          final subCatCard = subCats.first;
+          await tester.tap(subCatCard);
+          await tester.pump(const Duration(seconds: 2));
         }
-        final subCatCard = subCats.at(pickIndex);
-        await tester.tap(subCatCard);
-        await tester.pump(const Duration(seconds: 2));
       } else {
         throw Exception('Neither CityPage nor SubcategoriesPage loaded');
       }
     }
     
     if (isFinishedAll) {
-      print('Finished testing all subcategories in this branch.');
+      print('Finished testing all subcategories in all branches!');
       break;
+    }
+    
+    if (skipToNextLevel0) {
+      // We exhausted this branch. Go back to Home and start over with new level0Index.
+      final navState = tester.state<NavigatorState>(find.byType(Navigator).first);
+      navState.popUntil((route) => route.isFirst);
+      await tester.pumpAndSettle();
+      continue;
     }
 
     // 6. AddAdCityPage
@@ -297,7 +324,8 @@ void main() {
     navState.popUntil((route) => route.isFirst);
     await tester.pumpAndSettle();
 
-      print('✅ Finished flow loop $testLoop');
+    level1Index++;
+    print('✅ Finished flow loop $testLoop (Completed level 1 index ${level1Index-1} for level 0 index $level0Index)');
     }
     print('✅ E2E Automation test completed ALL Add Ad flow loops successfully!');
   });
