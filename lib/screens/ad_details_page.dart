@@ -64,6 +64,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
       _fetchRelatedAds();
     } else {
       _isLoadingAds = false;
+      _isPageTransitioning = false;
     }
     _pageController = PageController();
 
