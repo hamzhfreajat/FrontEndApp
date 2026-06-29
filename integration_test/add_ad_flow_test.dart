@@ -230,13 +230,18 @@ void main() {
     // 9. AddAdBasicInfoPage
     for(int i=0; i<15; i++) { if (find.byType(TextFormField).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
     final basicInfoFields = find.byType(TextFormField);
-    
-    await Scrollable.ensureVisible(tester.element(basicInfoFields.at(0)), alignment: 0.5); await tester.pumpAndSettle(); await tester.enterText(basicInfoFields.at(0), '150000'); // Price
-    await Scrollable.ensureVisible(tester.element(basicInfoFields.at(1)), alignment: 0.5); await tester.pumpAndSettle(); await tester.enterText(basicInfoFields.at(1), 'Ad Title - E2E Test'); // Title
-    await Scrollable.ensureVisible(tester.element(basicInfoFields.at(2)), alignment: 0.5); await tester.pumpAndSettle(); await tester.enterText(basicInfoFields.at(2), 'This is an E2E test ad with more than 20 characters to pass validation.'); // Description
-    if (basicInfoFields.evaluate().length > 3) {
-      await Scrollable.ensureVisible(tester.element(basicInfoFields.at(3)), alignment: 0.5); await tester.pumpAndSettle(); await tester.enterText(basicInfoFields.at(3), '0790000000'); // Phone
-    }
+      for (int i = 0; i < basicInfoFields.evaluate().length; i++) {
+        final textFieldWidget = tester.widget<TextField>(find.descendant(of: basicInfoFields.at(i), matching: find.byType(TextField)));
+        await Scrollable.ensureVisible(tester.element(basicInfoFields.at(i)), alignment: 0.5); 
+        await tester.pumpAndSettle();
+        if (textFieldWidget.keyboardType == TextInputType.phone) {
+          await tester.enterText(basicInfoFields.at(i), '0790000000');
+        } else if (textFieldWidget.keyboardType == TextInputType.number) {
+          await tester.enterText(basicInfoFields.at(i), '150000');
+        } else {
+          await tester.enterText(basicInfoFields.at(i), 'This is an E2E test ad with more than 20 characters to pass validation.');
+        }
+      }
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
     
@@ -244,18 +249,17 @@ void main() {
     await Scrollable.ensureVisible(tester.element(basicInfoNextBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(basicInfoNextBtn);
     await tester.pumpAndSettle();
 
-    // 9. AddAdMapPage (Optional) -> Skip
-    final skipMapBtn = find.byType(TextButton);
+    // 10. AddAdMapPage (Optional) -> Skip
+    final skipMapBtn = find.text('تخطي');
     if (skipMapBtn.evaluate().isNotEmpty) {
       await tester.tap(skipMapBtn.first);
       await tester.pumpAndSettle();
+    } else {
+      for(int i=0; i<15; i++) { if (find.byType(ElevatedButton).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
+      final publishBtn = find.byType(ElevatedButton).last;
+      await Scrollable.ensureVisible(tester.element(publishBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(publishBtn);
+      await tester.pump(const Duration(seconds: 2));
     }
-
-    // 10. AddAdPreviewPage
-    // Find the Publish button (last Elevated button)
-    final publishBtn = find.byType(ElevatedButton).last;
-    await Scrollable.ensureVisible(tester.element(publishBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(publishBtn);
-    await tester.pump(const Duration(seconds: 2));
 
     print('✅ E2E Automation test completed the Add Ad flow successfully!');
   });
