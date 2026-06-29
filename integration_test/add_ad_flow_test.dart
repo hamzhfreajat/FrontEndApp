@@ -270,7 +270,15 @@ void main() {
     for(int i=0; i<15; i++) { if (find.byType(ElevatedButton).evaluate().isNotEmpty) break; await tester.pump(const Duration(seconds: 1)); }
     final publishBtn = find.byType(ElevatedButton).last;
     await Scrollable.ensureVisible(tester.element(publishBtn), alignment: 0.5); await tester.pumpAndSettle(); await tester.tap(publishBtn);
-    await tester.pump(const Duration(seconds: 4));
+    await tester.pump(const Duration(seconds: 1));
+    
+    // Wait for the publish network request to finish
+    int waitTicks = 0;
+    while (find.byType(CircularProgressIndicator).evaluate().isNotEmpty && waitTicks < 30) {
+      await tester.pump(const Duration(seconds: 1));
+      waitTicks++;
+    }
+    await tester.pump(const Duration(seconds: 2));
     
     // Navigate back to Root (Home)
     final navState = tester.state<NavigatorState>(find.byType(Navigator).first);
