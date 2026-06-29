@@ -155,6 +155,7 @@ void main() {
     // 5. AddAdSubcategoriesPage
     // Handle multi-level subcategories
     bool reachedCityPage = false;
+    bool isFinishedAll = false;
     for (int depth = 0; depth < 5; depth++) {
       bool foundCity = false;
       bool foundSubcat = false;
@@ -169,9 +170,10 @@ void main() {
       }
       if (foundSubcat) {
         final subCats = find.byType(ListTile);
-        final pickIndex = (depth == 0 && testLoop < subCats.evaluate().length) ? testLoop : 0;
-        if (pickIndex >= subCats.evaluate().length) {
+        final pickIndex = (depth == 1) ? testLoop : 0;
+        if (depth == 1 && pickIndex >= subCats.evaluate().length) {
           print('No more subcategories. Breaking.');
+          isFinishedAll = true;
           break;
         }
         final subCatCard = subCats.at(pickIndex);
@@ -180,6 +182,11 @@ void main() {
       } else {
         throw Exception('Neither CityPage nor SubcategoriesPage loaded');
       }
+    }
+    
+    if (isFinishedAll) {
+      print('Finished testing all subcategories in this branch.');
+      break;
     }
 
     // 6. AddAdCityPage
