@@ -147,6 +147,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     AnalyticsEngine().logScreenViewed(screenName: 'home');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SavedSearchProvider>(context, listen: false).refreshSearches();
+    });
   }
 
   Future<void> _refreshData() async {
@@ -154,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       _refreshKey++;
     });
     await Provider.of<AppProvider>(context, listen: false).refreshAll();
+    await Provider.of<SavedSearchProvider>(context, listen: false).refreshSearches();
   }
 
   @override
