@@ -26,6 +26,7 @@ import '../providers/app_provider.dart';
 import '../providers/saved_search_provider.dart';
 import '../providers/auth_provider.dart';
 import 'package:app_links/app_links.dart';
+import 'package:upgrader/upgrader.dart';
 import 'ad_details_page.dart';
 import 'category_details_page.dart';
 import '../models/category.dart';
@@ -154,8 +155,13 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
       color: Theme.of(context).scaffoldBackgroundColor,
       child: SafeArea(
         bottom: false,
-        child: Scaffold(
-          backgroundColor: _bg,
+        child: UpgradeAlert(
+          upgrader: Upgrader(
+            languageCode: 'ar',
+            messages: UpgraderMessages(code: 'ar'),
+          ),
+          child: Scaffold(
+            backgroundColor: _bg,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(

@@ -54,6 +54,7 @@ dependencies:
   app_links: ^7.0.0
   font_awesome_flutter: ^11.0.0
   image: ^4.8.0
+  upgrader: ^13.5.0
 
 dev_dependencies:
   flutter_test:
