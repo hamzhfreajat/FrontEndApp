@@ -952,11 +952,8 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
         if (durR is List) {
           rentDuration = durR.isEmpty ? null : durR.join('، ');
         } else {
-          rentDuration = durR.toString();
-          if (rentDuration!.startsWith('[') && rentDuration!.endsWith(']')) {
-            rentDuration = rentDuration!.substring(1, rentDuration!.length - 1).trim();
-            if (rentDuration!.isEmpty) rentDuration = null;
-          }
+          rentDuration = durR.toString().replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", "").trim();
+          if (rentDuration!.isEmpty) rentDuration = null;
         }
       }
       
@@ -1166,11 +1163,9 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               if (val.isEmpty) continue;
               strVal = val.join('، ');
             } else {
-              strVal = val.toString().trim();
-              if (strVal.startsWith('[') && strVal.endsWith(']')) {
-                strVal = strVal.substring(1, strVal.length - 1).trim();
-              }
+              strVal = val.toString();
             }
+            strVal = strVal.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", "").trim();
             if (strVal.toLowerCase() == 'true') strVal = 'نعم';
             if (strVal.toLowerCase() == 'false') strVal = 'لا';
             if (strVal.isNotEmpty && strVal != 'null' && strVal != '0' && strVal != '0.0' && strVal != '0.00' && strVal != 'none' && strVal != 'غير محدد') {
