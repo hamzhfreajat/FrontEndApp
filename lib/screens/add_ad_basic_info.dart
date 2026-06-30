@@ -6,6 +6,7 @@ import '../models/category.dart';
 import '../services/api_service.dart';
 import 'add_ad_preview.dart';
 import '../utils/form_analytics_tracker.dart';
+import '../utils/arabic_numbers_formatter.dart';
 
 class AddAdBasicInfoPage extends StatefulWidget {
   final Category selectedLeafCategory;
@@ -384,6 +385,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                             controller: _priceController,
                             focusNode: _priceFocus,
                             keyboardType: TextInputType.number,
+                            inputFormatters: [ArabicNumbersFormatter()],
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.center,
                             validator: (val) => val == null || val.isEmpty ? 'مطلوب إدخال السعر' : null,
@@ -409,6 +411,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                             controller: _downPaymentController,
                             focusNode: _downPaymentFocus,
                             keyboardType: TextInputType.number,
+                            inputFormatters: [ArabicNumbersFormatter()],
                             textDirection: TextDirection.ltr,
                             textAlign: TextAlign.center,
                             validator: (val) => val == null || val.isEmpty ? 'مطلوب إدخال الدفعة الأولى' : null,
@@ -523,6 +526,7 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                           controller: _phoneController,
                           focusNode: _phoneFocus,
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [ArabicNumbersFormatter()],
                           textDirection: TextDirection.ltr,
                           textAlign: TextAlign.center,
                           validator: (val) {

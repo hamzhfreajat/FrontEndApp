@@ -144,8 +144,7 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       ownerName: ownerName,
     );
   }
-
-  Future<void> _publishAd() async {
+  Future<void> _publishAd() async {
     if (_isPublishing) return;
 
     final existingImagesCount = (widget.adData['image_urls'] as List<dynamic>?)?.length ?? 0;
@@ -153,7 +152,7 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
     if (existingImagesCount + newImagesCount < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("U,OO\"O_ U.U+ OO OU?O_ 3 OU^O O1U,U% O U,OU,U, U,U+O'O O U,OO1U,O U+"),
+          content: Text("لابد من رفع 3 صور على الأقل لنشر الإعلان"),
           backgroundColor: Colors.red,
         ),
       );

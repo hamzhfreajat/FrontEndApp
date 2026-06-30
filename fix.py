@@ -1,20 +1,20 @@
-import sys
+﻿import sys
 
-filepath = r'd:\open\classifieds-app\frontend\pubspec.yaml'
-with open(filepath, 'r', encoding='utf-8') as f:
-    lines = f.readlines()
+file_path = r'd:\open\classifieds-app\frontend\lib\screens\add_ad_details.dart'
+with open(file_path, 'r', encoding='utf-8') as f:
+    content = f.read()
 
-config = '''flutter_icons:
-  android: true
-  ios: true
-  image_path: "assets/images/app_icon.png"
-  remove_alpha_ios: true
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/app_icon.png"
-'''
+content = content.replace("import 'add_ad_basic_info.dart';", "import 'add_ad_basic_info.dart';\nimport '../utils/arabic_numbers_formatter.dart';")
 
-with open(filepath, 'w', encoding='utf-8') as f:
-    f.writelines(lines[:51])
-    f.write('\n')
-    f.write(config)
-print('Fixed pubspec.yaml')
+content = content.replace(
+    "keyboardType: const TextInputType.numberWithOptions(decimal: true),",
+    "keyboardType: const TextInputType.numberWithOptions(decimal: true),\n            inputFormatters: [ArabicNumbersFormatter()],"
+)
+
+content = content.replace(
+    "keyboardType: keyboardType,",
+    "keyboardType: keyboardType,\n            inputFormatters: (keyboardType == TextInputType.number || keyboardType == const TextInputType.numberWithOptions(decimal: true) || keyboardType == TextInputType.phone) ? [ArabicNumbersFormatter()] : null,"
+)
+
+with open(file_path, 'w', encoding='utf-8') as f:
+    f.write(content)

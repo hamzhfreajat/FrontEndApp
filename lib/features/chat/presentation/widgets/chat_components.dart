@@ -78,19 +78,13 @@ class GlassProductHeader extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? ChatTheme.accentColDark : ChatTheme.accentColLight;
 
-    bool hasRealName = userName != null && 
-                       userName!.trim().isNotEmpty && 
-                       !userName!.toLowerCase().startsWith('user-') &&
-                       userName != 'مستخدم' &&
-                       userName != 'LOADING_NAME';
-    
     bool isLoadingName = userName == 'LOADING_NAME';
     String displayName = 'مستخدم غير معروف';
     String? subtitlePhone;
     
     if (isLoadingName) {
        displayName = ''; // Handled by shimmer
-    } else if (hasRealName) {
+    } else if (userName != null && userName!.trim().isNotEmpty) {
        displayName = userName!;
        if (userPhone != null && userPhone!.isNotEmpty) {
           subtitlePhone = userPhone;
@@ -98,8 +92,6 @@ class GlassProductHeader extends StatelessWidget {
     } else {
        if (userPhone != null && userPhone!.isNotEmpty) {
           displayName = userPhone!;
-       } else if (userName != null && userName!.isNotEmpty) {
-          displayName = userName!;
        }
     }
 

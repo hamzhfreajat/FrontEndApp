@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../providers/app_provider.dart';
 import '../models/location.dart';
 import '../services/analytics_engine.dart';
-
+import '../utils/arabic_numbers_formatter.dart';
 class PremiumFilterData {
   final double? minPrice;
   final double? maxPrice;
@@ -809,6 +809,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                 TextField(
                   controller: minCtrl,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [ArabicNumbersFormatter()],
                   textDirection: TextDirection.ltr,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
@@ -831,6 +832,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                 TextField(
                   controller: maxCtrl,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [ArabicNumbersFormatter()],
                   textDirection: TextDirection.ltr,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(

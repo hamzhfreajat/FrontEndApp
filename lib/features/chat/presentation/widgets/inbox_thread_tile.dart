@@ -50,10 +50,7 @@ class _InboxThreadTileState extends State<InboxThreadTile> with SingleTickerProv
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = isDark ? ChatTheme.accentColDark : ChatTheme.accentColLight;
 
-    bool hasRealName = widget.thread.otherUserName.isNotEmpty && 
-                       !widget.thread.otherUserName.toLowerCase().startsWith('user-') &&
-                       widget.thread.otherUserName != 'مستخدم';
-                       
+    bool isLoadingName = widget.thread.otherUserName == 'LOADING_NAME';
     String displayName = 'مستخدم';
     String? subtitlePhone;
     
@@ -62,7 +59,7 @@ class _InboxThreadTileState extends State<InboxThreadTile> with SingleTickerProv
     if (isSupportChat) {
        displayName = 'فريق الدعم الفني';
        subtitlePhone = null;
-    } else if (hasRealName) {
+    } else if (widget.thread.otherUserName.isNotEmpty && !isLoadingName) {
        displayName = widget.thread.otherUserName;
        if (widget.thread.otherUserPhone != null && widget.thread.otherUserPhone!.isNotEmpty) {
           subtitlePhone = widget.thread.otherUserPhone;
@@ -70,8 +67,6 @@ class _InboxThreadTileState extends State<InboxThreadTile> with SingleTickerProv
     } else {
        if (widget.thread.otherUserPhone != null && widget.thread.otherUserPhone!.isNotEmpty) {
           displayName = widget.thread.otherUserPhone!;
-       } else if (widget.thread.otherUserName.isNotEmpty) {
-          displayName = widget.thread.otherUserName;
        }
     }
 

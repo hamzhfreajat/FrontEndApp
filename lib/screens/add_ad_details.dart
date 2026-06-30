@@ -9,6 +9,7 @@ import '../providers/app_provider.dart';
 import '../models/category.dart';
 import '../services/api_service.dart';
 import 'add_ad_basic_info.dart';
+import '../utils/arabic_numbers_formatter.dart';
 
 class AddAdDetailsPage extends StatefulWidget {
   final Category selectedLeafCategory;
@@ -451,6 +452,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
             controller: controller,
             initialValue: controller == null ? _dynamicData[key]?.toString() : null,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [ArabicNumbersFormatter()],
             textDirection: TextDirection.ltr,
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
@@ -552,6 +554,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
           TextFormField(
             initialValue: _dynamicData[key]?.toString(),
             keyboardType: keyboardType,
+            inputFormatters: (keyboardType == TextInputType.number || keyboardType == const TextInputType.numberWithOptions(decimal: true) || keyboardType == TextInputType.phone) ? [ArabicNumbersFormatter()] : null,
             textDirection: (keyboardType == TextInputType.number || keyboardType == const TextInputType.numberWithOptions(decimal: true)) ? TextDirection.ltr : null,
             textAlign: (keyboardType == TextInputType.number || keyboardType == const TextInputType.numberWithOptions(decimal: true)) ? TextAlign.center : TextAlign.start,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
