@@ -1030,25 +1030,44 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
   // ═══════════════════════════════════════════════
   Widget _buildQualitiesCard() {
     final q = <MapEntry<String, String>>[];
+    
+    String _clean(String? val) {
+      if (val == null) return '';
+      return val.replaceAll('[', '').replaceAll(']', '').replaceAll('"', '').replaceAll("'", "").trim();
+    }
+
     final d = ad.sharedRoomDetails;
     if (d != null) {
-      if (d.rentDuration != null && d.rentDuration!.trim().isNotEmpty && d.rentDuration != 'غير محدد') q.add(MapEntry('مدة الإيجار', d.rentDuration!));
-      if (d.floor != null && d.floor!.trim().isNotEmpty && d.floor != '0') q.add(MapEntry('الطابق', d.floor!));
-      if (d.buildingAge != null && d.buildingAge!.trim().isNotEmpty && d.buildingAge != '0') q.add(MapEntry('عمر البناء', d.buildingAge!));
+      final rentDur = _clean(d.rentDuration);
+      if (rentDur.isNotEmpty && rentDur != 'غير محدد') q.add(MapEntry('مدة الإيجار', rentDur));
+      final floorStr = _clean(d.floor);
+      if (floorStr.isNotEmpty && floorStr != '0') q.add(MapEntry('الطابق', floorStr));
+      final ageStr = _clean(d.buildingAge);
+      if (ageStr.isNotEmpty && ageStr != '0') q.add(MapEntry('عمر البناء', ageStr));
       if (d.rooms != null && d.rooms! > 0) q.add(MapEntry('عدد الغرف', '${d.rooms}'));
       if (d.bathrooms != null && d.bathrooms! > 0) q.add(MapEntry('عدد الحمامات', '${d.bathrooms}'));
-      if (d.furnished != null && d.furnished!.trim().isNotEmpty) q.add(MapEntry('مفروشة؟', d.furnished!));
-      if (d.roomType != null && d.roomType!.trim().isNotEmpty) q.add(MapEntry('نوع السكن', d.roomType!));
-      if (d.roomCapacity != null && d.roomCapacity!.trim().isNotEmpty && d.roomCapacity != '0') q.add(MapEntry('السعة', d.roomCapacity!));
+      final furnishedStr = _clean(d.furnished);
+      if (furnishedStr.isNotEmpty) q.add(MapEntry('مفروشة؟', furnishedStr));
+      final roomTypeStr = _clean(d.roomType);
+      if (roomTypeStr.isNotEmpty) q.add(MapEntry('نوع السكن', roomTypeStr));
+      final roomCapStr = _clean(d.roomCapacity);
+      if (roomCapStr.isNotEmpty && roomCapStr != '0') q.add(MapEntry('السعة', roomCapStr));
       if (d.currentOccupants != null && d.currentOccupants! > 0) q.add(MapEntry('عدد السكان', '${d.currentOccupants} أشخاص'));
-      if (d.bathroomType != null && d.bathroomType!.trim().isNotEmpty) q.add(MapEntry('نوع الحمام', d.bathroomType!));
-      if (d.paymentFrequency != null && d.paymentFrequency!.trim().isNotEmpty && d.paymentFrequency != 'غير محدد') q.add(MapEntry('طريقة الدفع', d.paymentFrequency!));
+      final bathroomTypeStr = _clean(d.bathroomType);
+      if (bathroomTypeStr.isNotEmpty) q.add(MapEntry('نوع الحمام', bathroomTypeStr));
+      final paymentFreqStr = _clean(d.paymentFrequency);
+      if (paymentFreqStr.isNotEmpty && paymentFreqStr != 'غير محدد') q.add(MapEntry('طريقة الدفع', paymentFreqStr));
       if (d.insuranceRequired != null) q.add(MapEntry('التأمين', d.insuranceRequired! ? 'مطلوب' : 'غير مطلوب'));
-      if (d.smokingRules != null && d.smokingRules!.trim().isNotEmpty) q.add(MapEntry('التدخين', d.smokingRules!));
-      if (d.quietnessRules != null && d.quietnessRules!.trim().isNotEmpty) q.add(MapEntry('الهدوء', d.quietnessRules!));
-      if (d.guestsRules != null && d.guestsRules!.trim().isNotEmpty) q.add(MapEntry('الزوار', d.guestsRules!));
-      if (d.petsRules != null && d.petsRules!.trim().isNotEmpty) q.add(MapEntry('الحيوانات الأليفة', d.petsRules!));
-      if (d.cleaningRules != null && d.cleaningRules!.trim().isNotEmpty) q.add(MapEntry('النظافة', d.cleaningRules!));
+      final smokingStr = _clean(d.smokingRules);
+      if (smokingStr.isNotEmpty) q.add(MapEntry('التدخين', smokingStr));
+      final quietStr = _clean(d.quietnessRules);
+      if (quietStr.isNotEmpty) q.add(MapEntry('الهدوء', quietStr));
+      final guestsStr = _clean(d.guestsRules);
+      if (guestsStr.isNotEmpty) q.add(MapEntry('الزوار', guestsStr));
+      final petsStr = _clean(d.petsRules);
+      if (petsStr.isNotEmpty) q.add(MapEntry('الحيوانات الأليفة', petsStr));
+      final cleanStr = _clean(d.cleaningRules);
+      if (cleanStr.isNotEmpty) q.add(MapEntry('النظافة', cleanStr));
     }
 
     if (ad.attributes != null) {
