@@ -113,6 +113,13 @@ class _PremiumChatScreenState extends State<PremiumChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_resolvedUserName == 'LOADING_NAME') {
+      return Scaffold(
+        appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return BlocProvider(
       create: (context) => ChatBloc(
         repository: FirebaseChatRepository(),

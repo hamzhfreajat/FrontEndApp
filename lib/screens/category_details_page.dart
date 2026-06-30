@@ -3114,6 +3114,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى تسجيل الدخول أولاً')));
                              return;
                            }
+                           if (currentUserId == ad.userId.toString()) {
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
+                             return;
+                           }
                            Navigator.push(context, MaterialPageRoute(
                              builder: (_) => PremiumChatScreen(
                                adId: ad.id.toString(),
@@ -3124,7 +3128,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                currentUserId: currentUserId,
                                currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
                                otherUserId: ad.userId.toString(),
-                               otherUserName: ad.ownerName ?? 'مستخدم',
+                               otherUserName: ad.ownerName,
                                otherUserPhone: ad.phoneNumber,
                              )
                            ));

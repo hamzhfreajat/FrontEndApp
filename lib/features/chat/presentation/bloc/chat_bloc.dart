@@ -102,7 +102,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         .getChatMessages(event.adId, currentUserId, otherUserId)
         .listen((messages) {
       add(_UpdateChatMessages(messages, event.adId));
-      repository.markChatAsRead(event.adId, currentUserId, otherUserId);
+      repository.markChatAsRead(
+        event.adId, 
+        currentUserId, 
+        otherUserId,
+        currentUserName: currentUserName,
+        otherUserName: otherUserName,
+      );
     }, onError: (error) {
       add(_ChatStreamError("Failed to load messages: $error"));
     });

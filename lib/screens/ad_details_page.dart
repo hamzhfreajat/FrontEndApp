@@ -705,7 +705,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
     padding: const EdgeInsets.all(8),
     child: ClipRRect(borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Container(color: Colors.white.withOpacity(0.2),
+        child: Container(color: Colors.black.withOpacity(0.4),
           child: IconButton(icon: Icon(icon, color: color, size: 20), onPressed: onTap)))),
   );
 
@@ -1670,6 +1670,11 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                   final currentUserId = authProvider.userData?['sub']?.toString();
                   if (currentUserId == null) {
                     _snack('يرجى تسجيل الدخول أولاً');
+                    return;
+                  }
+                  
+                  if (currentUserId == ad.userId.toString()) {
+                    _snack('لا يمكنك بدء محادثة مع نفسك');
                     return;
                   }
 

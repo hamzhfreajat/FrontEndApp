@@ -1551,7 +1551,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                     icon: Icons.landscape_rounded),
               if (!widget.selectedLeafCategory.name.contains('ستوديو') && !widget.selectedLeafCategory.name.contains('استوديو'))
                 _buildRadioChips('عدد الغرف', 'bedrooms',
-                    ['ستوديو', '1', '2', '3', '4', '5', '+6'],
+                    ['1', '2', '3', '4', '5', '+6'],
                     icon: Icons.bed_rounded),
               _buildRadioChips(
                   'عدد الحمامات', 'bathrooms', ['1', '2', '3', '4', '5', '+6'],

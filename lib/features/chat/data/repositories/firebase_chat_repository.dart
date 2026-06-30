@@ -231,17 +231,33 @@ class FirebaseChatRepository {
     }
   }
 
-  Future<void> markChatAsRead(String adId, String currentUserId, String otherUserId) async {
+  Future<void> markChatAsRead(String adId, String currentUserId, String otherUserId, {String? currentUserName, String? otherUserName}) async {
     final chatId = _getChatId(adId, currentUserId, otherUserId);
     final batch = _firestore.batch();
     
     final chatRef = _firestore.collection('chats').doc(chatId);
+
+    final currentUserData = <String, dynamic>{
+      'unreadCount': 0,
+    };
+    if (currentUserName != null && currentUserName.isNotEmpty && currentUserName != 'مستخدم') {
+      currentUserData['name'] = currentUserName;
+    }
+
+    final otherUserData = <String, dynamic>{};
+    if (otherUserName != null && otherUserName.isNotEmpty && otherUserName != 'مستخدم' && otherUserName != 'LOADING_NAME') {
+      otherUserData['name'] = otherUserName;
+    }
+
+    final usersMap = <String, dynamic>{
+      currentUserId: currentUserData,
+    };
+    if (otherUserData.isNotEmpty) {
+      usersMap[otherUserId] = otherUserData;
+    }
+
     batch.set(chatRef, {
-      'users': {
-        currentUserId: {
-          'unreadCount': 0,
-        }
-      }
+      'users': usersMap
     }, SetOptions(merge: true));
 
     // Mark messages sent by the other user as read

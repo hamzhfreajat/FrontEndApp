@@ -810,6 +810,10 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى تسجيل الدخول أولاً')));
               return;
             }
+            if (currentUserId == widget.ad.userId.toString()) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
+              return;
+            }
             Navigator.push(context, MaterialPageRoute(
               builder: (_) => PremiumChatScreen(
                 adId: widget.ad.id.toString(),
@@ -820,6 +824,8 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                 currentUserId: currentUserId,
                 currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
                 otherUserId: widget.ad.userId.toString(),
+                otherUserName: widget.ad.ownerName,
+                otherUserPhone: widget.ad.phoneNumber,
               )
             ));
           }

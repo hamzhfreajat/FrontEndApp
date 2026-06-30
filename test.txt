@@ -1,0 +1,2 @@
+1552: if (!widget.selectedLeafCategory.name.contains('ستوديو') && !widget.selectedLeafCategory.name.contains('استوديو'))
+1554: ['ستوديو', '1', '2', '3', '4', '5', '+6'],
