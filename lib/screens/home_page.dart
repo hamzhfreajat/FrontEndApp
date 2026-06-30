@@ -2028,39 +2028,6 @@ class __PromoBannerCarouselState extends State<_PromoBannerCarousel> {
                                       letterSpacing: 0.2,
                                     ),
                                   ),
-                                  const Spacer(),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(color: Theme.of(context).cardColor,
-                                      borderRadius: BorderRadius.circular(30),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: (Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black).withOpacity(0.1),
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 2),
-                                        )
-                                      ],
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        const Icon(
-                                          Icons.arrow_back_ios_new_rounded,
-                                          size: 10,
-                                          color: Color(0xFF1A73E8),
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          banner['subtitle'],
-                                          style: const TextStyle(
-                                            color: Color(0xFF1A73E8),
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
