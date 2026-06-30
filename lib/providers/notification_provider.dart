@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -220,12 +221,12 @@ class NotificationProvider with ChangeNotifier {
       if (token != null) {
         print('[FCM] Token: $token');
         // Send to backend
-        await ApiService().registerDeviceToken(token);
+        await ApiService().registerDeviceToken(token, deviceType: Platform.isIOS ? 'ios' : 'android');
       }
       
       // Listen for token refreshes
       messaging.onTokenRefresh.listen((newToken) {
-        ApiService().registerDeviceToken(newToken);
+        ApiService().registerDeviceToken(newToken, deviceType: Platform.isIOS ? 'ios' : 'android');
       });
     } catch (e) {
       print('[FCM] Error getting token: $e');
