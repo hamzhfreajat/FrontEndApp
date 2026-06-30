@@ -948,7 +948,17 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
       if (buildingAge == null && ageR != null) buildingAge = ageR.toString();
       
       var durR = ad.attributes!['rent_duration'] ?? dyn['rent_duration'];
-      if (rentDuration == null && durR != null) rentDuration = durR.toString();
+      if (rentDuration == null && durR != null) {
+        if (durR is List) {
+          rentDuration = durR.isEmpty ? null : durR.join('، ');
+        } else {
+          rentDuration = durR.toString();
+          if (rentDuration!.startsWith('[') && rentDuration!.endsWith(']')) {
+            rentDuration = rentDuration!.substring(1, rentDuration!.length - 1).trim();
+            if (rentDuration!.isEmpty) rentDuration = null;
+          }
+        }
+      }
       
       var areaR = ad.attributes!['area'] ?? dyn['area'];
       if (areaR != null) area = areaR.toString().replaceAll(RegExp(r'[^0-9]'), '');
@@ -1150,8 +1160,17 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
 
         for (var entry in dyn.entries) {
           final val = entry.value;
-          if (val != null && val is! List) {
-            String strVal = val.toString().trim();
+          if (val != null) {
+            String strVal;
+            if (val is List) {
+              if (val.isEmpty) continue;
+              strVal = val.join('، ');
+            } else {
+              strVal = val.toString().trim();
+              if (strVal.startsWith('[') && strVal.endsWith(']')) {
+                strVal = strVal.substring(1, strVal.length - 1).trim();
+              }
+            }
             if (strVal.toLowerCase() == 'true') strVal = 'نعم';
             if (strVal.toLowerCase() == 'false') strVal = 'لا';
             if (strVal.isNotEmpty && strVal != 'null' && strVal != '0' && strVal != '0.0' && strVal != '0.00' && strVal != 'none' && strVal != 'غير محدد') {
