@@ -357,6 +357,7 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
           ),
         ),
       ),
+      ),
     );
   }
 
