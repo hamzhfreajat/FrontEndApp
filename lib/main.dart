@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -111,6 +112,21 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    AnalyticsEngine().logError(
+      error: details.exceptionAsString(),
+      stackTrace: details.stack?.toString() ?? '',
+    );
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AnalyticsEngine().logError(
+      error: error.toString(),
+      stackTrace: stack.toString(),
+    );
+    return true;
+  };
   
   AnalyticsEngine().initialize();
   

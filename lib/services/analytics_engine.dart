@@ -159,4 +159,12 @@ class AnalyticsEngine with WidgetsBindingObserver {
     });
     _lastScreenName = screenName;
   }
+
+  void logError({required String error, required String stackTrace}) {
+    _enqueueEvent('error', {
+      'error_message': error,
+      'stack_trace': stackTrace,
+      if (_lastScreenName != null) 'screen_name': _lastScreenName,
+    });
+  }
 }
