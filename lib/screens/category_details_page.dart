@@ -437,6 +437,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     if (!mounted) return;
     setState(() => _isLoadingMore = true);
     try {
+      final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('كل المدن') || _locationsFilter!.contains('كل الأردن'))) ? null : _locationsFilter;
+
       final fetchedAds = await _apiService.fetchAds(
         categoryId: widget.category.id, 
         tags: _selectedTags.isNotEmpty ? _selectedTags : null, 
@@ -446,7 +448,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         sortBy: _sortBy,
         minPrice: _minPrice,
         maxPrice: _maxPrice,
-        locations: _locationsFilter,
+        locations: cleanedLocations,
         isHot: _isHot,
         userLat: _sortBy == 'nearest' ? _userLat : null,
         userLng: _sortBy == 'nearest' ? _userLng : null,
