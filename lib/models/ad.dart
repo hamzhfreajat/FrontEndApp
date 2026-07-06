@@ -181,6 +181,17 @@ class Ad {
       lastRepublishedAt: json['last_republished_at'] != null ? DateTime.tryParse(json['last_republished_at'].toString()) : null,
     );
   }
+  String get displayLocation {
+    final city = attributes?['city']?.toString();
+    final region = attributes?['region']?.toString();
+    if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
+      return '$region، $city';
+    } else if (region != null && region.isNotEmpty) {
+      return region;
+    } else {
+      return location;
+    }
+  }
 
   Map<String, dynamic> toJson() {
     return {

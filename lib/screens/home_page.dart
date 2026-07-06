@@ -979,7 +979,7 @@ class _PremiumHorizontalListState extends State<_PremiumHorizontalList> {
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            ad.location.isNotEmpty ? ad.location : 'عمان',
+                            ad.displayLocation.isNotEmpty ? ad.displayLocation : 'عمان',
                             style: TextStyle(color: Colors.grey.shade600, fontSize: 10, fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -1694,7 +1694,7 @@ class _AdCard extends StatelessWidget {
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 80),
                           child: Text(
-                            ad.location.split('،').first, 
+                            ad.displayLocation.split('،').first, 
                             style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600, fontWeight: FontWeight.w600),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

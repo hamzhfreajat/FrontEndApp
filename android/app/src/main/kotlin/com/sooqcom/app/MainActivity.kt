@@ -46,6 +46,27 @@ class MainActivity: FlutterActivity() {
                 } catch (e: Exception) {
                     result.error("APP_NOT_INSTALLED", "App not installed or failed to launch", null)
                 }
+            } else if (call.method == "shareTextToApp") {
+                try {
+                    val text = call.argument<String>("text")
+                    val packageId = call.argument<String>("packageId")
+                    
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.type = "text/plain"
+                    
+                    if (packageId != null && packageId.isNotEmpty()) {
+                        intent.setPackage(packageId)
+                    }
+                    
+                    if (text != null) {
+                        intent.putExtra(Intent.EXTRA_TEXT, text)
+                    }
+                    
+                    startActivity(intent)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("APP_NOT_INSTALLED", "App not installed or failed to launch", null)
+                }
             } else {
                 result.notImplemented()
             }

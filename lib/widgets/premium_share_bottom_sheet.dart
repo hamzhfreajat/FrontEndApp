@@ -53,7 +53,6 @@ class PremiumShareBottomSheet extends StatelessWidget {
       return null;
     }
   }
-
   Future<String?> _createCollage(List<String> urls) async {
     if (urls.isEmpty) return null;
     
@@ -127,51 +126,23 @@ class PremiumShareBottomSheet extends StatelessWidget {
     Share.share(_shareText); // Share text only to allow Messenger/Insta to parse OG tags
   }
 
-  void _shareDirectToApp(BuildContext context, String packageId) async {
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      showDialog(
-        context: context, 
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    String? imagePath;
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      imagePath = await _createCollage(previewImages!);
-    } else {
-      imagePath = await _getLocalImagePath();
-    }
-
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      Navigator.pop(context); // Close loading dialog
-    }
+  void _shareTextToApp(BuildContext context, String packageId) async {
     Navigator.pop(context); // Close bottom sheet
-
-    // Some apps (like Messenger) drop the text when an image is attached.
-    // We copy the text to clipboard just in case they want to paste it.
-    Clipboard.setData(ClipboardData(text: _shareText));
-    _showSnack(context, 'تم نسخ النص احتياطياً للصقه');
-
-    if (Platform.isAndroid && imagePath != null) {
+    
+    if (Platform.isAndroid) {
       try {
-        await _channel.invokeMethod('shareImageToApp', {
+        await _channel.invokeMethod('shareTextToApp', {
           'text': _shareText,
-          'imagePath': imagePath,
           'packageId': packageId,
         });
-        return; // Success! It bypassed the share menu and went to the target app!
+        return;
       } catch (e) {
         // Fallback below
       }
     }
-
+    
     // iOS or generic fallback
-    if (imagePath != null) {
-      await Share.shareXFiles([XFile(imagePath, mimeType: 'image/jpeg')], text: _shareText);
-    } else {
-      Share.share(_shareText);
-    }
+    Share.share(_shareText);
   }
 
   void _shareDirectInstagram(BuildContext context) async {
@@ -197,37 +168,8 @@ class PremiumShareBottomSheet extends StatelessWidget {
   }
 
   void _shareNative(BuildContext context) async {
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      showDialog(
-        context: context, 
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    String? imagePath;
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      imagePath = await _createCollage(previewImages!);
-    } else {
-      imagePath = await _getLocalImagePath();
-    }
-
-    if (previewImages != null && previewImages!.isNotEmpty) {
-      Navigator.pop(context); // Close loading dialog
-    }
-    
-    // Some apps like Messenger/Instagram ignore text when sharing an image.
-    // We copy the text to clipboard so the user can easily paste it.
-    Clipboard.setData(ClipboardData(text: _shareText));
-    _showSnack(context, 'تم نسخ النص احتياطياً للصقه في المحادثة');
-    
     Navigator.pop(context); // Close bottom sheet
-
-    if (imagePath != null) {
-      await Share.shareXFiles([XFile(imagePath, mimeType: 'image/jpeg')], text: _shareText);
-    } else {
-      Share.share(_shareText);
-    }
+    Share.share(_shareText);
   }
 
   void _showSnack(BuildContext context, String msg) {
@@ -360,21 +302,21 @@ class PremiumShareBottomSheet extends StatelessWidget {
                         iconWidget: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 28),
                         color: const Color(0xFF25D366),
                         label: 'واتساب',
-                        onTap: () => _shareDirectToApp(context, 'com.whatsapp'),
+                        onTap: () => _shareTextToApp(context, 'com.whatsapp'),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.instagram, color: Color(0xFFE4405F), size: 28),
                         color: const Color(0xFFE4405F),
                         label: 'انستغرام',
-                        onTap: () => _shareDirectToApp(context, 'com.instagram.android'),
+                        onTap: () => _shareTextToApp(context, 'com.instagram.android'),
                       ),
                       _buildSocialIconButton(
                         context,
                         iconWidget: const FaIcon(FontAwesomeIcons.facebookMessenger, color: Color(0xFF00B2FF), size: 28),
                         color: const Color(0xFF00B2FF),
                         label: 'ماسنجر',
-                        onTap: () => _shareDirectToApp(context, 'com.facebook.orca'),
+                        onTap: () => _shareTextToApp(context, 'com.facebook.orca'),
                       ),
                       _buildSocialIconButton(
                         context,
