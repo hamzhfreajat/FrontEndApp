@@ -361,6 +361,8 @@ class ApiService {
     }
   }
 
+  static final Set<int> _deletedAdIds = {};
+
   Future<List<Ad>> fetchAds({
     String? section, 
     int? categoryId, 
@@ -414,7 +416,9 @@ class ApiService {
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((ad) => Ad.fromJson(ad)).toList();
+      var ads = jsonResponse.map((ad) => Ad.fromJson(ad)).toList();
+      ads.removeWhere((ad) => _deletedAdIds.contains(ad.id));
+      return ads;
     } else {
       throw Exception('Failed to load ads');
     }
@@ -696,6 +700,10 @@ class ApiService {
     ).timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) {
       throw Exception('Failed to perform bulk action');
+    }
+    
+    if (action == 'delete') {
+      _deletedAdIds.addAll(adIds);
     }
   }
 
