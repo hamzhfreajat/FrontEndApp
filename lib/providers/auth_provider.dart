@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
+import '../services/analytics_engine.dart';
 
 class AuthProvider with ChangeNotifier {
   String? _token;
@@ -43,6 +44,7 @@ class AuthProvider with ChangeNotifier {
     await prefs.remove('jwt_token');
     _token = null;
     _userData = null;
+    AnalyticsEngine().setUserId('guest');
     notifyListeners();
   }
 
@@ -69,6 +71,10 @@ class AuthProvider with ChangeNotifier {
         _userData = {...?_userData, ...fullProfile};
       } catch (e) {
         print('Failed to fetch full profile from API: $e');
+      }
+      
+      if (_userData != null && _userData!['id'] != null) {
+        AnalyticsEngine().setUserId(_userData!['id'].toString());
       }
       notifyListeners();
     } catch (e) {
