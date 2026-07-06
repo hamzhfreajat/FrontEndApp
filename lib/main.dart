@@ -112,6 +112,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
   
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);

@@ -71,6 +71,7 @@ flutter:
     - assets/images/
     - assets/images/real_estate/
     - assets/sounds/
+    - assets/fonts/
 
 
 flutter_icons:

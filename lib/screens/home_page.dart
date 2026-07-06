@@ -157,6 +157,7 @@ class _HomePageState extends State<HomePage> {
       _refreshKey++;
     });
     await Provider.of<AppProvider>(context, listen: false).refreshAll();
+    if (!mounted) return;
     await Provider.of<SavedSearchProvider>(context, listen: false).refreshSearches();
   }
 
@@ -370,10 +371,6 @@ class _StoriesRow extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           color: Colors.black12,
-          image: DecorationImage(
-            image: CachedNetworkImageProvider(story.imageUrl),
-            fit: BoxFit.cover,
-          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -385,6 +382,15 @@ class _StoriesRow extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: CachedNetworkImage(
+                imageUrl: story.imageUrl,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => const Icon(Icons.error_outline, color: Colors.grey),
+                placeholder: (context, url) => Container(color: Colors.black12),
+              ),
+            ),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
@@ -878,9 +884,11 @@ class _PremiumHorizontalListState extends State<_PremiumHorizontalList> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image(
-                      image: CachedNetworkImageProvider(imageUrl),
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
+                      errorWidget: (context, url, error) => const Icon(Icons.broken_image, color: Colors.grey),
+                      placeholder: (context, url) => Container(color: Colors.black12),
                     ),
                     Positioned(
                       top: 0, left: 0, right: 0,
