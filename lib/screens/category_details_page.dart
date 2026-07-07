@@ -29,6 +29,7 @@ import 'add_ad_images.dart';
 import 'root_screen.dart';
 import '../widgets/premium_real_estate_card.dart';
 import '../widgets/emoji_category_icon.dart';
+import '../widgets/inline_banner_ad.dart';
 import '../widgets/premium_filter_bottom_sheet.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
@@ -532,6 +533,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   _buildHeroHeader(brandColor),
                   _buildSearchBar(brandColor),
                   _buildSleekSubCategories(brandColor),
+                  const InlineBannerAd(),
                   _buildMinimalTags(brandColor),
                   if (_ads.isNotEmpty) ...[
                     const SizedBox(height: 8),
