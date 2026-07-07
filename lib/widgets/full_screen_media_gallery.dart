@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'premium_video_player.dart';
+import 'premium_share_bottom_sheet.dart';
 
 class FullScreenMediaGallery extends StatefulWidget {
   final Ad ad;
@@ -255,9 +256,16 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
                               ],
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.more_vert, color: Colors.white),
-                            onPressed: () {},
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Text(
+                              '${_currentIndex + 1} / ${_mediaItems.length}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -309,7 +317,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 _buildActionButton(Icons.share_outlined, () {
-                                  // Implement share
+                                  PremiumShareBottomSheet.show(context, widget.ad);
                                 }),
                                 if (widget.showDetailsButton) _buildDetailsButton(),
                                 _buildActionButton(
