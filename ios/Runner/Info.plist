@@ -83,6 +83,8 @@
 	<string>We need microphone access to allow you to record audio and video for your ads. نحتاج إلى صلاحية الميكروفون لتتمكن من تسجيل مقاطع الصوت والفيديو لإعلاناتك.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need location access to show you relevant local ads and listings nearby. نحتاج إلى صلاحية الموقع لعرض الإعلانات المحلية القريبة منك.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need location access to show you relevant local ads and listings nearby. نحتاج إلى صلاحية الموقع لعرض الإعلانات المحلية القريبة منك.</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tel</string>
