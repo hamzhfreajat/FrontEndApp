@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'root_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'login_page.dart';
+
 import '../providers/notification_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -49,10 +49,10 @@ class _SplashScreenState extends State<SplashScreen> {
           }
         }
       }
-      nextScreen = const RootScreen();
-    } else {
-      nextScreen = const LoginPage();
     }
+    
+    // Apple App Review (Guideline 5.1.1): Allow guests to browse without forcing login
+    nextScreen = const RootScreen();
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

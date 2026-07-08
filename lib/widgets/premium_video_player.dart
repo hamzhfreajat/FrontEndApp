@@ -33,15 +33,17 @@ class _PremiumVideoPlayerState extends State<PremiumVideoPlayer> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl))
-      ..initialize().then((_) {
+    _controller = VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoUrl),
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    )..initialize().then((_) {
         if (mounted) {
           setState(() {
             _initialized = true;
           });
           _controller.setLooping(true);
           _controller.setVolume(GlobalVideoSettings.isGlobalMuted.value ? 0.0 : 1.0);
-          _controller.play();
+          // Removed immediate play() - let VisibilityDetector handle it
         }
       });
       

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'premium_video_player.dart';
 import 'premium_share_bottom_sheet.dart';
+import 'premium_login_bottom_sheet.dart';
 
 class FullScreenMediaGallery extends StatefulWidget {
   final Ad ad;
@@ -72,6 +73,16 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
   }
 
   Future<void> _toggleFavorite() async {
+    final currentUserId = context.read<AuthProvider>().userData?['sub']?.toString();
+    if (currentUserId == null || currentUserId.isEmpty) {
+      PremiumLoginBottomSheet.show(
+        context, 
+        subtitle: 'يرجى تسجيل الدخول لإضافة الإعلان للمفضلة',
+        onLoginSuccess: () => _toggleFavorite(),
+      );
+      return;
+    }
+
     final originalState = _isFavorite;
     setState(() => _isFavorite = !_isFavorite);
 

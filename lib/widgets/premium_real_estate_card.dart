@@ -4,6 +4,7 @@ import '../models/ad.dart';
 import '../services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
+import 'premium_login_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'premium_video_player.dart';
@@ -75,6 +76,17 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
 
   Future<void> _toggleFavorite() async {
     if (widget.isPreview) return;
+    
+    final currentUserId = context.read<AuthProvider>().userData?['sub']?.toString();
+    if (currentUserId == null || currentUserId.isEmpty) {
+      PremiumLoginBottomSheet.show(
+        context, 
+        subtitle: 'يرجى تسجيل الدخول لإضافة الإعلان للمفضلة',
+        onLoginSuccess: () => _toggleFavorite(),
+      );
+      return;
+    }
+
     final originalState = _isFavorite;
     setState(() => _isFavorite = !_isFavorite);
 
@@ -806,8 +818,12 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
           onTap: () {
             final authProvider = Provider.of<AuthProvider>(context, listen: false);
             final currentUserId = authProvider.userData?['sub']?.toString();
-            if (currentUserId == null) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى تسجيل الدخول أولاً')));
+            if (currentUserId == null || currentUserId.isEmpty) {
+              PremiumLoginBottomSheet.show(
+                context, 
+                subtitle: 'يرجى تسجيل الدخول لبدء محادثة',
+                onLoginSuccess: () {},
+              );
               return;
             }
             if (currentUserId == widget.ad.userId.toString()) {

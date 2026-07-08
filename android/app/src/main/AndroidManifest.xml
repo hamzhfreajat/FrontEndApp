@@ -11,10 +11,10 @@
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true">
         
-        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3347511713 -->
+        <!-- AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-2993417564924380~9193738974"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

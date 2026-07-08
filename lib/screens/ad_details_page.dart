@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../widgets/premium_login_bottom_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
@@ -194,6 +195,17 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
   }
 
   Future<void> _toggleFavorite() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    if (!auth.isAuthenticated) {
+      PremiumLoginBottomSheet.show(
+        context,
+        title: 'أضف للمفضلة',
+        subtitle: 'سجل الدخول لإضافة هذا الإعلان إلى مفضلتك والرجوع إليه لاحقاً',
+        onLoginSuccess: () => _toggleFavorite(), // Retry after login
+      );
+      return;
+    }
+    
     if (widget.isPreview) {
       _snack('هذه الميزة غير متاحة في وضع المعاينة');
       return;
@@ -1681,9 +1693,19 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               child: GestureDetector(
                 onTap: () {
                   final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  if (!authProvider.isAuthenticated) {
+                    PremiumLoginBottomSheet.show(
+                      context,
+                      title: 'دردشة',
+                      subtitle: 'سجل الدخول للدردشة مع البائع داخل التطبيق بأمان',
+                      onLoginSuccess: () {}, // Handled by user clicking again
+                    );
+                    return;
+                  }
+                  
                   final currentUserId = authProvider.userData?['sub']?.toString();
                   if (currentUserId == null) {
-                    _snack('يرجى تسجيل الدخول أولاً');
+                    _snack('حدث خطأ في معلومات الحساب');
                     return;
                   }
                   

@@ -7,7 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'screens/root_screen.dart';
 import 'screens/splash_screen.dart';
-import 'screens/login_page.dart';
+
 import 'providers/app_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/notification_provider.dart';
@@ -265,6 +265,21 @@ class OpenSooqApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         cardColor: Colors.white,
         scaffoldBackgroundColor: const Color(0xFFF3F4F9),
+        snackBarTheme: SnackBarThemeData(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: const Color(0xFF1E293B), // Dark slate premium color
+          contentTextStyle: GoogleFonts.tajawal(
+            color: Colors.white,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          elevation: 8,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          actionTextColor: const Color(0xFF3B82F6),
+        ),
         textTheme: GoogleFonts.tajawalTextTheme(
           Theme.of(context).textTheme,
         ),

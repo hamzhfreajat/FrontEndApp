@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart' show navigatorKey;
 import '../providers/auth_provider.dart';
-import '../screens/login_page.dart';
+
 
 class AuthInterceptingClient extends http.BaseClient {
   final http.Client _inner = http.Client();
@@ -29,11 +29,6 @@ class AuthInterceptingClient extends http.BaseClient {
       final context = navigatorKey.currentContext;
       if (context != null) {
         Provider.of<AuthProvider>(context, listen: false).logout();
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
-          (route) => false,
-        );
       }
     }
     return response;

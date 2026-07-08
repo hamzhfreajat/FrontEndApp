@@ -4,7 +4,7 @@ import '../../../../../providers/settings_provider.dart';
 import '../../../../../l10n/app_localizations.dart';
 import '../../../../../providers/auth_provider.dart';
 import '../../../../../screens/root_screen.dart';
-import '../../../../../screens/login_page.dart';
+import '../../../../../screens/root_screen.dart';
 import '../../../../chat/presentation/screens/premium_chat_screen.dart';
 import '../../../../../services/api_service.dart';
 
@@ -185,7 +185,7 @@ class SettingsSection extends StatelessWidget {
                   if (!context.mounted) return;
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                    MaterialPageRoute(builder: (_) => const RootScreen()),
                     (route) => false,
                   );
                 }),
@@ -249,7 +249,7 @@ class SettingsSection extends StatelessWidget {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const LoginPage()),
+          MaterialPageRoute(builder: (_) => const RootScreen()),
           (route) => false,
         );
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم حذف الحساب بنجاح')));

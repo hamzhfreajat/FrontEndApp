@@ -14,8 +14,8 @@ class _InlineBannerAdState extends State<InlineBannerAd> {
   bool _isLoaded = false;
 
   final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-3940256099942544/2934735716';
+      ? 'ca-app-pub-2993417564924380/9946593618' // Real Android Ad Unit ID
+      : 'ca-app-pub-3940256099942544/2934735716'; // Test iOS Ad Unit ID
 
   @override
   void initState() {

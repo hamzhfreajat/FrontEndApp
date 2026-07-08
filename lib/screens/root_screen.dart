@@ -30,6 +30,8 @@ import 'package:upgrader/upgrader.dart';
 import 'ad_details_page.dart';
 import 'category_details_page.dart';
 import '../models/category.dart';
+import '../widgets/premium_login_bottom_sheet.dart';
+import '../widgets/guest_prompt_widget.dart';
 
 class RootScreen extends StatefulWidget {
   final int initialIndex;
@@ -211,6 +213,16 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                     return GestureDetector(
                       onTap: () {
                         AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_saved_ads', location: 'root_screen');
+                        final auth = Provider.of<AuthProvider>(context, listen: false);
+                        if (!auth.isAuthenticated) {
+                          PremiumLoginBottomSheet.show(
+                            context,
+                            title: 'الإعلانات المحفوظة',
+                            subtitle: 'سجل الدخول للوصول إلى إعلاناتك المحفوظة',
+                            onLoginSuccess: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage())),
+                          );
+                          return;
+                        }
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const SavedAdsPage()));
                       },
                       child: _headerBtnWithBadge(Icons.favorite_border_rounded, count > 0 ? count.toString() : null),
@@ -225,6 +237,16 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                     return GestureDetector(
                       onTap: () {
                         AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_notifications', location: 'root_screen');
+                        final auth = Provider.of<AuthProvider>(context, listen: false);
+                        if (!auth.isAuthenticated) {
+                          PremiumLoginBottomSheet.show(
+                            context,
+                            title: 'الإشعارات',
+                            subtitle: 'سجل الدخول لرؤية أحدث الإشعارات والتنبيهات',
+                            onLoginSuccess: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage())),
+                          );
+                          return;
+                        }
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsPage()));
                       },
                       child: _headerBtnWithBadge(
@@ -241,6 +263,15 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                     return GestureDetector(
                       onTap: () {
                         AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_inbox', location: 'root_screen');
+                        if (!authProvider.isAuthenticated) {
+                          PremiumLoginBottomSheet.show(
+                            context,
+                            title: 'الرسائل',
+                            subtitle: 'سجل الدخول للتواصل مع البائعين والمشترين',
+                            onLoginSuccess: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen())),
+                          );
+                          return;
+                        }
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
                       },
                       child: StreamBuilder<int>(
@@ -272,6 +303,16 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                       GestureDetector(
                         onTap: () {
                           AnalyticsEngine().logButtonTapped(buttonName: 'bottom_nav_add_ad', location: 'root_screen');
+                          final auth = Provider.of<AuthProvider>(context, listen: false);
+                          if (!auth.isAuthenticated) {
+                            PremiumLoginBottomSheet.show(
+                              context,
+                              title: 'إضافة إعلان',
+                              subtitle: 'سجل الدخول لتتمكن من إضافة إعلاناتك الخاصة',
+                              onLoginSuccess: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage())),
+                            );
+                            return;
+                          }
                           Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
                         },
                         child: Container(
@@ -339,20 +380,42 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
               ),
             ),
           ],
-          body: TabBarView(
-            controller: _tabController,
-            children: [
-              const HomePage(),
-              const CategoriesPage(),
-              BlocProvider(
-                create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                child: const MyAdsScreen(),
-              ),
-              BlocProvider(
-                create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl()),
-                child: const PrivateProfileScreen(),
-              ),
-            ],
+          body: Consumer<AuthProvider>(
+            builder: (context, auth, child) {
+              return TabBarView(
+                controller: _tabController,
+                children: [
+                  const HomePage(),
+                  const CategoriesPage(),
+                  if (auth.isAuthenticated)
+                    BlocProvider(
+                      create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
+                      child: const MyAdsScreen(),
+                    )
+                  else
+                    GuestPromptWidget(
+                      icon: Icons.article_rounded,
+                      title: 'إعلاناتي',
+                      subtitle: 'سجل الدخول لعرض وإدارة إعلاناتك بكل سهولة',
+                      onLoginSuccess: () {
+                        // After login, auth provider updates and the view rebuilds automatically
+                      },
+                    ),
+                  if (auth.isAuthenticated)
+                    BlocProvider(
+                      create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl()),
+                      child: const PrivateProfileScreen(),
+                    )
+                  else
+                    GuestPromptWidget(
+                      icon: Icons.person_rounded,
+                      title: 'حسابي',
+                      subtitle: 'سجل الدخول للوصول إلى تفاصيل حسابك وإعداداتك',
+                      onLoginSuccess: () {},
+                    ),
+                ],
+              );
+            },
           ),
           ),
         ),

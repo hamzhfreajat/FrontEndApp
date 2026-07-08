@@ -8,11 +8,13 @@ import '../models/saved_search.dart';
 import '../services/api_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:geolocator/geolocator.dart';
+import '../widgets/premium_login_bottom_sheet.dart';
 import '../services/analytics_engine.dart';
 
 import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import '../features/chat/presentation/screens/premium_inbox_screen.dart';
 import '../features/chat/data/repositories/firebase_chat_repository.dart';
+import '../widgets/premium_login_bottom_sheet.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/premium_video_player.dart';
 import 'package:provider/provider.dart';
@@ -533,7 +535,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   _buildHeroHeader(brandColor),
                   _buildSearchBar(brandColor),
                   _buildSleekSubCategories(brandColor),
-                  const InlineBannerAd(),
                   _buildMinimalTags(brandColor),
                   if (_ads.isNotEmpty) ...[
                     const SizedBox(height: 8),
@@ -641,7 +642,20 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   Widget _buildPremiumAddButton(BuildContext context, Color brandColor) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage())),
+      onTap: () {
+        final currentUserId = context.read<AuthProvider>().userData?['sub']?.toString();
+        if (currentUserId == null || currentUserId.isEmpty) {
+          PremiumLoginBottomSheet.show(
+            context, 
+            subtitle: 'يرجى تسجيل الدخول لإضافة إعلان جديد',
+            onLoginSuccess: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
+            },
+          );
+          return;
+        }
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
@@ -721,8 +735,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               icon: const Icon(Icons.support_agent_rounded, color: Colors.black87, size: 24),
               onPressed: () {
                 if (currentUserId.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('يرجى تسجيل الدخول أولاً'), backgroundColor: Colors.red),
+                  PremiumLoginBottomSheet.show(
+                    context, 
+                    subtitle: 'يرجى تسجيل الدخول للوصول لخدمة العملاء',
+                    onLoginSuccess: () {},
                   );
                   return;
                 }
@@ -756,6 +772,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     IconButton(
                       icon: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.black87, size: 24),
                       onPressed: () {
+                        if (currentUserId.isEmpty) {
+                          PremiumLoginBottomSheet.show(
+                            context, 
+                            subtitle: 'يرجى تسجيل الدخول لفتح الرسائل',
+                            onLoginSuccess: () {},
+                          );
+                          return;
+                        }
                         Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
                       },
                     ),
@@ -3114,8 +3138,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         onTap: () {
                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
                            final currentUserId = authProvider.userData?['sub']?.toString();
-                           if (currentUserId == null) {
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى تسجيل الدخول أولاً')));
+                           if (currentUserId == null || !authProvider.isAuthenticated) {
+                             PremiumLoginBottomSheet.show(context,
+                                 title: 'يرجى تسجيل الدخول أولاً',
+                                 subtitle: 'يجب أن تسجل دخولك لتتمكن من التواصل مع المعلن',
+                                 onLoginSuccess: () {
+                                   Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
+                                 });
                              return;
                            }
                            if (currentUserId == ad.userId.toString()) {
@@ -3156,24 +3185,44 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Icon(Icons.favorite_border, color: Colors.grey.shade600, size: 20),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Icon(Icons.favorite_border, color: Colors.grey.shade600, size: 20),
+                    StatefulBuilder(
+                      builder: (context, setLocalState) {
+                        return GestureDetector(
+                          onTap: () async {
+                            final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                            if (!authProvider.isAuthenticated) {
+                              PremiumLoginBottomSheet.show(context,
+                                title: 'يرجى تسجيل الدخول أولاً',
+                                subtitle: 'قم بتسجيل الدخول لحفظ الإعلان في المفضلة والرجوع إليه لاحقاً',
+                                onLoginSuccess: () {}
+                              );
+                              return;
+                            }
+                            final originalState = ad.isSaved;
+                            setLocalState(() => ad.isSaved = !originalState);
+                            try {
+                              final isNowSaved = await ApiService().toggleSaveAd(ad.id);
+                              if (isNowSaved != ad.isSaved) {
+                                setLocalState(() => ad.isSaved = isNowSaved);
+                              }
+                            } catch (e) {
+                              setLocalState(() => ad.isSaved = originalState);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء حفظ الإعلان')));
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: ad.isSaved ? Colors.red.shade50 : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: ad.isSaved ? Colors.red.shade200 : Colors.grey.shade200),
+                            ),
+                            child: Icon(ad.isSaved ? Icons.favorite : Icons.favorite_border, color: ad.isSaved ? Colors.redAccent : Colors.grey.shade600, size: 20),
+                          ),
+                        );
+                      }
                     ),
                     const SizedBox(width: 8),
                     GestureDetector(
