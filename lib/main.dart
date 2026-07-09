@@ -139,10 +139,14 @@ void main() async {
     statusBarBrightness: Brightness.light, // for iOS
   ));
   
-  HttpOverrides.global = MyHttpOverrides();
+  try {
+    HttpOverrides.global = MyHttpOverrides();
 
-  await Firebase.initializeApp();
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e, stack) {
+    print('CRITICAL ERROR DURING FIREBASE INIT: $e\n$stack');
+  }
 
   // Initialize the high importance channel for Android 8+
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
