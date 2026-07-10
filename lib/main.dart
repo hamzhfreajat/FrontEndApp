@@ -1,3 +1,4 @@
+import 'firebase_options.dart';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -43,7 +44,9 @@ class MyHttpOverrides extends HttpOverrides {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   print("Handling a background message: ${message.messageId}");
 
   if (message.data['type'] == 'chat_message') {
@@ -96,7 +99,9 @@ void main() async {
   try {
     HttpOverrides.global = MyHttpOverrides();
 
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   } catch (e, stack) {
     print('CRITICAL ERROR DURING FIREBASE INIT: $e\n$stack');
