@@ -62,52 +62,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         print("Failed to update message status to delivered: $e");
       }
     }
-
-    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    
-    final senderName = message.data['sender_name']?.toString() ?? 'مستخدم';
-    final adTitle = message.data['ad_title']?.toString();
-    final messageBody = message.data['body']?.toString() ?? '';
-    final messageTitle = message.data['title']?.toString() ?? 'رسالة جديدة';
-
-    AndroidNotificationDetails androidDetails;
-
-    if (adTitle != null && adTitle.isNotEmpty) {
-      final person = Person(name: senderName);
-      androidDetails = AndroidNotificationDetails(
-        'high_importance_channel',
-        'High Importance Notifications',
-        channelDescription: 'This channel is used for important notifications.',
-        icon: '@mipmap/ic_launcher',
-        priority: Priority.high,
-        importance: Importance.max,
-        styleInformation: MessagingStyleInformation(
-          person,
-          conversationTitle: adTitle,
-          groupConversation: true,
-          messages: [
-            Message(messageBody, DateTime.now(), person),
-          ],
-        ),
-      );
-    } else {
-      androidDetails = const AndroidNotificationDetails(
-        'high_importance_channel',
-        'High Importance Notifications',
-        channelDescription: 'This channel is used for important notifications.',
-        icon: '@mipmap/ic_launcher',
-        priority: Priority.high,
-        importance: Importance.max,
-      );
-    }
-
-    await flutterLocalNotificationsPlugin.show(
-      id: message.hashCode,
-      title: messageTitle,
-      body: messageBody,
-      notificationDetails: NotificationDetails(android: androidDetails),
-      payload: message.data['type']?.toString() ?? 'chat_message',
-    );
   }
 }
 
