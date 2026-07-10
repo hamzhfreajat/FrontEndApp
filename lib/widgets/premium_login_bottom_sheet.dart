@@ -10,6 +10,7 @@ import '../services/analytics_engine.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../providers/notification_provider.dart';
 
 class PremiumLoginBottomSheet extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -50,9 +51,21 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
 
   Future<void> _handleSuccess(String token) async {
     if (!mounted) return;
-    await Provider.of<AuthProvider>(context, listen: false).login(token);
+    
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    await auth.login(token);
     
     if (mounted) {
+      final userId = auth.userData?['sub'];
+      if (userId != null) {
+        final uid = int.tryParse(userId.toString());
+        if (uid != null) {
+          final notifProvider = Provider.of<NotificationProvider>(context, listen: false);
+          notifProvider.connect(uid);
+          notifProvider.loadUnreadCount();
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('تم تسجيل الدخول بنجاح!', style: TextStyle(fontFamily: 'Cairo')),
