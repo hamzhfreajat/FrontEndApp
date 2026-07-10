@@ -47,7 +47,11 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
   bool _isLoadingApple = false;
   String? _errorMessage;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  late final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: Platform.isIOS ? '683492643202-6c3dpratbgg0ec33ujmh4b66ar969ni4.apps.googleusercontent.com' : null,
+    serverClientId: '683492643202-gaki00v62u58p3gh84vjavkdst9c36sb.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
 
   Future<void> _handleSuccess(String token) async {
     if (!mounted) return;
