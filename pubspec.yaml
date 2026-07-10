@@ -2,7 +2,7 @@ name: classifieds_frontend
 description: A new Flutter project for Multi-vendor Classifieds App.
 
 publish_to: 'none'
-version: 1.0.9+15
+version: 1.0.9+16
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -73,6 +73,16 @@ flutter:
     - assets/images/real_estate/
     - assets/sounds/
     - assets/fonts/
+
+  fonts:
+    - family: Cairo
+      fonts:
+        - asset: assets/fonts/Cairo-Regular.ttf
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
 
 
 flutter_icons:
