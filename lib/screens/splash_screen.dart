@@ -106,12 +106,12 @@ class _SplashScreenState extends State<SplashScreen> {
               duration: const Duration(milliseconds: 800),
               child: Text(
                 'SOOQCOM',
-                style: GoogleFonts.montserrat(
-                  color: const Color(0xFF1A73E8),
+                style: const TextStyle(
+                  fontFamily: 'Montserrat',
+                  color: Color(0xFF1A73E8),
                   fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  letterSpacing: 6.0,
-                  height: 1.2,
+                  fontSize: 14,
+                  letterSpacing: 3.0,
                 ),
               ),
             ),

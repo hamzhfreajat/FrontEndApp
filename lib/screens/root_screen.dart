@@ -189,7 +189,7 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                           ),
                           Text('SOOQCOM',
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.montserrat(color: const Color(0xFF1A73E8), fontWeight: FontWeight.w800, fontSize: 10, letterSpacing: 2.0, height: 1.1),
+                            style: const TextStyle(fontFamily: 'Montserrat', color: Color(0xFF1A73E8), fontWeight: FontWeight.w800, fontSize: 10, letterSpacing: 2.0, height: 1.1),
                           ),
                         ],
                       ),
