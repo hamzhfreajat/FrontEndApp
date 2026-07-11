@@ -66,6 +66,12 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearUserData() {
+    metrics = null;
+    recentlyViewedAds = [];
+    notifyListeners();
+  }
+
   Future<void> refreshAll() async {
     _isLoading = true;
     notifyListeners();

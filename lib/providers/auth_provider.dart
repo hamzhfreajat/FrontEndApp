@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../services/analytics_engine.dart';
+import 'package:provider/provider.dart';
+import 'app_provider.dart';
+import 'notification_provider.dart';
+import 'saved_search_provider.dart';
 
 class AuthProvider with ChangeNotifier {
   String? _token;
@@ -39,12 +43,22 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> logout() async {
+  Future<void> logout([BuildContext? context]) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt_token');
     _token = null;
     _userData = null;
     AnalyticsEngine().setUserId('guest');
+    
+    if (context != null) {
+      try {
+        context.read<AppProvider>().clearUserData();
+        context.read<NotificationProvider>().clearUserData();
+        context.read<SavedSearchProvider>().clear();
+      } catch (e) {
+        // Just in case context is unmounted
+      }
+    }
     notifyListeners();
   }
 

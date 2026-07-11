@@ -181,7 +181,7 @@ class SettingsSection extends StatelessWidget {
                 }),
                 _buildDivider(),
                 _buildSettingsTile(Icons.logout_rounded, context.tr('logout'), null, context, true, () async {
-                  await context.read<AuthProvider>().logout();
+                  await context.read<AuthProvider>().logout(context);
                   if (!context.mounted) return;
                   Navigator.pushAndRemoveUntil(
                     context,
@@ -245,7 +245,7 @@ class SettingsSection extends StatelessWidget {
         if (!context.mounted) return;
         Navigator.pop(context); // close progress
         
-        await context.read<AuthProvider>().logout();
+        await context.read<AuthProvider>().logout(context);
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,

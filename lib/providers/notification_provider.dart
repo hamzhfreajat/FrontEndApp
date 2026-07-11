@@ -29,6 +29,14 @@ class NotificationProvider with ChangeNotifier {
   List<Map<String, dynamic>> get notifications => _notifications;
   bool get isConnected => _isConnected;
 
+  void clearUserData() {
+    _unreadCount = 0;
+    _notifications = [];
+    _userId = null;
+    disconnect();
+    notifyListeners();
+  }
+
   /// Connect to the user-specific WebSocket channel AND initialize FCM
   Future<void> connect(int userId) async {
     _userId = userId;

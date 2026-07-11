@@ -28,7 +28,7 @@ class AuthInterceptingClient extends http.BaseClient {
     if (response.statusCode == 401) {
       final context = navigatorKey.currentContext;
       if (context != null) {
-        Provider.of<AuthProvider>(context, listen: false).logout();
+        Provider.of<AuthProvider>(context, listen: false).logout(context);
       }
     }
     return response;
@@ -544,7 +544,7 @@ class ApiService {
         request.files.add(await http.MultipartFile.fromPath('files', file.path));
       }
 
-      final response = await _client.send(request);
+      final response = await _client.send(request).timeout(const Duration(seconds: 45));
       if (response.statusCode == 200) {
         final respStr = await response.stream.bytesToString();
         final data = json.decode(respStr) as Map<String, dynamic>;
@@ -563,7 +563,7 @@ class ApiService {
       Uri.parse('$baseUrl/ads/draft'),
       headers: await _getHeaders(),
       body: jsonEncode(adData),
-    );
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return Ad.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
@@ -577,7 +577,7 @@ class ApiService {
       Uri.parse('$baseUrl/ads/$adId/draft'),
       headers: await _getHeaders(),
       body: jsonEncode(adData),
-    );
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
       return Ad.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
@@ -607,7 +607,7 @@ class ApiService {
         Uri.parse('$baseUrl/ads'),
         headers: await _getHeaders(),
         body: jsonEncode(adData),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return Ad.fromJson(json.decode(response.body));
@@ -646,7 +646,7 @@ class ApiService {
         Uri.parse('$baseUrl/ads/$adId'),
         headers: await _getHeaders(),
         body: jsonEncode(adData),
-      );
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         return Ad.fromJson(json.decode(response.body));
@@ -1108,7 +1108,7 @@ class ApiService {
         Uri.parse('$baseUrl/ai/evaluate-ad'),
         headers: await _getHeaders(),
         body: jsonEncode(adData),
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final decoded = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
@@ -1206,6 +1206,19 @@ class ApiService {
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to delete saved search: ${response.statusCode}');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchAppVersionInfo() async {
+    final response = await _client.get(
+      Uri.parse('$baseUrl/config/version'),
+      headers: await _getHeaders(),
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      return json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to fetch version info: ${response.statusCode}');
     }
   }
 }

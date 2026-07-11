@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../providers/notification_provider.dart';
+import '../utils/error_handler.dart';
 
 class PremiumLoginBottomSheet extends StatefulWidget {
   final VoidCallback onLoginSuccess;
@@ -103,7 +104,7 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
       final response = await ApiService().loginWithGoogle(idToken);
       await _handleSuccess(response['token']);
     } catch (e) {
-      setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
+      setState(() => _errorMessage = ErrorHandler.getFriendlyError(e));
       await _googleSignIn.signOut();
     } finally {
       if (mounted) setState(() => _isLoadingGoogle = false);
@@ -131,7 +132,7 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
         throw Exception(result.message ?? 'Facebook login failed');
       }
     } catch (e) {
-      setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
+      setState(() => _errorMessage = ErrorHandler.getFriendlyError(e));
       await FacebookAuth.instance.logOut();
     } finally {
       if (mounted) setState(() => _isLoadingFacebook = false);
@@ -163,7 +164,7 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
       );
       await _handleSuccess(response['token']);
     } catch (e) {
-      setState(() => _errorMessage = e.toString().replaceAll('Exception: ', ''));
+      setState(() => _errorMessage = ErrorHandler.getFriendlyError(e));
     } finally {
       if (mounted) setState(() => _isLoadingApple = false);
     }
@@ -242,7 +243,7 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
                     children: [
                       Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
                       const SizedBox(width: 8),
-                      Expanded(child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade700, fontSize: 13))),
+                      Expanded(child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade700, fontSize: 14))),
                     ],
                   ),
                 ),

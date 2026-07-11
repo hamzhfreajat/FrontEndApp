@@ -185,7 +185,7 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                         children: [
                           Text(context.tr('sooqcom'),
                             overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.cairo(color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w900, fontSize: 20, height: 1.1),
+                            style: TextStyle(fontFamily: 'Cairo', color: Theme.of(context).textTheme.bodyLarge?.color, fontWeight: FontWeight.w900, fontSize: 20, height: 1.1),
                           ),
                           Text('SOOQCOM',
                             overflow: TextOverflow.ellipsis,

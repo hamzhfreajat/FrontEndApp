@@ -6,6 +6,10 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 import '../providers/notification_provider.dart';
+import '../services/api_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,6 +35,31 @@ class _SplashScreenState extends State<SplashScreen> {
     // Wait explicitly if the auth provider is somehow still loading from SharedPreferences
     while (auth.isLoading) {
       await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (!mounted) return;
+
+    // Check for updates
+    try {
+      final versionInfo = await ApiService().fetchAppVersionInfo();
+      final packageInfo = await PackageInfo.fromPlatform();
+      final currentVersion = packageInfo.version;
+
+      String latestVersion = versionInfo['latest_ios'] ?? currentVersion;
+      String testflightUrl = versionInfo['testflight_url'] ?? '';
+
+      if (Platform.isIOS && _isVersionOlder(currentVersion, latestVersion)) {
+        // Show update dialog
+        bool shouldUpdate = await _showUpdateDialog(latestVersion, testflightUrl);
+        if (shouldUpdate) {
+          final uri = Uri.parse(testflightUrl);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        }
+      }
+    } catch (e) {
+      print('Failed to check for updates: $e');
     }
 
     if (!mounted) return;
@@ -65,6 +94,49 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
+  bool _isVersionOlder(String current, String latest) {
+    List<int> currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> latestParts = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    for (int i = 0; i < 3; i++) {
+      int c = i < currentParts.length ? currentParts[i] : 0;
+      int l = i < latestParts.length ? latestParts[i] : 0;
+      if (c < l) return true;
+      if (c > l) return false;
+    }
+    return false;
+  }
+
+  Future<bool> _showUpdateDialog(String latestVersion, String url) async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('تحديث جديد متاح 🎉', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+          content: Text(
+            'يتوفر إصدار جديد ($latestVersion) من التطبيق. يرجى التحديث من TestFlight للحصول على أحدث الميزات والإصلاحات.',
+            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('لاحقاً', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('تحديث الآن', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,8 +163,9 @@ class _SplashScreenState extends State<SplashScreen> {
               duration: const Duration(milliseconds: 800),
               child: Text(
                 'سوقكم',
-                style: GoogleFonts.cairo(
-                  color: const Color(0xFF1A1A2E),
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  color: Color(0xFF1A1A2E),
                   fontWeight: FontWeight.w900,
                   fontSize: 48,
                   height: 1.0,

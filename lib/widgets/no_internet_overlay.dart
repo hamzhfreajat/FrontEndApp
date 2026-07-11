@@ -99,7 +99,8 @@ class _NoInternetOverlayState extends State<NoInternetOverlay> with SingleTicker
                     Text(
                       'أوه! يبدو أنك غير متصل',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
+                          fontFamily: 'Tajawal',
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1E293B),
@@ -110,7 +111,8 @@ class _NoInternetOverlayState extends State<NoInternetOverlay> with SingleTicker
                     Text(
                       'يرجى التحقق من إعدادات الشبكة الخاصة بك\nوالمحاولة مرة أخرى للوصول إلى التطبيق',
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.tajawal(
+                      style: TextStyle(
+                          fontFamily: 'Tajawal',
                         fontSize: 16,
                         color: const Color(0xFF64748B),
                         height: 1.5,
@@ -146,7 +148,8 @@ class _NoInternetOverlayState extends State<NoInternetOverlay> with SingleTicker
                         ),
                         child: Text(
                           'المحاولة مرة أخرى',
-                          style: GoogleFonts.tajawal(
+                          style: TextStyle(
+                          fontFamily: 'Tajawal',
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

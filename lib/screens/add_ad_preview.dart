@@ -9,6 +9,7 @@ import '../models/category.dart';
 import 'category_details_page.dart';
 import 'ad_details_page.dart';
 import '../widgets/premium_real_estate_card.dart';
+import '../utils/error_handler.dart';
 
 import '../services/api_service.dart';
 import 'package:provider/provider.dart';
@@ -144,7 +145,7 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       ownerName: ownerName,
     );
   }
-  Future<void> _publishAd() async {
+  Future<void> _publishAd() async {
     if (_isPublishing) return;
 
     final existingImagesCount = (widget.adData['image_urls'] as List<dynamic>?)?.length ?? 0;
@@ -158,7 +159,6 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       );
       return;
     }
-
     if (mounted) {
       setState(() => _isPublishing = true);
     }
@@ -235,7 +235,11 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       if (mounted) {
         setState(() => _isPublishing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('حدث خطأ أثناء نشر الإعلان: $e'), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating),
+          SnackBar(
+            content: Text('حدث خطأ: ${ErrorHandler.getFriendlyError(e)}'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
         );
       }
     }
@@ -272,7 +276,7 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
               ),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [const Color(0xFF0075FF).withValues(alpha: 0.05), Colors.white],
+                  colors: [const Color(0xFF0075FF).withOpacity(0.05), Colors.white],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

@@ -32,7 +32,8 @@ class ChatTheme {
   }
 
   static TextStyle font(BuildContext context, {double size = 15, FontWeight weight = FontWeight.w600, Color? color, double? height, double? letterSpacing}) {
-    return GoogleFonts.tajawal(
+    return TextStyle(
+      fontFamily: 'Tajawal',
       fontSize: size,
       fontWeight: weight,
       color: color,
