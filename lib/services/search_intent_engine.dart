@@ -416,13 +416,47 @@ class SearchIntentEngine {
       }
       confidence = 0.9;
     } else if (saleScore > 0 && saleScore >= rentScore) {
-      categoryId = 2;
-      categoryName = 'عقارات للبيع';
-      confidence = saleScore >= 2 ? 0.95 : 0.8;
+      if (tags.contains('شقق')) { categoryId = 10301; categoryName = 'شقق للبيع'; }
+      else if (tags.contains('ستوديو')) { categoryId = 10302; categoryName = 'ستوديوهات للبيع'; }
+      else if (tags.contains('فيلا')) { categoryId = 10101; categoryName = 'فلل وقصور'; }
+      else if (tags.contains('بيت')) { categoryId = 10102; categoryName = 'بيوت مستقلة'; }
+      else if (tags.contains('دوبلكس')) { categoryId = 10103; categoryName = 'دوبلكس / بنتهاوس'; }
+      else if (tags.contains('عمارة')) { categoryId = 10104; categoryName = 'عمارة'; }
+      else if (tags.contains('طابق كامل')) { categoryId = 10106; categoryName = 'طابق كامل'; }
+      else if (tags.contains('روف')) { categoryId = 10105; categoryName = 'ملحق / روف'; }
+      else if (tags.contains('محل')) { categoryId = 10303; categoryName = 'محل تجاري'; }
+      else if (tags.contains('مكتب')) { categoryId = 10304; categoryName = 'مكتب'; }
+      else if (tags.contains('ارض')) { categoryId = 10313; categoryName = 'ارض'; }
+      else if (tags.contains('مزرعة')) { categoryId = 10314; categoryName = 'مزرعة'; }
+      else if (saleScore >= 2) {
+        categoryId = 2;
+        categoryName = 'عقارات للبيع';
+      } else {
+        // Just "للبيع" without property tags
+        categoryId = null;
+        categoryName = null;
+      }
+      confidence = saleScore >= 2 ? 0.95 : 0.4;
     } else if (rentScore > 0 && rentScore > saleScore) {
-      categoryId = 3;
-      categoryName = 'عقارات للإيجار';
-      confidence = rentScore >= 2 ? 0.95 : 0.8;
+      if (tags.contains('شقق')) { categoryId = 301; categoryName = 'شقق للإيجار'; }
+      else if (tags.contains('ستوديو')) { categoryId = 302; categoryName = 'ستوديوهات للإيجار'; }
+      else if (tags.contains('فيلا')) { categoryId = 3101; categoryName = 'فلل وقصور'; }
+      else if (tags.contains('بيت')) { categoryId = 3102; categoryName = 'بيوت مستقلة للإيجار'; }
+      else if (tags.contains('دوبلكس')) { categoryId = 3103; categoryName = 'دوبلكس / بنتهاوس'; }
+      else if (tags.contains('طابق كامل')) { categoryId = 3104; categoryName = 'طابق كامل للإيجار'; }
+      else if (tags.contains('روف')) { categoryId = 3105; categoryName = 'ملحق / روف'; }
+      else if (tags.contains('محل')) { categoryId = 303; categoryName = 'محل تجاري'; }
+      else if (tags.contains('مكتب')) { categoryId = 304; categoryName = 'مكتب'; }
+      else if (tags.contains('عمارة')) { categoryId = 3104; categoryName = 'طابق كامل للإيجار'; }
+      else if (rentScore >= 2) {
+        categoryId = 3;
+        categoryName = 'عقارات للإيجار';
+      } else {
+        // Just "للايجار" without property tags
+        categoryId = null;
+        categoryName = null;
+      }
+      confidence = rentScore >= 2 ? 0.95 : 0.4;
     } else if (tags.isNotEmpty || location != null) {
       // Have property type tags but no clear sale/rent → ambiguous
       confidence = 0.4;
