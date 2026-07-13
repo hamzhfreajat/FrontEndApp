@@ -45,6 +45,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     AnalyticsEngine().logScreenViewed(screenName: widget.category?.name ?? widget.title);
     if (widget.parentId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         Provider.of<AppProvider>(context, listen: false)
             .loadSubCategories(widget.parentId!).then((success) {
               if (mounted) {
@@ -55,6 +56,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
     } else {
       _isLoadingSubcategories = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
         final provider = Provider.of<AppProvider>(context, listen: false);
         provider.loadSubCategories(3);
         provider.loadSubCategories(2);
