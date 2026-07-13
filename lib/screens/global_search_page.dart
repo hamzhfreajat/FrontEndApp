@@ -6,7 +6,6 @@ import '../services/api_service.dart';
 import '../services/search_intent_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'category_details_page.dart';
-import 'categories_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/analytics_engine.dart';
@@ -289,40 +288,18 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     final finalTags = currentTags.isEmpty ? null : currentTags;
     final locs = intent.location != null ? [intent.location!] : null;
 
-    final isGenericCategorySearch = finalTags == null &&
-        intent.location == null &&
-        (intent.cleanQuery == null || intent.cleanQuery!.isEmpty);
-
-    if (hasSubcategories && isGenericCategorySearch) {
-      // Navigate to subcategory picker but with pre-filters
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CategoriesPage(
-            parentId: targetCat!.id,
-            allCategories: allCats,
-            title: targetCat.name,
-            category: targetCat,
-            initialSearchQuery: intent.cleanQuery,
-            initialTags: finalTags,
-            initialLocations: locs,
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CategoryDetailsPage(
+          category: targetCat!,
+          allCategories: allCats,
+          initialSearchQuery: intent.cleanQuery,
+          initialTags: finalTags,
+          initialLocations: locs,
         ),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => CategoryDetailsPage(
-            category: targetCat!,
-            allCategories: allCats,
-            initialSearchQuery: intent.cleanQuery,
-            initialTags: finalTags,
-            initialLocations: locs,
-          ),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   // ── Disambiguation bottom sheet ────────────────────────────────────────────
