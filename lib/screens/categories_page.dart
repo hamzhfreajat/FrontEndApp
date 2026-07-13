@@ -16,6 +16,10 @@ class CategoriesPage extends StatefulWidget {
   final List<Category>? allCategories;
   final String title;
   final Category? category;
+  
+  final String? initialSearchQuery;
+  final List<String>? initialTags;
+  final List<String>? initialLocations;
 
   const CategoriesPage({
     super.key, 
@@ -23,6 +27,9 @@ class CategoriesPage extends StatefulWidget {
     this.allCategories, 
     this.title = 'الأقسام',
     this.category,
+    this.initialSearchQuery,
+    this.initialTags,
+    this.initialLocations,
   });
 
   @override
@@ -396,6 +403,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
               builder: (_) => CategoryDetailsPage(
                 category: cat,
                 allCategories: allCategories,
+                initialSearchQuery: widget.initialSearchQuery,
+                initialTags: widget.initialTags,
+                initialLocations: widget.initialLocations,
               ),
             ),
           );
@@ -413,6 +423,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 title: cat.name,
                 category: cat,
                 allCategories: allCategories,
+                initialSearchQuery: widget.initialSearchQuery,
+                initialTags: widget.initialTags,
+                initialLocations: widget.initialLocations,
               ),
             ),
           );
@@ -443,6 +456,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
               builder: (_) => CategoryDetailsPage(
                 category: cat,
                 allCategories: allCategories,
+                initialSearchQuery: widget.initialSearchQuery,
+                initialTags: widget.initialTags,
+                initialLocations: widget.initialLocations,
               ),
             ),
           );
@@ -456,6 +472,9 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 title: cat.name,
                 category: cat,
                 allCategories: allCategories,
+                initialSearchQuery: widget.initialSearchQuery,
+                initialTags: widget.initialTags,
+                initialLocations: widget.initialLocations,
               ),
             ),
           );
@@ -536,4 +555,5 @@ class _CategoriesPageState extends State<CategoriesPage> {
     );
   }
 }
+
 

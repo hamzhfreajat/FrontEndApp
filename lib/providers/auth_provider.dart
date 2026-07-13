@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../services/api_service.dart';
 import '../services/analytics_engine.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +10,7 @@ import 'notification_provider.dart';
 import 'saved_search_provider.dart';
 
 class AuthProvider with ChangeNotifier {
+  final _storage = const FlutterSecureStorage();
   String? _token;
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
@@ -23,8 +25,7 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> _loadToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedToken = prefs.getString('jwt_token');
+    final savedToken = await _storage.read(key: 'jwt_token');
 
     if (savedToken != null) {
       _token = savedToken;
@@ -36,16 +37,14 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> login(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('jwt_token', token);
+    await _storage.write(key: 'jwt_token', value: token);
     _token = token;
     await _fetchUserProfile();
     notifyListeners();
   }
 
   Future<void> logout([BuildContext? context]) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('jwt_token');
+    await _storage.delete(key: 'jwt_token');
     _token = null;
     _userData = null;
     AnalyticsEngine().setUserId('guest');
