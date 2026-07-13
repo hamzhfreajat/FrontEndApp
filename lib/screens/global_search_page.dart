@@ -141,8 +141,9 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     // ── 3. Route ──────────────────────────────────────────────────────────
     final allCats = appProvider.categories ?? _allDisplayedCategories;
 
-    if (mergedIntent.categoryId == null || mergedIntent.confidence < 0.45) {
-      // Ambiguous — show disambiguation sheet
+    final isRealEstateAmbiguous = mergedIntent.tags.isNotEmpty && (mergedIntent.categoryId == null || mergedIntent.confidence < 0.45);
+    if (isRealEstateAmbiguous) {
+      // Ambiguous real estate search ?" show disambiguation sheet
       _showCategorySelectionBottomSheet(
         keyword: keyword,
         intent: mergedIntent,
@@ -390,13 +391,15 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       color: const Color(0xFF0075FF),
                       onTap: () {
                         Navigator.pop(ctx);
+                        final simulatedQuery = keyword + " للبيع";
+                        final newIntent = SearchIntentEngine.parse(simulatedQuery, cities: appProvider.dbCities);
                         final merged = _MergedIntent(
-                          categoryId: 2,
-                          categoryName: 'عقارات للبيع',
-                          tags: intent.tags,
-                          location: intent.location,
+                          categoryId: newIntent.categoryId ?? 2,
+                          categoryName: newIntent.categoryName ?? 'عقارات للبيع',
+                          tags: newIntent.tags,
+                          location: newIntent.location,
                           confidence: 1.0,
-                          cleanQuery: intent.cleanQuery,
+                          cleanQuery: newIntent.cleanQuery,
                         );
                         _routeByIntent(merged, allCats,
                             isTag: isTag, rawTag: rawTag);
@@ -411,13 +414,15 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       color: const Color(0xFF00B0FF),
                       onTap: () {
                         Navigator.pop(ctx);
+                        final simulatedQuery = keyword + " للايجار";
+                        final newIntent = SearchIntentEngine.parse(simulatedQuery, cities: appProvider.dbCities);
                         final merged = _MergedIntent(
-                          categoryId: 3,
-                          categoryName: 'عقارات للإيجار',
-                          tags: intent.tags,
-                          location: intent.location,
+                          categoryId: newIntent.categoryId ?? 3,
+                          categoryName: newIntent.categoryName ?? 'عقارات للإيجار',
+                          tags: newIntent.tags,
+                          location: newIntent.location,
                           confidence: 1.0,
-                          cleanQuery: intent.cleanQuery,
+                          cleanQuery: newIntent.cleanQuery,
                         );
                         _routeByIntent(merged, allCats,
                             isTag: isTag, rawTag: rawTag);
