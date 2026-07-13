@@ -6,6 +6,7 @@ import '../services/api_service.dart';
 import '../services/search_intent_engine.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'category_details_page.dart';
+import 'categories_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/analytics_engine.dart';
@@ -288,18 +289,43 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     final finalTags = currentTags.isEmpty ? null : currentTags;
     final locs = intent.location != null ? [intent.location!] : null;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CategoryDetailsPage(
-          category: targetCat!,
-          allCategories: allCats,
-          initialSearchQuery: intent.cleanQuery,
-          initialTags: finalTags,
-          initialLocations: locs,
+    final isGenericCategorySearch = finalTags == null &&
+        intent.location == null &&
+        (intent.cleanQuery == null || intent.cleanQuery!.isEmpty);
+
+    // Only consider it a broad parent if it is Level 1 or Level 2 (e.g. parentId is null, 2, 3, or 10313)
+    final isBroadParent = targetCat != null && 
+        (targetCat.parentId == null || targetCat.parentId == 2 || targetCat.parentId == 3 || targetCat.parentId == 10313);
+
+    if (hasSubcategories && isBroadParent && isGenericCategorySearch) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CategoriesPage(
+            parentId: targetCat!.id,
+            allCategories: allCats,
+            title: targetCat.name,
+            category: targetCat,
+            initialSearchQuery: intent.cleanQuery,
+            initialTags: finalTags,
+            initialLocations: locs,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CategoryDetailsPage(
+            category: targetCat!,
+            allCategories: allCats,
+            initialSearchQuery: intent.cleanQuery,
+            initialTags: finalTags,
+            initialLocations: locs,
+          ),
+        ),
+      );
+    }
   }
 
   // ── Disambiguation bottom sheet ────────────────────────────────────────────
