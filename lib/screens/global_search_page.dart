@@ -297,7 +297,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     final isBroadParent = targetCat != null && 
         (targetCat.parentId == null || targetCat.parentId == 2 || targetCat.parentId == 3 || targetCat.parentId == 10313);
 
-    if (hasSubcategories && isBroadParent && isGenericCategorySearch) {
+    if (isBroadParent && isGenericCategorySearch) {
       Navigator.push(
         context,
         MaterialPageRoute(
