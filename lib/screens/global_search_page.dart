@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import '../models/category.dart';
+import '../models/location.dart'; // Added for City
 import '../services/api_service.dart';
-import '../services/search_intent_engine.dart';
+import '../services/search_intent_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'category_details_page.dart';
 import 'categories_page.dart';
@@ -11,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/analytics_engine.dart';
 import '../widgets/emoji_category_icon.dart';
+
 
 class GlobalSearchPage extends StatefulWidget {
   const GlobalSearchPage({super.key});
@@ -30,11 +33,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
 
   List<Map<String, dynamic>> _trendingSearches = [];
   List<String> _recentSearches = [];
-  List<Category> _saleCategories = [];
-  List<Category> _rentCategories = [];
 
-  List<Category> get _allDisplayedCategories =>
-      [..._saleCategories, ..._rentCategories];
 
   late final AnimationController _animController;
   late final Animation<double> _fadeAnim;
@@ -60,28 +59,19 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
 
       if (mounted) {
         final provider = Provider.of<AppProvider>(context, listen: false);
-        final saleCats = provider.categories
-                ?.where((c) =>
-                    (c.id == 2 || c.parentId == 2) &&
-                    !c.name.contains('سكني'))
-                .toList() ??
-            [];
-        final rentCats = provider.categories
-                ?.where((c) =>
-                    (c.id == 3 || c.parentId == 3) &&
-                    !c.name.contains('سكني'))
-                .toList() ??
-            [];
-
-        saleCats.sort((a, b) => b.adsCount.compareTo(a.adsCount));
-        rentCats.sort((a, b) => b.adsCount.compareTo(a.adsCount));
+        provider.loadSubCategories(2);
+        provider.loadSubCategories(3);
+        provider.loadSubCategories(10313);
 
         setState(() {
-          _trendingSearches =
-              List<Map<String, dynamic>>.from(results[0] as List);
-          _saleCategories = saleCats.take(8).toList();
-          _rentCategories = rentCats.take(8).toList();
-          _recentSearches = recent;
+          _trendingSearches = [
+            {'text': 'شقق مفروشة للايجار', 'raw_value': null},
+            {'text': 'ستوديو للايجار في عمان', 'raw_value': null},
+            {'text': 'اراضي للبيع', 'raw_value': null},
+            {'text': 'شقق للبيع بالتقسيط', 'raw_value': null},
+            {'text': 'فيلا للبيع', 'raw_value': null},
+          ];
+          _recentSearches = recent.take(5).toList();
           _isInitLoading = false;
         });
         _animController.forward();
@@ -116,18 +106,17 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     List<String> recent = prefs.getStringList('recent_searches') ?? [];
     recent.remove(keyword);
     recent.insert(0, keyword);
-    if (recent.length > 8) recent = recent.sublist(0, 8);
+    if (recent.length > 5) recent = recent.sublist(0, 5);
     await prefs.setStringList('recent_searches', recent);
 
     setState(() => _isLoading = true);
+    
+    // Allow the UI thread to pump a frame and render the loader
+    await Future.delayed(const Duration(milliseconds: 50));
 
-    // ── 1. Parse intent locally (instant) ─────────────────
-    final intent = SearchIntentEngine.parse(keyword, cities: cities);
-
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-
+    // ── 1. Parse intent from new API Microservice ───
+    final intent = await SearchIntentApi.parse(keyword);
+    
     // ── 2. Merge intent (using local only) ────────────────────────────────────
     final mergedIntent = _mergeIntents(
       local: intent,
@@ -139,10 +128,11 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     );
 
     // ── 3. Route ──────────────────────────────────────────────────────────
-    final allCats = appProvider.categories ?? _allDisplayedCategories;
+    final allCats = appProvider.categories ?? [];
 
-    final isRealEstateAmbiguous = mergedIntent.tags.isNotEmpty && (mergedIntent.categoryId == null || mergedIntent.confidence < 0.45);
-    if (isRealEstateAmbiguous) {
+    final isAmbiguous = mergedIntent.categoryId == null || (mergedIntent.tags.isNotEmpty && mergedIntent.confidence < 0.45);
+    if (isAmbiguous) {
+      setState(() => _isLoading = false);
       // Ambiguous real estate search ?" show disambiguation sheet
       _showCategorySelectionBottomSheet(
         keyword: keyword,
@@ -153,7 +143,12 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
       return;
     }
 
-    _routeByIntent(mergedIntent, allCats, isTag: isTag, rawTag: rawTag);
+    // Await routing so loading indicator stays on screen until transition completes
+    await _routeByIntent(mergedIntent, allCats, isTag: isTag, rawTag: rawTag);
+    
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   // ── Merge local NLP + server response ────────────────────────────────────
@@ -209,12 +204,12 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
   }
 
   // ── Route to proper page based on merged intent ───────────────────────────
-  void _routeByIntent(
+  Future<void> _routeByIntent(
     _MergedIntent intent,
     List<Category> allCats, {
     bool isTag = false,
     String? rawTag,
-  }) {
+  }) async {
     Category? targetCat;
     try {
       targetCat = allCats.firstWhere((c) => c.id == intent.categoryId);
@@ -228,7 +223,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         intent.categoryId == 10313 ||
         allCats.any((c) => c.parentId == intent.categoryId);
 
-    List<String> currentTags = List<String>.from(intent.tags);
+    List<String> currentTags = intent.tags.map((t) => t.contains(':') ? t.split(':')[1] : t).toList();
 
     // ── Leaf Category Promotion ──
     // If we have tags and subcategories, try to promote to the actual leaf category
@@ -243,47 +238,53 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
 
       final subCats = allCats.where((c) => c.parentId == targetCat!.id).toList();
 
+      Category? exactMatchCat;
+      Category? fallbackCat;
+
       for (final tag in currentTags) {
         final nTag = n(tag);
-        Category? matchedSubCat;
-
-        // Map specific tags to known Soogcom subcategory names
-        final bool isResidential = ['شقه', 'شقق', 'استوديو', 'فيلا', 'بيت', 'دور', 'روف', 'غرفه'].contains(nTag);
-        final bool isCommercial = ['محل', 'تجاري', 'مستودع', 'مكتب', 'عياده', 'معرض'].contains(nTag);
-        final bool isLand = nTag.contains('ارض') || nTag.contains('اراضي');
-        final bool isFarm = nTag.contains('مزرع');
-        final bool isChalet = nTag.contains('شاليه');
-
+        
         for (final c in subCats) {
           final nName = n(c.name);
-          
-          if (isResidential && nName.contains('سكن')) {
-            matchedSubCat = c;
-            break;
-          } else if (isCommercial && nName.contains('تجار')) {
-            matchedSubCat = c;
-            break;
-          } else if (isLand && nName.contains('اراض')) {
-            matchedSubCat = c;
-            break;
-          } else if (isFarm && nName.contains('مزارع')) {
-            matchedSubCat = c;
-            break;
-          } else if (isChalet && nName.contains('شاليه')) {
-            matchedSubCat = c;
-            break;
-          } else if (nName == nTag || nName.contains(nTag)) {
-            matchedSubCat = c;
+          if (nName == nTag || nName.contains(nTag)) {
+            exactMatchCat = c;
             break;
           }
         }
+        if (exactMatchCat != null) break;
+      }
 
-        if (matchedSubCat != null) {
-          targetCat = matchedSubCat;
-          // We DO NOT remove the tag here, because we want CategoryDetailsPage 
-          // to use it as a pre-applied filter (e.g., category: "سكني", filter: "شقة").
-          break; // Stop after promoting the first matching tag
+      if (exactMatchCat == null) {
+        for (final tag in currentTags) {
+          final nTag = n(tag);
+          final bool isResidential = ['شقه', 'شقق', 'استوديو', 'فيلا', 'بيت', 'دور', 'روف', 'غرفه'].contains(nTag);
+          final bool isCommercial = ['محل', 'تجاري', 'مستودع', 'مكتب', 'عياده', 'معرض'].contains(nTag);
+          final bool isLand = nTag.contains('ارض') || nTag.contains('اراضي');
+          final bool isFarm = nTag.contains('مزرع');
+          final bool isChalet = nTag.contains('شالي');
+
+          for (final c in subCats) {
+            final nName = n(c.name);
+            if (isResidential && nName.contains('سكن')) {
+              fallbackCat = c; break;
+            } else if (isCommercial && nName.contains('تجار')) {
+              fallbackCat = c; break;
+            } else if (isLand && (nName.contains('اراض') || nName.contains('أراض'))) {
+              fallbackCat = c; break;
+            } else if (isFarm && nName.contains('مزارع')) {
+              fallbackCat = c; break;
+            } else if (isChalet && nName.contains('شالي')) {
+              fallbackCat = c; break;
+            }
+          }
+          if (fallbackCat != null) break;
         }
+      }
+
+      if (exactMatchCat != null) {
+        targetCat = exactMatchCat;
+      } else if (fallbackCat != null) {
+        targetCat = fallbackCat;
       }
     }
 
@@ -299,7 +300,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         (targetCat.parentId == null || targetCat.parentId == 2 || targetCat.parentId == 3 || targetCat.parentId == 10313);
 
     if (isBroadParent && isGenericCategorySearch) {
-      Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => CategoriesPage(
@@ -314,7 +315,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         ),
       );
     } else {
-      Navigator.push(
+      await Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => CategoryDetailsPage(
@@ -342,7 +343,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
       isScrollControlled: true,
       builder: (ctx) {
         final appProvider = Provider.of<AppProvider>(context, listen: false);
-        final allCats = appProvider.categories ?? _allDisplayedCategories;
+        final allCats = appProvider.categories ?? [];
 
         return Container(
           padding: EdgeInsets.only(
@@ -391,18 +392,16 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       color: const Color(0xFF0075FF),
                       onTap: () {
                         Navigator.pop(ctx);
-                        final simulatedQuery = keyword + " للبيع";
-                        final newIntent = SearchIntentEngine.parse(simulatedQuery, cities: appProvider.dbCities);
-                        final merged = _MergedIntent(
-                          categoryId: newIntent.categoryId ?? 2,
-                          categoryName: newIntent.categoryName ?? 'عقارات للبيع',
-                          tags: newIntent.tags,
-                          location: newIntent.location,
-                          confidence: 1.0,
-                          cleanQuery: newIntent.cleanQuery,
-                        );
-                        _routeByIntent(merged, allCats,
-                            isTag: isTag, rawTag: rawTag);
+                        final targetCat = allCats.firstWhere((c) => c.id == 2, orElse: () => Category(id: 2, name: 'عقارات للبيع'));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriesPage(
+                          parentId: 2,
+                          allCategories: allCats,
+                          title: 'عقارات للبيع',
+                          category: targetCat,
+                          initialSearchQuery: intent.cleanQuery ?? keyword,
+                          initialLocations: intent.location != null ? [intent.location!] : null,
+                          initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
+                        )));
                       },
                     ),
                   ),
@@ -414,18 +413,16 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       color: const Color(0xFF00B0FF),
                       onTap: () {
                         Navigator.pop(ctx);
-                        final simulatedQuery = keyword + " للايجار";
-                        final newIntent = SearchIntentEngine.parse(simulatedQuery, cities: appProvider.dbCities);
-                        final merged = _MergedIntent(
-                          categoryId: newIntent.categoryId ?? 3,
-                          categoryName: newIntent.categoryName ?? 'عقارات للإيجار',
-                          tags: newIntent.tags,
-                          location: newIntent.location,
-                          confidence: 1.0,
-                          cleanQuery: newIntent.cleanQuery,
-                        );
-                        _routeByIntent(merged, allCats,
-                            isTag: isTag, rawTag: rawTag);
+                        final targetCat = allCats.firstWhere((c) => c.id == 3, orElse: () => Category(id: 3, name: 'عقارات للإيجار'));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriesPage(
+                          parentId: 3,
+                          allCategories: allCats,
+                          title: 'عقارات للإيجار',
+                          category: targetCat,
+                          initialSearchQuery: intent.cleanQuery ?? keyword,
+                          initialLocations: intent.location != null ? [intent.location!] : null,
+                          initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
+                        )));
                       },
                     ),
                   ),
@@ -437,16 +434,16 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       color: const Color(0xFF00C853),
                       onTap: () {
                         Navigator.pop(ctx);
-                        final merged = _MergedIntent(
-                          categoryId: 10313,
-                          categoryName: 'أراضي',
-                          tags: intent.tags,
-                          location: intent.location,
-                          confidence: 1.0,
-                          cleanQuery: intent.cleanQuery,
-                        );
-                        _routeByIntent(merged, allCats,
-                            isTag: isTag, rawTag: rawTag);
+                        final targetCat = allCats.firstWhere((c) => c.id == 10313, orElse: () => Category(id: 10313, name: 'أراضي'));
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriesPage(
+                          parentId: 10313,
+                          allCategories: allCats,
+                          title: 'أراضي',
+                          category: targetCat,
+                          initialSearchQuery: intent.cleanQuery ?? keyword,
+                          initialLocations: intent.location != null ? [intent.location!] : null,
+                          initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
+                        )));
                       },
                     ),
                   ),
@@ -544,7 +541,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
             final appProvider =
                 Provider.of<AppProvider>(context, listen: false);
             final allCats =
-                appProvider.categories ?? _allDisplayedCategories;
+                appProvider.categories ?? [];
             final merged = _MergedIntent(
               categoryId: cat.id,
               categoryName: cat.name,
@@ -749,15 +746,27 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
   }
 
   Widget _buildInitialState() {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Quick shortcut chips
-          _buildQuickShortcuts(),
-          const SizedBox(height: 28),
+    return Consumer<AppProvider>(
+      builder: (context, provider, child) {
+        final allCats = provider.categories ?? [];
+        
+        final saleCats = allCats
+            .where((c) => c.parentId == 2)
+            .toList();
+        final rentCats = allCats
+            .where((c) => c.parentId == 3)
+            .toList();
+
+        saleCats.sort((a, b) => b.adsCount.compareTo(a.adsCount));
+        rentCats.sort((a, b) => b.adsCount.compareTo(a.adsCount));
+
+        return SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+          // (Removed quick shortcuts based on user request)
 
           if (_recentSearches.isNotEmpty) ...[
             _buildSectionHeader(
@@ -816,24 +825,26 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
             const SizedBox(height: 32),
           ],
 
-          if (_saleCategories.isNotEmpty) ...[
+          if (saleCats.isNotEmpty) ...[
             _buildSectionHeader(
                 'عقارات للبيع', Icons.home_rounded, const Color(0xFF0075FF)),
             const SizedBox(height: 16),
-            _buildCategoryGrid(_saleCategories),
+            _buildCategoryGrid(saleCats),
             const SizedBox(height: 32),
           ],
 
-          if (_rentCategories.isNotEmpty) ...[
+          if (rentCats.isNotEmpty) ...[
             _buildSectionHeader(
                 'عقارات للإيجار', Icons.vpn_key_rounded, const Color(0xFF00B0FF)),
             const SizedBox(height: 16),
-            _buildCategoryGrid(_rentCategories),
+            _buildCategoryGrid(rentCats),
           ],
 
           const SizedBox(height: 100),
-        ],
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -38,6 +38,9 @@ class AuthInterceptingClient extends http.BaseClient {
 final _client = AuthInterceptingClient();
 
 class ApiService {
+  static String get searchApiUrl {
+    return 'https://api-search.sooq-com.com';
+  }
   static String get baseUrl {
     return 'https://api.sooq-com.com/api';
   }

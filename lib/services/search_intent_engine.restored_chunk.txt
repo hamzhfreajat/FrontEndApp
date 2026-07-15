@@ -1,0 +1,201 @@
+  static const Map<String, String> _paymentMap = {
+    'بالتقسيط بدون مقدم': 'تقسيط بدون مقدم',
+    'بالتقسيط بدون فوايد': 'تقسيط بدون فوائد',
+    'تقسيط بدون مقدم': 'تقسيط بدون مقدم',
+    'تقسيط بدون فوايد': 'تقسيط بدون فوائد',
+    'تقسيط': 'تقسيط',
+    'بالتقسيط': 'تقسيط',
+    'اقساط': 'تقسيط',
+    'بالاقساط': 'تقسيط',
+    'بالقسط': 'تقسيط',
+    'بدون مقدم': 'بدون مقدم',
+    'بدون فوايد': 'بدون فوائد',
+    'قسط': 'تقسيط',
+  };
+
+  // Tenant type tags
+  static const Map<String, String> _tenantMap = {
+    'عزاب': 'عزاب',
+    'عزوبيه': 'عزاب',
+    'للشباب': 'عزاب',
+    'عائلات': 'عائلات',
+    'عائلي': 'عائلات',
+    'العائلي': 'عائلات',
+    'عائله': 'عائلات',
+    'عائلة': 'عائلات',
+    'عمال': 'عمال',
+    'للعمال': 'عمال',
+  };
+
+  // Source / ownership tags
+  static const Map<String, String> _sourceMap = {
+    'من المالك مباشره': 'من المالك مباشرة',
+    'من المالك مباشرة': 'من المالك مباشرة',
+    'من المالك': 'من المالك',
+    'مباشره': 'من المالك مباشرة',
+    'بدون عموله': 'بدون عمولة',
+    'بدون عمولة': 'بدون عمولة',
+  };
+
+  // Feature tags
+  static const Map<String, String> _featuresMap = {
+    'بحمام سباحه': 'مسبح',
+    'بحمام سباحة': 'مسبح',
+    'حمام سباحه': 'مسبح',
+    'حمام سباحة': 'مسبح',
+    'مسبح': 'مسبح',
+    'دوبلكس': 'دوبلكس',
+    'دبلكس': 'دوبلكس',
+    'دورين': 'دوبلكس',
+    'روف': 'روف',
+    'ملحق': 'روف',
+    'ارضي': 'ارضي',
+    'ارضيه': 'ارضي',
+    'أرضية': 'ارضي',
+    'سرداب': 'سرداب',
+    'حوش': 'حوش',
+    'فاخره': 'فاخر',
+    'فاخرة': 'فاخر',
+    'فاخر': 'فاخر',
+    'رخيصه': 'رخيص',
+    'رخيصة': 'رخيص',
+    'رخيص': 'رخيص',
+    'أرخص': 'رخيص',
+    'ارخص': 'رخيص',
+    'لقطه': 'لقطة',
+    'لقطة': 'لقطة',
+    'اقتصادي': 'رخيص',
+    'على البحر': 'على البحر',
+    'علي البحر': 'على البحر',
+  };
+
+  // Famous compound/project/company names → add as tag
+  static const Map<String, String> _projectMap = {
+    // Compounds
+    'بيت الوطن': 'بيت الوطن',
+    'القوات المسلحه': 'القوات المسلحة',
+    'التوسعات الشماليه': 'التوسعات الشمالية',
+    'العلمين الجديده': 'العلمين الجديدة',
+    'النزهه الجديده': 'النزهة الجديدة',
+    'كمبوند بادية': 'بادية',
+    'كمبوند ارمونيا': 'أرمونيا',
+    'كمبوند الياسمين': 'الياسمين',
+    'كمبوند لوروا': 'لوروا',
+    'كمبوند ديار': 'ديار',
+    'كمبوند ريتاج': 'ريتاج',
+    'كمبوند زايد ديونز': 'زايد ديونز',
+    'كمبوند روضه السالميه': 'روضة السالمية',
+    'كومباوند البروج': 'البروج',
+    'كومباوند انطونيادس': 'انطونيادس',
+    'جولدن جيتس': 'جولدن جيتس',
+    'روضه السالميه': 'روضة السالمية',
+    'زايد ديونز': 'زايد ديونز',
+    'درب الحرمين': 'درب الحرمين',
+    // Brands
+    'داماك': 'داماك',
+    'ارمونيا': 'أرمونيا',
+    'الياسمين': 'الياسمين',
+    'البروج': 'البروج',
+    'ديار': 'ديار',
+    'بادية': 'بادية',
+    'روشن': 'روشن',
+    'مدينتي': 'مدينتي',
+    'المدينه': 'مدينتي',
+    'العلمين': 'العلمين الجديدة',
+    'لوروا': 'لوروا',
+    'نيوم': 'نيوم',
+    'ريتاج': 'ريتاج',
+    'ريف المصري': 'الريف المصري',
+    'الوفاء': 'الوفاء',
+    'الاوقاف': 'الأوقاف',
+    'العجلان': 'العجلان',
+    'المراسم': 'المراسم',
+    'انطونيادس': 'انطونيادس',
+    // RE companies (treated as brand context)
+    'شموع العقار': 'شموع العقار',
+    'اسس العقار': 'أسس العقار',
+    'سهيل العقاريه': 'سهيل',
+    'سهيل عقار': 'سهيل',
+    'الغرير للعقارات': 'الغرير',
+    'ابو شملان للعقارات': 'بوشملان',
+    'بو شملان للعقارات': 'بوشملان',
+    'بوشملان عقار': 'بوشملان',
+    'ديار العقاريه': 'ديار',
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  Main Parse Entry Point
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  static SearchIntent parse(String rawQuery, {List<City>? cities}) {
+    if (rawQuery.trim().isEmpty) {
+      return const SearchIntent(confidence: 0);
+    }
+
+    // 1. Normalize
+    final cleaned = _stripDiacritics(rawQuery.trim());
+    final normalized = _n(cleaned);
+
+    // 2. Extract location first (city or region name in the query)
+    String? location;
+    String workingQuery = normalized;
+    if (cities != null && cities.isNotEmpty) {
+      final locResult = _extractLocation(workingQuery, cities);
+      location = locResult.location;
+      workingQuery = locResult.remainder;
+    }
+
+    // 3. Collect tags
+    final tags = <String>{};
+
+    _extractMultiWordMatches(_propertyTypeMap, workingQuery, tags);
+    _extractMultiWordMatches(_furnishingMap, workingQuery, tags);
+    _extractMultiWordMatches(_bedroomsMap, workingQuery, tags);
+    _extractMultiWordMatches(_bathroomsMap, workingQuery, tags);
+    _extractMultiWordMatches(_floorMap, workingQuery, tags);
+    _extractMultiWordMatches(_ageMap, workingQuery, tags);
+    _extractMultiWordMatches(_rentPeriodMap, workingQuery, tags);
+    _extractMultiWordMatches(_paymentMap, workingQuery, tags);
+    _extractMultiWordMatches(_tenantMap, workingQuery, tags);
+    _extractMultiWordMatches(_sourceMap, workingQuery, tags);
+    _extractMultiWordMatches(_featuresMap, workingQuery, tags);
+    _extractMultiWordMatches(_projectMap, workingQuery, tags);
+
+    // 4. Determine category
+    int? categoryId;
+    String? categoryName;
+    double confidence = 0.5;
+
+    // Score using deduplicated signal sets
+    final saleScore = _scoreSignals(workingQuery, _saleSignals);
+    final rentScore = _scoreSignals(workingQuery, _rentSignals);
+    final hasStrongLand = _hasAnySignal(workingQuery, _strongLandSignals);
+
+    // Land detection: requires strong land word
+    if (hasStrongLand) {
+      categoryId = 10313;
+      if (saleScore > rentScore) {
+        categoryName = 'أراضي للبيع';
+      } else if (rentScore > saleScore) {
+        categoryName = 'أراضي للإيجار';
+      } else {
+        categoryName = 'أراضي';
+      }
+      confidence = 0.9;
+    } else if (saleScore > 0 && saleScore >= rentScore) {
+      if (tags.contains('شقة')) { categoryId = 10301; categoryName = 'شقق للبيع'; }
+      else if (tags.contains('فيلا')) { categoryId = 10101; categoryName = 'فلل وقصور'; }
+      else if (tags.contains('بيت')) { categoryId = 10102; categoryName = 'بيوت مستقلة'; }
+      else if (tags.contains('دوبلكس')) { categoryId = 10103; categoryName = 'دوبلكس / بنتهاوس'; }
+      else if (tags.contains('عمارة')) { categoryId = 10104; categoryName = 'عمارة'; }
+      else if (tags.contains('طابق كامل')) { categoryId = 10106; categoryName = 'طابق كامل'; }
+      else if (tags.contains('روف')) { categoryId = 10105; categoryName = 'ملحق / روف'; }
+      else if (tags.contains('محل تجاري')) { categoryId = 10303; categoryName = 'محل تجاري'; }
+      else if (tags.contains('مكتب')) { categoryId = 10304; categoryName = 'مكتب'; }
+      else if (tags.contains('أرض')) { categoryId = 10313; categoryName = 'ارض'; }
+      else if (tags.contains('مزرعة')) { categoryId = 10314; categoryName = 'مزرعة'; }
+      else if (saleScore >= 2) {
+        categoryId = 2;
+        categoryName = 'عقارات للبيع';
+      } else {
+        // Just "للبيع" without property tags

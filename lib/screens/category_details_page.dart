@@ -341,9 +341,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
       final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('كل المدن') || _locationsFilter!.contains('كل الأردن'))) ? null : _locationsFilter;
 
-      // Execute loadSubCategories without blocking the ads fetching
-      Provider.of<AppProvider>(context, listen: false)
-          .loadSubCategories(widget.category.id, locations: cleanedLocations)
+      // Recursively load the whole subtree (without blocking the ads fetching)
+      // so we can surface only the "ended" (leaf) subcategories as chips.
+      _loadLeafSubCategories(widget.category.id, cleanedLocations, thisGeneration, forceRefresh: true)
           .then((_) {
             if (mounted && thisGeneration == _fetchGeneration) {
               setState(() => _isSubcategoriesLoaded = true);
@@ -353,7 +353,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             if (mounted && thisGeneration == _fetchGeneration) {
               setState(() => _isSubcategoriesLoaded = true);
             }
-            return false;
           });
 
       // Execute all 2 requests via concurrent futures 
@@ -406,10 +405,18 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         for (var ad in fetchedAds) {
           for (var tag in ad.tags) {
             _tagCounts[tag] = (_tagCounts[tag] ?? 0) + 1;
-            _availableTags.add(tag);
           }
           currentTags.addAll(ad.tags);
         }
+        
+        if (_availableTags.isEmpty) {
+          for (var ad in fetchedAds) {
+            for (var tag in ad.tags) {
+              _availableTags.add(tag);
+            }
+          }
+        }
+        
         _compatibleTags = currentTags;
         
         // Populate ordered tags once
@@ -434,6 +441,43 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         _hasError = true;
       });
     }
+  }
+
+  /// Recursively loads the entire subcategory subtree under [parentId] so the
+  /// details page can display only the leaf ("ended") subcategories. Deeper
+  /// levels are fetched lazily (only once); the direct parent is refreshed when
+  /// [forceRefresh] is set so location-aware counts stay up to date.
+  Future<void> _loadLeafSubCategories(int parentId, List<String>? locations, int generation, {bool forceRefresh = false}) async {
+    if (!mounted || generation != _fetchGeneration) return;
+    final provider = Provider.of<AppProvider>(context, listen: false);
+
+    if (forceRefresh || !provider.fetchedParentIds.contains(parentId)) {
+      await provider.loadSubCategories(parentId, locations: locations);
+    }
+    if (!mounted || generation != _fetchGeneration) return;
+
+    final children = provider.categories?.where((c) => c.parentId == parentId).toList() ?? [];
+    if (children.isEmpty) return;
+
+    await Future.wait(
+      children.map((c) => _loadLeafSubCategories(c.id, locations, generation)),
+    );
+  }
+
+  /// Flattens the loaded subtree under [parentId] down to leaf categories only
+  /// (categories that themselves have no subcategories). Parents that have
+  /// subcategories are skipped and replaced by their leaf descendants.
+  List<Category> _collectLeafSubCategories(List<Category> allCats, int parentId) {
+    final result = <Category>[];
+    for (final child in allCats.where((c) => c.parentId == parentId)) {
+      final hasChildren = allCats.any((c) => c.parentId == child.id);
+      if (hasChildren) {
+        result.addAll(_collectLeafSubCategories(allCats, child.id));
+      } else {
+        result.add(child);
+      }
+    }
+    return result;
   }
 
   Future<void> _loadMoreAds() async {
@@ -462,8 +506,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         _skip += _limit;
         _hasMoreAds = fetchedAds.length == _limit;
         _isLoadingMore = false;
-        
-        if (_selectedTags.isEmpty) {
+        if (_availableTags.isEmpty) {
           for (var ad in fetchedAds) {
             for (var tag in ad.tags) {
               _tagCounts[tag] = (_tagCounts[tag] ?? 0) + 1;
@@ -953,7 +996,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   void _showFilterBottomSheet(Color brandColor) {
     final allCats = Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories;
-    final subCategories = allCats.where((c) => c.parentId == widget.category.id).toList();
+    // Only offer leaf ("ended") subcategories — never a category with children.
+    final subCategories = _collectLeafSubCategories(allCats, widget.category.id);
 
     showModalBottomSheet(
       context: context,
@@ -2332,11 +2376,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     final allCats = Provider.of<AppProvider>(context).categories ?? widget.allCategories;
     if (allCats.isEmpty) return const SizedBox.shrink();
 
-    final subCategories = allCats
-        .where((c) => c.parentId == widget.category.id &&
-                      (_searchQuery.isEmpty || c.name.toLowerCase().contains(_searchQuery.toLowerCase())))
+    // Only ever surface "ended" (leaf) subcategories here — never a category
+    // that itself has subcategories. Parents are flattened to their leaves.
+    final subCategories = _collectLeafSubCategories(allCats, widget.category.id)
+        .where((c) => _searchQuery.isEmpty || c.name.toLowerCase().contains(_searchQuery.toLowerCase()))
         .toList();
-        
+
     // Sort subcategories by adsCount descending
     subCategories.sort((a, b) => b.adsCount.compareTo(a.adsCount));
 
