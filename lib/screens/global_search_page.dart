@@ -295,9 +295,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         intent.location == null &&
         (intent.cleanQuery == null || intent.cleanQuery!.isEmpty);
 
-    // Only consider it a broad parent if it is Level 1 or Level 2 (e.g. parentId is null, 2, 3, or 10313)
-    final isBroadParent = targetCat != null && 
-        (targetCat.parentId == null || targetCat.parentId == 2 || targetCat.parentId == 3 || targetCat.parentId == 10313);
+    final isBroadParent = targetCat != null && allCats.any((c) => c.parentId == targetCat!.id);
 
     if (isBroadParent && isGenericCategorySearch) {
       await Navigator.push(
