@@ -2172,7 +2172,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       return val == 'ستوديو' ? 'ستوديو' : '$val غرف نوم';
     }
     if (tag.startsWith('bathrooms:')) return '${tag.substring(10)} حمامات';
-    if (tag.startsWith('floor:')) return 'طابق ${tag.substring(6)}';
+    if (tag.startsWith('floor:')) {
+      final f = tag.substring(6);
+      if (f.contains('طابق') || f.contains('الطابق') || f.contains('أرضي') || f.contains('روف')) return f;
+      return 'طابق $f';
+    }
     if (tag.startsWith('age:')) return 'عمر ${tag.substring(4)}';
     if (tag.startsWith('min_area:')) return 'مساحة أكبر من ${tag.substring(9)}';
     if (tag.startsWith('max_area:')) return 'مساحة أقل من ${tag.substring(9)}';
