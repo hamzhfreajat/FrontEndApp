@@ -288,7 +288,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
       }
     }
 
-    final finalTags = currentTags.isEmpty ? null : currentTags;
+    final finalTags = intent.tags.isEmpty ? null : intent.tags.toList();
     final locs = intent.location != null ? [intent.location!] : null;
 
     final isGenericCategorySearch = finalTags == null &&
