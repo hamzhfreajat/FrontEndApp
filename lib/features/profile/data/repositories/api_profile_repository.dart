@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
@@ -10,8 +10,8 @@ import '../../../../services/api_service.dart'; // To access base URL
 class ApiProfileRepositoryImpl implements ProfileRepository {
   
   Future<Map<String, String>> _getHeaders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt_token');
     return {
       'Content-Type': 'application/json',
       'ngrok-skip-browser-warning': 'true',

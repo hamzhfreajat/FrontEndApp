@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/ad.dart';
@@ -156,8 +156,8 @@ class ApiService {
 
   // Helper to get headers with Auth token dynamically appended
   Future<Map<String, String>> _getHeaders() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('jwt_token');
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt_token');
     
     final headers = Map<String, String>.from(_defaultHeaders);
     if (token != null) {

@@ -45,6 +45,8 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout([BuildContext? context]) async {
     await _storage.delete(key: 'jwt_token');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
     _token = null;
     _userData = null;
     AnalyticsEngine().setUserId('guest');
