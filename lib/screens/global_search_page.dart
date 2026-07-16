@@ -896,10 +896,13 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-                fontWeight: FontWeight.w700, fontSize: 13, color: color),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                  fontWeight: FontWeight.w700, fontSize: 13, color: color),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
