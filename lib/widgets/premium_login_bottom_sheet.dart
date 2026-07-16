@@ -11,6 +11,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../providers/notification_provider.dart';
+import '../providers/app_provider.dart';
+import '../providers/saved_search_provider.dart';
 import '../utils/error_handler.dart';
 
 class PremiumLoginBottomSheet extends StatefulWidget {
@@ -69,6 +71,13 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
           notifProvider.connect(uid);
           notifProvider.loadUnreadCount();
         }
+      }
+
+      try {
+        Provider.of<AppProvider>(context, listen: false).refreshAll();
+        Provider.of<SavedSearchProvider>(context, listen: false).refreshSearches();
+      } catch (e) {
+        // Safe fallback in case context is unmounted
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
