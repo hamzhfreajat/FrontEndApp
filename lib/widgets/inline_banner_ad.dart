@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/ad_manager.dart';
 
 class InlineBannerAd extends StatefulWidget {
   const InlineBannerAd({super.key});
@@ -9,38 +9,36 @@ class InlineBannerAd extends StatefulWidget {
   State<InlineBannerAd> createState() => _InlineBannerAdState();
 }
 
-class _InlineBannerAdState extends State<InlineBannerAd> {
+class _InlineBannerAdState extends State<InlineBannerAd> with AutomaticKeepAliveClientMixin {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
-  final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-2993417564924380/9946593618' // Real Android Ad Unit ID
-      : 'ca-app-pub-2993417564924380/8456156193'; // Real iOS Ad Unit ID
+  @override
+  bool get wantKeepAlive => true; // Keep ad alive when scrolling
 
   @override
-  void initState() {
-    super.initState();
-    _loadAd();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isLoaded && _bannerAd == null) {
+      _loadAd();
+    }
   }
 
-  void _loadAd() {
-    _bannerAd = BannerAd(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          debugPrint('BannerAd loaded.');
-          setState(() {
-            _isLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, err) {
-          debugPrint('BannerAd failed to load: $err');
-          ad.dispose();
-        },
-      ),
-    )..load();
+  Future<void> _loadAd() async {
+    // Get screen width to pass to AdManager
+    final double width = MediaQuery.of(context).size.width;
+    
+    // Get preloaded ad from manager (or it will create a new one instantly)
+    final BannerAd ad = await AdManager.instance.getAd(width);
+    
+    if (mounted) {
+      setState(() {
+        _bannerAd = ad;
+        _isLoaded = true;
+      });
+    } else {
+      ad.dispose();
+    }
   }
 
   @override
@@ -51,6 +49,8 @@ class _InlineBannerAdState extends State<InlineBannerAd> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
     if (_bannerAd != null && _isLoaded) {
       return Container(
         alignment: Alignment.center,
