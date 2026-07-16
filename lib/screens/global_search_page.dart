@@ -424,27 +424,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                       },
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildCategoryOption(
-                      title: 'أراضي',
-                      icon: '🌍',
-                      color: const Color(0xFF00C853),
-                      onTap: () {
-                        Navigator.pop(ctx);
-                        final targetCat = allCats.firstWhere((c) => c.id == 10313, orElse: () => Category(id: 10313, name: 'أراضي'));
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => CategoriesPage(
-                          parentId: 10313,
-                          allCategories: allCats,
-                          title: 'أراضي',
-                          category: targetCat,
-                          initialSearchQuery: intent.cleanQuery ?? keyword,
-                          initialLocations: intent.location != null ? [intent.location!] : null,
-                          initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
-                        )));
-                      },
-                    ),
-                  ),
+
                 ],
               ),
               const SizedBox(height: 12),
