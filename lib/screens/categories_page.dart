@@ -153,7 +153,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
                        child: Text(
                          sectionTitle,
-                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black87),
                        ),
                      ),
                      GridView.builder(
@@ -235,7 +235,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                     widget.title,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.bold,
                       fontFamily: 'Tajawal',
                       fontSize: 18,
                       shadows: [Shadow(color: Colors.black87, blurRadius: 10)],
@@ -534,7 +534,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyLarge?.color ?? const Color(0xFF1E1E2C),
                   fontSize: 12,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.w600,
                   fontFamily: 'Tajawal',
                 ),
               ),

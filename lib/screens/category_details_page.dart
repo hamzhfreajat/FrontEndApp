@@ -958,7 +958,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                    child: Text('ترتيب حسب', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: -0.5, color: Colors.black87)),
+                    child: Text('ترتيب حسب', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: Colors.black87)),
                   ),
                   const SizedBox(height: 12),
                   const Padding(
@@ -1431,7 +1431,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           Flexible(
                             child: Text(
                               locationText, 
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Color(0xFF1A1A2E)),
+                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -1501,7 +1501,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 Expanded(
                   child: Text(
                     widget.category.name,
-                    style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 24, letterSpacing: -0.5, color: Colors.black87),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24, letterSpacing: -0.5, color: Colors.black87),
                   ),
                 ),
                 if (_isLoadingAds)
@@ -1540,7 +1540,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           const SizedBox(width: 6),
                           Text(
                             '$_totalAdsCount إعلان',
-                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: brandColor),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: brandColor),
                           ),
                         ],
                       ),
@@ -2609,7 +2609,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       const SizedBox(height: 8),
                       const Text('استكشاف الخريطة',
                           style: TextStyle(
-                              fontWeight: FontWeight.w900,
+                              fontWeight: FontWeight.bold,
                               fontSize: 18,
                               color: Colors.black87)),
                       const SizedBox(height: 4),
@@ -2933,7 +2933,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                 style: TextStyle(
                                     color: Color(0xFF0075FF),
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w900)),
+                                    fontWeight: FontWeight.bold)),
                             SizedBox(width: 4),
                             Icon(Icons.verified, color: Color(0xFF0075FF), size: 14),
                           ],
@@ -2965,7 +2965,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w900,
+                    fontWeight: FontWeight.bold,
                     fontSize: 18,
                     height: 1.3,
                     color: Colors.black,
@@ -2982,7 +2982,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       '${ad.price.toStringAsFixed(0)} دينار',
                       style: const TextStyle(
                         fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.bold,
                         fontSize: 22,
                         letterSpacing: -0.5,
                         color: Color(0xFF0075FF),
@@ -3451,7 +3451,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Text('موثوق', style: TextStyle(color: Color(0xFF0075FF), fontSize: 10, fontWeight: FontWeight.w900)),
+                Text('موثوق', style: TextStyle(color: Color(0xFF0075FF), fontSize: 10, fontWeight: FontWeight.bold)),
                 SizedBox(width: 4),
                 Icon(Icons.verified, color: Color(0xFF0075FF), size: 12),
               ],
