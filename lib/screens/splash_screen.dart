@@ -10,6 +10,7 @@ import '../services/api_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,8 +23,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(milliseconds: 3500), () {
-      _navigateToNext();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (Platform.isIOS) {
+        try {
+          await AppTrackingTransparency.requestTrackingAuthorization();
+        } catch (e) {
+          debugPrint('Error requesting ATT: $e');
+        }
+      }
+      Future.delayed(const Duration(milliseconds: 3500), () {
+        _navigateToNext();
+      });
     });
   }
 

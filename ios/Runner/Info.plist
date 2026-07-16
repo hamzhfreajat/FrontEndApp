@@ -8,6 +8,8 @@
 	<true/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2993417564924380~3572293932</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>يستخدم هذا التطبيق معرف الإعلانات الخاص بك لتقديم إعلانات مخصصة تهمك ولدعم استمرار التطبيق مجاناً.</string>
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>
