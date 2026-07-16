@@ -9,6 +9,7 @@ import 'ad_details_page.dart';
 import 'category_details_page.dart';
 import '../providers/saved_search_provider.dart';
 import '../providers/app_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/category.dart';
 
 class SavedAdsPage extends StatefulWidget {
@@ -24,11 +25,34 @@ class _SavedAdsPageState extends State<SavedAdsPage> {
   
   List<Ad> _ads = [];
   bool _isLoadingAds = true;
+  String? _lastToken;
 
   @override
   void initState() {
     super.initState();
-    _fetchAds();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = context.watch<AuthProvider>();
+    final currentToken = auth.token;
+    
+    if (currentToken != _lastToken) {
+      _lastToken = currentToken;
+      if (currentToken != null) {
+        _fetchAds();
+        // Also refresh saved searches when login state changes
+        context.read<SavedSearchProvider>().refreshSearches();
+      } else {
+        if (mounted) {
+          setState(() {
+            _ads.clear();
+            _isLoadingAds = false;
+          });
+        }
+      }
+    }
   }
 
   Future<void> _fetchAds() async {
