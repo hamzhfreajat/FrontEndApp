@@ -102,6 +102,15 @@ class AppProvider extends ChangeNotifier {
       stories = await _apiService.fetchStories();
       await loadRecentlyViewed();
       
+      try {
+        final savedAdsList = await _apiService.fetchSavedAds();
+        locallySavedAdIds.clear();
+        locallyUnsavedAdIds.clear();
+        locallySavedAdIds.addAll(savedAdsList.map((a) => a.id));
+      } catch (e) {
+        if (kDebugMode) print("Could not fetch saved ads for optimistic UI on login: $e");
+      }
+
       // Load locations asynchronously in the background so it doesn't delay the Home Page
       _apiService.fetchLocations().then((locations) async {
         dbCities = locations;
