@@ -38,8 +38,21 @@ class AppProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  // Optimistic UI state for favorites to mask API caching
+  final Set<int> locallySavedAdIds = {};
+  final Set<int> locallyUnsavedAdIds = {};
+
   /// Optimistically updates the global favorites counter
-  Future<void> toggleFavoriteCount(bool isSaved) async {
+  Future<void> toggleFavoriteCount(bool isSaved, {int? adId}) async {
+    if (adId != null) {
+      if (isSaved) {
+        locallySavedAdIds.add(adId);
+        locallyUnsavedAdIds.remove(adId);
+      } else {
+        locallyUnsavedAdIds.add(adId);
+        locallySavedAdIds.remove(adId);
+      }
+    }
     if (metrics == null) {
       try {
         metrics = await _apiService.fetchDashboardMetrics();
@@ -69,6 +82,8 @@ class AppProvider extends ChangeNotifier {
   void clearUserData() {
     metrics = null;
     recentlyViewedAds = [];
+    locallySavedAdIds.clear();
+    locallyUnsavedAdIds.clear();
     notifyListeners();
   }
 

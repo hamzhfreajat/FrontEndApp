@@ -63,13 +63,25 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
     _has360 = widget.ad.attributes != null && widget.ad.attributes!['virtual_tour_url'] != null;
     _hasVideo = widget.ad.attributes != null && widget.ad.attributes!['video_url'] != null;
     
-    _isFavorite = widget.ad.isSaved;
+    final appProvider = context.read<AppProvider>();
+    if (appProvider.locallySavedAdIds.contains(widget.ad.id)) {
+      _isFavorite = true;
+    } else if (appProvider.locallyUnsavedAdIds.contains(widget.ad.id)) {
+      _isFavorite = false;
+    } else {
+      _isFavorite = widget.ad.isSaved;
+    }
   }
 
   @override
   void didUpdateWidget(PremiumRealEstateCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.ad.isSaved != _isFavorite) {
+    final appProvider = context.read<AppProvider>();
+    if (appProvider.locallySavedAdIds.contains(widget.ad.id)) {
+      _isFavorite = true;
+    } else if (appProvider.locallyUnsavedAdIds.contains(widget.ad.id)) {
+      _isFavorite = false;
+    } else if (widget.ad.isSaved != _isFavorite) {
       _isFavorite = widget.ad.isSaved;
     }
   }
@@ -95,7 +107,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
       if (mounted) {
         setState(() => _isFavorite = isNowSaved);
         widget.ad.isSaved = isNowSaved;
-        context.read<AppProvider>().toggleFavoriteCount(isNowSaved);
+        context.read<AppProvider>().toggleFavoriteCount(isNowSaved, adId: widget.ad.id);
       }
     } catch (e) {
       if (mounted) {

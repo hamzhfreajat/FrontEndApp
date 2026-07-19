@@ -90,7 +90,14 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
     _fadeAnim = CurvedAnimation(parent: _fadeController, curve: Curves.easeOut);
     _fadeController.forward();
     
-    _isFavorited = widget.ad.isSaved;
+    final appProvider = context.read<AppProvider>();
+    if (appProvider.locallySavedAdIds.contains(widget.ad.id)) {
+      _isFavorited = true;
+    } else if (appProvider.locallyUnsavedAdIds.contains(widget.ad.id)) {
+      _isFavorited = false;
+    } else {
+      _isFavorited = widget.ad.isSaved;
+    }
 
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _isPageTransitioning = false);
@@ -221,7 +228,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
       final isNowSaved = await _apiService.toggleSaveAd(widget.ad.id);
       if (mounted) {
         setState(() => _isFavorited = isNowSaved);
-        context.read<AppProvider>().toggleFavoriteCount(isNowSaved);
+        context.read<AppProvider>().toggleFavoriteCount(isNowSaved, adId: widget.ad.id);
         if (isNowSaved) {
           _snack('تم حفظ الإعلان في المفضلة ❤️');
         } else {
