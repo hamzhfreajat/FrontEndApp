@@ -107,6 +107,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.683492643202-6c3dpratbgg0ec33ujmh4b66ar969ni4</string>
+				<string>sooqcom</string>
 			</array>
 		</dict>
 	</array>
