@@ -21,17 +21,73 @@ import '../providers/auth_provider.dart';
 
 class AuthInterceptingClient extends http.BaseClient {
   final http.Client _inner = http.Client();
+  bool _isRefreshing = false;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    final requestClone = _copyRequest(request);
     final response = await _inner.send(request);
+    
     if (response.statusCode == 401) {
+      final storage = const FlutterSecureStorage();
+      final refreshToken = await storage.read(key: 'refresh_token');
+      
+      if (refreshToken != null) {
+        if (!_isRefreshing) {
+          _isRefreshing = true;
+          try {
+            final refreshResponse = await _inner.post(
+              Uri.parse('${ApiService.baseUrl}/auth/refresh'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({'refresh_token': refreshToken})
+            );
+            
+            if (refreshResponse.statusCode == 200) {
+              final data = jsonDecode(refreshResponse.body);
+              await storage.write(key: 'jwt_token', value: data['token']);
+              if (data['refresh_token'] != null) {
+                 await storage.write(key: 'refresh_token', value: data['refresh_token']);
+              }
+              
+              final context = navigatorKey.currentContext;
+              if (context != null) {
+                Provider.of<AuthProvider>(context, listen: false).login(data['token'], refreshToken: data['refresh_token']);
+              }
+              
+              requestClone.headers['Authorization'] = 'Bearer ${data['token']}';
+              _isRefreshing = false;
+              return await _inner.send(requestClone);
+            }
+          } catch (e) {
+            debugPrint("Refresh token failed: $e");
+          }
+          _isRefreshing = false;
+        }
+      }
+      
       final context = navigatorKey.currentContext;
       if (context != null) {
         Provider.of<AuthProvider>(context, listen: false).logout(context);
       }
     }
     return response;
+  }
+  
+  http.BaseRequest _copyRequest(http.BaseRequest request) {
+    if (request is http.Request) {
+      var newRequest = http.Request(request.method, request.url)
+        ..encoding = request.encoding
+        ..bodyBytes = request.bodyBytes;
+      newRequest.headers.addAll(request.headers);
+      return newRequest;
+    } else if (request is http.MultipartRequest) {
+      var newRequest = http.MultipartRequest(request.method, request.url)
+        ..fields.addAll(request.fields)
+        ..files.addAll(request.files);
+      newRequest.headers.addAll(request.headers);
+      return newRequest;
+    }
+    return request;
   }
 }
 
