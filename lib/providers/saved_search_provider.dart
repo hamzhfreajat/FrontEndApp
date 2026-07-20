@@ -10,7 +10,7 @@ class SavedSearchProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   SavedSearchProvider() {
-    refreshSearches();
+    Future.microtask(() => refreshSearches());
   }
 
   Future<void> refreshSearches() async {

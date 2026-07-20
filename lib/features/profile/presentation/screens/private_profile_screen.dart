@@ -162,15 +162,15 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (innerContext, setDialogState) {
           return AlertDialog(
             title: const Text('نوع الحساب', style: TextStyle(fontWeight: FontWeight.bold)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RadioListTile(title: const Text('حساب شخصي / مُنشئ محتوى'), value: 'private', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
-                RadioListTile(title: const Text('شركة / مؤسسة'), value: 'company', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
-                RadioListTile(title: const Text('تاجر / معرض'), value: 'dealer', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
+                RadioListTile(title: const Text('حساب شخصي / مُنشئ محتوى'), value: 'private', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
+                RadioListTile(title: const Text('شركة / مؤسسة'), value: 'company', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
+                RadioListTile(title: const Text('تاجر / معرض'), value: 'dealer', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
               ],
             ),
             actions: [
@@ -257,15 +257,15 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (innerContext, setDialogState) {
           return AlertDialog(
             title: const Text('طريقة التواصل المفضلة', style: TextStyle(fontWeight: FontWeight.bold)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                RadioListTile(title: const Text('اتصال هاتفي'), value: 'phone', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
-                RadioListTile(title: const Text('رسائل واتساب'), value: 'whatsapp', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
-                RadioListTile(title: const Text('دردشة التطبيق'), value: 'chat', groupValue: selected, onChanged: (val) => setState(() => selected = val.toString())),
+                RadioListTile(title: const Text('اتصال هاتفي'), value: 'phone', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
+                RadioListTile(title: const Text('رسائل واتساب'), value: 'whatsapp', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
+                RadioListTile(title: const Text('دردشة التطبيق'), value: 'chat', groupValue: selected, onChanged: (val) => setDialogState(() => selected = val.toString())),
               ],
             ),
             actions: [
@@ -292,7 +292,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (innerContext, setDialogState) {
           return AlertDialog(
             title: const Text('اللغات المتحدثة', style: TextStyle(fontWeight: FontWeight.bold)),
             content: Wrap(
@@ -304,7 +304,7 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
                   label: Text(lang),
                   selected: isSel,
                   onSelected: (val) {
-                    setState(() {
+                    setDialogState(() {
                       if (val) selected.add(lang);
                       else selected.remove(lang);
                     });

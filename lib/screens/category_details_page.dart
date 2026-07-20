@@ -18,6 +18,7 @@ import '../widgets/premium_login_bottom_sheet.dart';
 import '../widgets/shimmer_loading.dart';
 import '../widgets/premium_video_player.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/app_provider.dart';
 import '../providers/notification_provider.dart';
 import 'notifications_page.dart';
@@ -46,6 +47,7 @@ class CategoryDetailsPage extends StatefulWidget {
   final String? initialSort;
   final bool? initialIsHot;
   final String? initialSearchQuery;
+  final String? originalSearchQuery;
   final bool initialShowSaveSearch;
 
   const CategoryDetailsPage({
@@ -61,6 +63,7 @@ class CategoryDetailsPage extends StatefulWidget {
     this.initialSort,
     this.initialIsHot,
     this.initialSearchQuery,
+    this.originalSearchQuery,
     this.initialShowSaveSearch = false,
   });
 
@@ -110,6 +113,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   bool _isHighlightActive = false;
   bool _isSubcategoriesLoaded = false;
   String _searchQuery = '';
+  String? _originalSearchQuery;
   late final TextEditingController _searchController;
 
   // Dynamic Filters Hookup
@@ -166,6 +170,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     super.initState();
     AnalyticsEngine().logScreenViewed(screenName: widget.category.name);
     _searchQuery = widget.initialSearchQuery ?? '';
+    _originalSearchQuery = widget.originalSearchQuery ?? _searchQuery;
     _searchController = TextEditingController(text: _searchQuery);
     _scrollController.addListener(_onScroll);
     
@@ -370,6 +375,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           categoryId: widget.category.id, 
           tags: tags, 
           search: _searchQuery.isNotEmpty ? _searchQuery : null,
+          originalSearch: _originalSearchQuery?.isNotEmpty == true ? _originalSearchQuery : null,
           skip: _skip, 
           limit: _limit,
           sortBy: _sortBy,
@@ -492,6 +498,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         skip: _skip, 
         limit: _limit,
         search: _searchQuery.isNotEmpty ? _searchQuery : null,
+        originalSearch: _originalSearchQuery?.isNotEmpty == true ? _originalSearchQuery : null,
         sortBy: _sortBy,
         minPrice: _minPrice,
         maxPrice: _maxPrice,
@@ -1759,10 +1766,31 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         ),
         child: TextField(
           controller: _searchController,
+          textInputAction: TextInputAction.search,
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
             });
+          },
+          onSubmitted: (value) async {
+            setState(() {
+              _searchQuery = value;
+              _originalSearchQuery = value;
+            });
+            if (value.trim().isNotEmpty) {
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              if (authProvider.isAuthenticated) {
+                _apiService.saveRecentSearch(value.trim());
+              } else {
+                final prefs = await SharedPreferences.getInstance();
+                List<String> recent = prefs.getStringList('recent_searches') ?? [];
+                recent.remove(value.trim());
+                recent.insert(0, value.trim());
+                if (recent.length > 5) recent = recent.sublist(0, 5);
+                await prefs.setStringList('recent_searches', recent);
+              }
+            }
+            _fetchAds();
           },
           decoration: InputDecoration(
             border: InputBorder.none,

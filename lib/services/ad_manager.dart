@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -58,7 +59,7 @@ class AdManager {
   }
 
   /// Returns a preloaded ad immediately if available, otherwise creates and loads a new one.
-  Future<BannerAd> getAd(double width) async {
+  Future<BannerAd?> getAd(double width) async {
     // Top up the queue in the background
     preloadAds(width);
     
@@ -69,18 +70,23 @@ class AdManager {
     // If no ad is ready, we have to create one on the spot
     final AdSize size = (await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width.truncate())) ?? AdSize.banner;
     
+    final completer = Completer<BannerAd?>();
     final BannerAd ad = BannerAd(
       adUnitId: _adUnitId,
       request: const AdRequest(),
       size: size,
       listener: BannerAdListener(
-        onAdFailedToLoad: (ad, err) {
+        onAdLoaded: (loadedAd) {
+          if (!completer.isCompleted) completer.complete(loadedAd as BannerAd);
+        },
+        onAdFailedToLoad: (failedAd, err) {
           debugPrint('AdManager (JIT): BannerAd failed to load: $err');
-          ad.dispose();
+          failedAd.dispose();
+          if (!completer.isCompleted) completer.complete(null);
         },
       ),
     );
     await ad.load();
-    return ad;
+    return completer.future;
   }
 }

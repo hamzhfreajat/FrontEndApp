@@ -367,6 +367,7 @@ class ApiService {
     String? userId,
     List<String>? tags, 
     String? search,
+    String? originalSearch,
     String? sortBy,
     double? minPrice,
     double? maxPrice,
@@ -380,6 +381,7 @@ class ApiService {
     String url = '$baseUrl/ads';
     List<String> queryParams = [];
     if (search != null && search.isNotEmpty) queryParams.add('search=${Uri.encodeComponent(search)}');
+    if (originalSearch != null && originalSearch.isNotEmpty) queryParams.add('original_search=${Uri.encodeComponent(originalSearch)}');
     if (section != null) queryParams.add('section=${Uri.encodeComponent(section)}');
     if (categoryId != null && categoryId > 0) queryParams.add('category_id=$categoryId');
     if (userId != null && userId.isNotEmpty) queryParams.add('user_id=$userId');
@@ -1222,6 +1224,63 @@ class ApiService {
       return json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to fetch version info: ${response.statusCode}');
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // User Recent Searches API
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Future<List<String>> fetchRecentSearches() async {
+    try {
+      final response = await _client.get(
+        Uri.parse('$baseUrl/users/me/recent-searches'),
+        headers: await _getHeaders(),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(utf8.decode(response.bodyBytes));
+        return data.cast<String>();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching recent searches: $e');
+      return [];
+    }
+  }
+
+  Future<void> saveRecentSearch(String query) async {
+    if (query.trim().isEmpty) return;
+    try {
+      await _client.post(
+        Uri.parse('$baseUrl/users/me/recent-searches'),
+        headers: await _getHeaders(),
+        body: json.encode({'query': query}),
+      ).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('Error saving recent search: $e');
+    }
+  }
+
+  Future<void> clearRecentSearches() async {
+    try {
+      await _client.delete(
+        Uri.parse('$baseUrl/users/me/recent-searches'),
+        headers: await _getHeaders(),
+      ).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('Error clearing recent searches: $e');
+    }
+  }
+
+  Future<void> deleteRecentSearch(String query) async {
+    try {
+      await _client.delete(
+        Uri.parse('$baseUrl/users/me/recent-searches/${Uri.encodeComponent(query)}'),
+        headers: await _getHeaders(),
+      ).timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('Error deleting recent search: $e');
     }
   }
 }

@@ -18,6 +18,7 @@ class CategoriesPage extends StatefulWidget {
   final Category? category;
   
   final String? initialSearchQuery;
+  final String? originalSearchQuery;
   final List<String>? initialTags;
   final List<String>? initialLocations;
 
@@ -28,6 +29,7 @@ class CategoriesPage extends StatefulWidget {
     this.title = 'الأقسام',
     this.category,
     this.initialSearchQuery,
+    this.originalSearchQuery,
     this.initialTags,
     this.initialLocations,
   });
@@ -406,6 +408,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 category: cat,
                 allCategories: allCategories,
                 initialSearchQuery: widget.initialSearchQuery,
+                originalSearchQuery: widget.originalSearchQuery,
                 initialTags: widget.initialTags,
                 initialLocations: widget.initialLocations,
               ),
@@ -459,6 +462,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                 category: cat,
                 allCategories: allCategories,
                 initialSearchQuery: widget.initialSearchQuery,
+                originalSearchQuery: widget.originalSearchQuery,
                 initialTags: widget.initialTags,
                 initialLocations: widget.initialLocations,
               ),

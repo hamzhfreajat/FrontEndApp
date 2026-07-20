@@ -25,7 +25,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    Future.microtask(() => _fetchData());
   }
 
   Future<void> _fetchData() async {

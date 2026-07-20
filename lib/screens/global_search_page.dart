@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../services/analytics_engine.dart';
 import '../widgets/emoji_category_icon.dart';
+import '../providers/auth_provider.dart';
 
 
 class GlobalSearchPage extends StatefulWidget {
@@ -55,7 +56,16 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
         _apiService.getTrendingSearches(),
       ]);
       final prefs = await SharedPreferences.getInstance();
-      final recent = prefs.getStringList('recent_searches') ?? [];
+      List<String> recent = [];
+      
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        if (authProvider.isAuthenticated) {
+          recent = await _apiService.fetchRecentSearches();
+        } else {
+          recent = prefs.getStringList('recent_searches') ?? [];
+        }
+      }
 
       if (mounted) {
         final provider = Provider.of<AppProvider>(context, listen: false);
@@ -102,12 +112,23 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     final appProvider = Provider.of<AppProvider>(context, listen: false);
     final cities = appProvider.dbCities;
     final prefs = await SharedPreferences.getInstance();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    List<String> recent = prefs.getStringList('recent_searches') ?? [];
-    recent.remove(keyword);
-    recent.insert(0, keyword);
-    if (recent.length > 5) recent = recent.sublist(0, 5);
-    await prefs.setStringList('recent_searches', recent);
+    if (authProvider.isAuthenticated) {
+      // Save in background to avoid blocking
+      _apiService.saveRecentSearch(keyword);
+      
+      _recentSearches.remove(keyword);
+      _recentSearches.insert(0, keyword);
+      if (_recentSearches.length > 5) _recentSearches = _recentSearches.sublist(0, 5);
+    } else {
+      List<String> recent = prefs.getStringList('recent_searches') ?? [];
+      recent.remove(keyword);
+      recent.insert(0, keyword);
+      if (recent.length > 5) recent = recent.sublist(0, 5);
+      await prefs.setStringList('recent_searches', recent);
+      _recentSearches = recent;
+    }
 
     setState(() => _isLoading = true);
     
@@ -144,7 +165,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
     }
 
     // Await routing so loading indicator stays on screen until transition completes
-    await _routeByIntent(mergedIntent, allCats, isTag: isTag, rawTag: rawTag);
+    await _routeByIntent(mergedIntent, allCats, keyword: keyword, isTag: isTag, rawTag: rawTag);
     
     if (mounted) {
       setState(() => _isLoading = false);
@@ -207,6 +228,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
   Future<void> _routeByIntent(
     _MergedIntent intent,
     List<Category> allCats, {
+    String? keyword,
     bool isTag = false,
     String? rawTag,
   }) async {
@@ -307,6 +329,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
             title: targetCat.name,
             category: targetCat,
             initialSearchQuery: intent.cleanQuery,
+            originalSearchQuery: keyword,
             initialTags: finalTags,
             initialLocations: locs,
           ),
@@ -320,6 +343,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
             category: targetCat!,
             allCategories: allCats,
             initialSearchQuery: intent.cleanQuery,
+            originalSearchQuery: keyword,
             initialTags: finalTags,
             initialLocations: locs,
           ),
@@ -397,6 +421,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                           title: 'عقارات للبيع',
                           category: targetCat,
                           initialSearchQuery: intent.cleanQuery ?? keyword,
+                          originalSearchQuery: keyword,
                           initialLocations: intent.location != null ? [intent.location!] : null,
                           initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
                         )));
@@ -418,6 +443,7 @@ class _GlobalSearchPageState extends State<GlobalSearchPage>
                           title: 'عقارات للإيجار',
                           category: targetCat,
                           initialSearchQuery: intent.cleanQuery ?? keyword,
+                          originalSearchQuery: keyword,
                           initialLocations: intent.location != null ? [intent.location!] : null,
                           initialTags: intent.tags.isNotEmpty ? intent.tags.toList() : null,
                         )));
