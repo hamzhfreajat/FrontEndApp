@@ -12,5 +12,7 @@
 		<string>applinks:www.sooq-com.com</string>
 		<string>applinks:share.sooq-com.com</string>
 	</array>
+	<key>aps-environment</key>
+	<string>production</string>
 </dict>
 </plist>
