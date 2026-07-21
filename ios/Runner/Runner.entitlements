@@ -6,5 +6,11 @@
 	<array>
 		<string>Default</string>
 	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:sooq-com.com</string>
+		<string>applinks:www.sooq-com.com</string>
+		<string>applinks:share.sooq-com.com</string>
+	</array>
 </dict>
 </plist>
