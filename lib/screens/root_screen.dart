@@ -86,59 +86,75 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
   }
 
   void _handleDeepLink(Uri uri) async {
-    // Example: https://sooq-com.com/ad/14032
-    if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'ad') {
-      if (uri.pathSegments.length > 1) {
-        final adIdStr = uri.pathSegments[1];
-        final adId = int.tryParse(adIdStr);
-        if (adId != null) {
-          try {
-            final ad = await ApiService().fetchAdById(adId);
-            if (mounted) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)));
-            }
-          } catch (e) {
-            print('Failed to load ad from deep link: $e');
-          }
+    // For HTTPS URLs: https://sooq-com.com/ad/14032 → pathSegments = ['ad', '14032']
+    // For custom scheme: sooqcom://ad/14032 → host = 'ad', pathSegments = ['14032']
+    
+    String? type;
+    String? idStr;
+    Map<String, String> queryParams = uri.queryParameters;
+    
+    if (uri.scheme == 'sooqcom') {
+      // Custom scheme: sooqcom://ad/123 or sooqcom://category/456
+      type = uri.host; // 'ad' or 'category'
+      if (uri.pathSegments.isNotEmpty) {
+        idStr = uri.pathSegments.first;
+      }
+    } else {
+      // HTTPS scheme: https://sooq-com.com/ad/123
+      if (uri.pathSegments.isNotEmpty) {
+        type = uri.pathSegments.first;
+        if (uri.pathSegments.length > 1) {
+          idStr = uri.pathSegments[1];
         }
       }
-    } else if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'category') {
-      if (uri.pathSegments.length > 1) {
-        final categoryIdStr = uri.pathSegments[1];
-        final categoryId = int.tryParse(categoryIdStr);
-        if (categoryId != null) {
-          final appProvider = Provider.of<AppProvider>(context, listen: false);
-          final categories = appProvider.categories ?? [];
-          Category? category;
-          try {
-            category = categories.firstWhere((c) => c.id == categoryId);
-          } catch (_) {}
+    }
+    
+    if (type == 'ad' && idStr != null) {
+      final adId = int.tryParse(idStr);
+      if (adId != null) {
+        try {
+          final ad = await ApiService().fetchAdById(adId);
+          if (mounted) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => AdDetailsPage(ad: ad)));
+          }
+        } catch (e) {
+          print('Failed to load ad from deep link: $e');
+        }
+      }
+    } else if (type == 'category' && idStr != null) {
+      final categoryId = int.tryParse(idStr);
+      if (categoryId != null) {
+        final appProvider = Provider.of<AppProvider>(context, listen: false);
+        final categories = appProvider.categories ?? [];
+        Category? category;
+        try {
+          category = categories.firstWhere((c) => c.id == categoryId);
+        } catch (_) {}
 
-          if (category != null) {
-            final query = uri.queryParameters['query'];
-            final minPriceStr = uri.queryParameters['minPrice'];
-            final maxPriceStr = uri.queryParameters['maxPrice'];
-            final isHotStr = uri.queryParameters['isHot'];
-            final locationsStr = uri.queryParameters['locations'];
-            final tagsStr = uri.queryParameters['tags'];
+        if (category != null) {
+          final query = queryParams['query'];
+          final minPriceStr = queryParams['minPrice'];
+          final maxPriceStr = queryParams['maxPrice'];
+          final isHotStr = queryParams['isHot'];
+          final locationsStr = queryParams['locations'];
+          final tagsStr = queryParams['tags'];
 
-            final minPrice = minPriceStr != null ? double.tryParse(minPriceStr) : null;
-            final maxPrice = maxPriceStr != null ? double.tryParse(maxPriceStr) : null;
-            final isHot = isHotStr == 'true';
-            final locations = locationsStr != null && locationsStr.isNotEmpty ? locationsStr.split(',') : null;
-            final tags = tagsStr != null && tagsStr.isNotEmpty ? tagsStr.split(',') : null;
+          final minPrice = minPriceStr != null ? double.tryParse(minPriceStr) : null;
+          final maxPrice = maxPriceStr != null ? double.tryParse(maxPriceStr) : null;
+          final isHot = isHotStr == 'true';
+          final locations = locationsStr != null && locationsStr.isNotEmpty ? locationsStr.split(',') : null;
+          final tags = tagsStr != null && tagsStr.isNotEmpty ? tagsStr.split(',') : null;
 
-            if (mounted) {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => CategoryDetailsPage(
-                category: category!,
-                initialSearchQuery: query,
-                initialMinPrice: minPrice,
-                initialMaxPrice: maxPrice,
-                initialIsHot: isHot,
-                initialLocations: locations,
-                initialTags: tags,
-              )));
-            }
+          if (mounted) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (_) => CategoryDetailsPage(
+              category: category!,
+              initialSearchQuery: query,
+              initialMinPrice: minPrice,
+              initialMaxPrice: maxPrice,
+              initialIsHot: isHot,
+              initialLocations: locations,
+              initialTags: tags,
+            )));
           }
         }
       }
