@@ -51,7 +51,7 @@ class AuthInterceptingClient extends http.BaseClient {
               
               final context = navigatorKey.currentContext;
               if (context != null) {
-                Provider.of<AuthProvider>(context, listen: false).login(data['token'], refreshToken: data['refresh_token']);
+                Provider.of<AuthProvider>(context, listen: false).login(data['token']);
               }
               
               requestClone.headers['Authorization'] = 'Bearer ${data['token']}';
