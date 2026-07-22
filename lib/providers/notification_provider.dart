@@ -244,6 +244,19 @@ class NotificationProvider with ChangeNotifier {
         print('[FCM] Token: $token');
         // Send to backend
         await ApiService().registerDeviceToken(token, deviceType: Platform.isIOS ? 'ios' : 'android');
+        
+        // Show success for debugging (can be removed later)
+        if (Platform.isIOS && navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(content: Text('iOS Push Token Successfully Registered!'), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        if (Platform.isIOS && navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(content: Text('iOS Error: getToken() returned null. APNs rejected it.'), backgroundColor: Colors.red, duration: Duration(seconds: 10)),
+          );
+        }
       }
       
       // Listen for token refreshes
@@ -252,6 +265,11 @@ class NotificationProvider with ChangeNotifier {
       });
     } catch (e) {
       print('[FCM] Error getting token: $e');
+      if (Platform.isIOS && navigatorKey.currentContext != null) {
+        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+          SnackBar(content: Text('iOS Token Error: $e'), backgroundColor: Colors.red, duration: const Duration(seconds: 10)),
+        );
+      }
     }
 
     // Handle foreground messages (while app is open)
