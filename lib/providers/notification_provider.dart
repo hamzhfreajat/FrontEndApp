@@ -224,6 +224,19 @@ class NotificationProvider with ChangeNotifier {
     );
     print('[FCM] User granted permission: ${settings.authorizationStatus}');
 
+    // Important for iOS: wait for APNs token before requesting FCM token
+    if (Platform.isIOS) {
+      String? apnsToken = await messaging.getAPNSToken();
+      if (apnsToken != null) {
+        print('[FCM] APNs Token retrieved: $apnsToken');
+      } else {
+        // Wait a bit and try again, APNs token can sometimes be delayed
+        await Future.delayed(const Duration(seconds: 3));
+        apnsToken = await messaging.getAPNSToken();
+        print('[FCM] APNs Token after delay: $apnsToken');
+      }
+    }
+
     // Get the FCM token
     try {
       String? token = await messaging.getToken();
