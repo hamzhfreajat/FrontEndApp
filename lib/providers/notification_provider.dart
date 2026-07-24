@@ -227,14 +227,18 @@ class NotificationProvider with ChangeNotifier {
 
     // Important for iOS: wait for APNs token before requesting FCM token
     if (Platform.isIOS) {
-      String? apnsToken = await messaging.getAPNSToken();
-      if (apnsToken != null) {
-        print('[FCM] APNs Token retrieved: $apnsToken');
-      } else {
-        // Wait a bit and try again, APNs token can sometimes be delayed
-        await Future.delayed(const Duration(seconds: 3));
+      String? apnsToken;
+      for (int attempt = 0; attempt < 5; attempt++) {
         apnsToken = await messaging.getAPNSToken();
-        print('[FCM] APNs Token after delay: $apnsToken');
+        if (apnsToken != null) {
+          print('[FCM] APNs Token retrieved on attempt ${attempt + 1}: $apnsToken');
+          break;
+        }
+        print('[FCM] APNs Token null on attempt ${attempt + 1}, waiting...');
+        await Future.delayed(const Duration(seconds: 2));
+      }
+      if (apnsToken == null) {
+        print('[FCM] APNs Token still null after 5 attempts. FCM token will likely fail.');
       }
     }
 
