@@ -223,7 +223,16 @@ class NotificationProvider with ChangeNotifier {
       badge: true,
       sound: true,
     );
-    print('[FCM] User granted permission: ${settings.authorizationStatus}');
+    
+    if (Platform.isIOS && navigatorKey.currentContext != null) {
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Permission status: ${settings.authorizationStatus.name}'),
+          backgroundColor: Colors.blue,
+          duration: const Duration(seconds: 4)
+        ),
+      );
+    }
 
     // Important for iOS: wait for APNs token before requesting FCM token
     if (Platform.isIOS) {
@@ -231,14 +240,26 @@ class NotificationProvider with ChangeNotifier {
       for (int attempt = 0; attempt < 5; attempt++) {
         apnsToken = await messaging.getAPNSToken();
         if (apnsToken != null) {
-          print('[FCM] APNs Token retrieved on attempt ${attempt + 1}: $apnsToken');
+          if (navigatorKey.currentContext != null) {
+            ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+              const SnackBar(content: Text('APNs token received successfully!'), backgroundColor: Colors.green),
+            );
+          }
           break;
         }
-        print('[FCM] APNs Token null on attempt ${attempt + 1}, waiting...');
         await Future.delayed(const Duration(seconds: 2));
       }
       if (apnsToken == null) {
-        print('[FCM] APNs Token still null after 5 attempts. FCM token will likely fail.');
+        if (navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to get APNs token from iOS. Please check iPhone Settings -> Sooqcom -> Notifications, and ensure Xcode is using the new profile.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 10)
+            ),
+          );
+        }
+        return; // Stop here instead of crashing Firebase
       }
     }
 
