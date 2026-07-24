@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import FirebaseMessaging
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -15,7 +16,8 @@ import UIKit
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
     print("APNs Token successfully received by AppDelegate!")
-    // Pass it to Firebase explicitly just in case swizzling failed
+    // Force pass it to Firebase explicitly to bypass swizzling issues
+    Messaging.messaging().apnsToken = deviceToken
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 
