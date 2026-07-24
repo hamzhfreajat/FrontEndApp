@@ -206,9 +206,20 @@ void main() async {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
 
+    // Show a snackbar so we know the message actually reached Dart
+    if (navigatorKey.currentContext != null) {
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Foreground message received: ${notification?.title ?? "data-only"}'),
+          backgroundColor: Colors.purple,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
     if (notification != null && android != null) {
       flutterLocalNotificationsPlugin.show(
-        id: notification.hashCode,
+        id: notification.hashCode & 0x7FFFFFFF, // Ensure valid 32-bit integer for iOS/Android
         title: notification.title,
         body: notification.body,
         notificationDetails: NotificationDetails(
@@ -230,7 +241,7 @@ void main() async {
       );
     } else if (notification != null && Platform.isIOS) {
        flutterLocalNotificationsPlugin.show(
-        id: notification.hashCode,
+        id: notification.hashCode & 0x7FFFFFFF, // Ensure valid 32-bit integer for iOS
         title: notification.title,
         body: notification.body,
         notificationDetails: const NotificationDetails(

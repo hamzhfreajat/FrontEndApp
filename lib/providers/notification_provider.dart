@@ -224,49 +224,18 @@ class NotificationProvider with ChangeNotifier {
       sound: true,
     );
     
-    if (Platform.isIOS && navigatorKey.currentContext != null) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Permission status: ${settings.authorizationStatus.name}'),
-          backgroundColor: Colors.blue,
-          duration: const Duration(seconds: 4)
-        ),
-      );
-    }
-
     // Important for iOS: wait for APNs token before requesting FCM token
     if (Platform.isIOS) {
       String? apnsToken;
       for (int attempt = 0; attempt < 5; attempt++) {
         apnsToken = await messaging.getAPNSToken();
         if (apnsToken != null) {
-          if (navigatorKey.currentContext != null) {
-            ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-              const SnackBar(content: Text('APNs token received successfully!'), backgroundColor: Colors.green),
-            );
-          }
           break;
         }
         await Future.delayed(const Duration(seconds: 2));
       }
       if (apnsToken == null) {
-        String nativeError = "Unknown error";
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          nativeError = prefs.getString('apns_debug_msg') ?? "No native debug msg found";
-        } catch (e) {
-          nativeError = "Failed to read prefs: $e";
-        }
-        
-        if (navigatorKey.currentContext != null) {
-          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            SnackBar(
-              content: Text('Failed to get APNs token. Native says: $nativeError'),
-              backgroundColor: Colors.orange,
-              duration: const Duration(seconds: 15)
-            ),
-          );
-        }
+        print('[FCM] APNs Token still null after 5 attempts. FCM token will likely fail.');
         return; // Stop here instead of crashing Firebase
       }
     }
