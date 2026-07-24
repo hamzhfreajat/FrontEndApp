@@ -8,6 +8,9 @@ import FirebaseMessaging
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    DispatchQueue.main.async {
+      application.registerForRemoteNotifications()
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -15,9 +18,10 @@ import FirebaseMessaging
     _ application: UIApplication,
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
-    print("APNs Token successfully received by AppDelegate!")
     // Force pass it to Firebase explicitly to bypass swizzling issues
     Messaging.messaging().apnsToken = deviceToken
+    let tokenStr = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+    UserDefaults.standard.set("SUCCESS: \(tokenStr)", forKey: "flutter_apns_debug_msg")
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
   }
 
@@ -25,7 +29,7 @@ import FirebaseMessaging
     _ application: UIApplication,
     didFailToRegisterForRemoteNotificationsWithError error: Error
   ) {
-    print("APNs Error: Failed to register for remote notifications: \(error.localizedDescription)")
+    UserDefaults.standard.set("ERROR: \(error.localizedDescription)", forKey: "flutter_apns_debug_msg")
     super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
   }
 
