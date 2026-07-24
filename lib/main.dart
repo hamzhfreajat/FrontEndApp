@@ -192,6 +192,59 @@ void main() async {
     }
   });
 
+  // Handle incoming push notifications while the app is OPEN (in foreground)
+  FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    print('Got a message whilst in the foreground!');
+    print('Message data: ${message.data}');
+
+    RemoteNotification? notification = message.notification;
+    AndroidNotification? android = message.notification?.android;
+
+    if (notification != null && android != null) {
+      flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            channel.id,
+            channel.name,
+            channelDescription: channel.description,
+            icon: '@mipmap/ic_launcher',
+            importance: Importance.max,
+            priority: Priority.max,
+          ),
+          iOS: const DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: message.data['type'],
+      );
+    } else if (notification != null && Platform.isIOS) {
+       flutterLocalNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        const NotificationDetails(
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: message.data['type'],
+      );
+    }
+  });
+
   runApp(
     MultiProvider(
       providers: [
