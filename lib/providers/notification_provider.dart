@@ -239,16 +239,6 @@ class NotificationProvider with ChangeNotifier {
       }
       if (apnsToken == null) {
         print('[FCM] APNs Token still null after 5 attempts. FCM token will likely fail.');
-        if (navigatorKey.currentContext != null) {
-          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: Text('خطأ في إعدادات الإشعارات (APNs). يرجى التأكد من تفعيل Push Notifications في Xcode وأن حساب Apple Developer مفعل.'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 8)
-            ),
-          );
-        }
-        return; // Skip getting FCM token since it will throw an exception
       }
     }
 
@@ -263,7 +253,13 @@ class NotificationProvider with ChangeNotifier {
         // Show success for debugging (can be removed later)
         if (Platform.isIOS && navigatorKey.currentContext != null) {
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(content: Text('تم تفعيل الإشعارات بنجاح!'), backgroundColor: Colors.green),
+            const SnackBar(content: Text('iOS Push Token Successfully Registered!'), backgroundColor: Colors.green),
+          );
+        }
+      } else {
+        if (Platform.isIOS && navigatorKey.currentContext != null) {
+          ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+            const SnackBar(content: Text('iOS Error: getToken() returned null. APNs rejected it.'), backgroundColor: Colors.red, duration: Duration(seconds: 10)),
           );
         }
       }
