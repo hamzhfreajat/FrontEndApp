@@ -250,12 +250,20 @@ class NotificationProvider with ChangeNotifier {
         await Future.delayed(const Duration(seconds: 2));
       }
       if (apnsToken == null) {
+        String nativeError = "Unknown error";
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          nativeError = prefs.getString('apns_debug_msg') ?? "No native debug msg found";
+        } catch (e) {
+          nativeError = "Failed to read prefs: $e";
+        }
+        
         if (navigatorKey.currentContext != null) {
           ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to get APNs token from iOS. Please check iPhone Settings -> Sooqcom -> Notifications, and ensure Xcode is using the new profile.'),
+            SnackBar(
+              content: Text('Failed to get APNs token. Native says: $nativeError'),
               backgroundColor: Colors.orange,
-              duration: Duration(seconds: 10)
+              duration: const Duration(seconds: 15)
             ),
           );
         }
