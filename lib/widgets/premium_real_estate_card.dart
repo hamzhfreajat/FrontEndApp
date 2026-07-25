@@ -850,7 +850,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                 adImageUrl: widget.ad.images.isNotEmpty ? widget.ad.images.first : '',
                 isSeller: false,
                 currentUserId: currentUserId,
-                currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
+                currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'مستخدم',
                 otherUserId: widget.ad.userId.toString(),
                 otherUserName: widget.ad.ownerName,
                 otherUserPhone: widget.ad.phoneNumber,

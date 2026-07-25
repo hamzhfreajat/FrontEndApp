@@ -28,7 +28,7 @@ class SupportActionButton extends StatelessWidget {
               adPrice: '',
               adImageUrl: '',
               currentUserId: currentUserId,
-              currentUserName: authProvider.userData?['name']?.toString() ?? '??????',
+              currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? '??????',
               currentUserPhone: authProvider.userData?['phone_number']?.toString(),
               otherUserId: 'admin',
               otherUserName: '???? ?????',

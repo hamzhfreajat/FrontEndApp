@@ -232,7 +232,7 @@ class _InboxViewState extends State<_InboxView> {
                             adPrice: '',
                             adImageUrl: '',
                             currentUserId: currentUserId,
-                            currentUserName: authProvider.userData?['name']?.toString() ?? 'مستخدم',
+                            currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? authProvider.userData?['name']?.toString() ?? 'مستخدم',
                             currentUserPhone: authProvider.userData?['phone_number']?.toString(),
                             otherUserId: 'admin',
                             otherUserName: 'فريق الدعم',

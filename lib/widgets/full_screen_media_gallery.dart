@@ -594,7 +594,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
                   adImageUrl: widget.ad.images.isNotEmpty ? widget.ad.images.first : '',
                   isSeller: false,
                   currentUserId: currentUserId,
-                  currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
+                  currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'مستخدم',
                   currentUserPhone: authProvider.userData?['phone']?.toString(),
                   otherUserId: widget.ad.userId.toString(),
                   otherUserName: widget.ad.ownerName,

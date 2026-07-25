@@ -164,7 +164,7 @@ class _InboxThreadTileState extends State<InboxThreadTile> with SingleTickerProv
             HapticFeedback.selectionClick();
             final authProvider = Provider.of<AuthProvider>(context, listen: false);
             final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
-            final currentUserName = authProvider.userData?['username']?.toString() ?? 'مستخدم';
+            final currentUserName = authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'مستخدم';
             final currentUserPhone = authProvider.userData?['phone']?.toString();
             
             Navigator.push(context, MaterialPageRoute(

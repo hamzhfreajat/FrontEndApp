@@ -1736,7 +1736,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                       adImageUrl: ad.images.isNotEmpty ? ad.images.first : '',
                       isSeller: false,
                       currentUserId: currentUserId,
-                      currentUserName: authProvider.userData?['username'] ?? 'مستخدم',
+                      currentUserName: authProvider.userData?['full_name'] ?? authProvider.userData?['username'] ?? 'مستخدم',
                       currentUserPhone: authProvider.userData?['phone']?.toString(),
                       otherUserId: ad.userId.toString(),
                       otherUserName: ad.ownerName,
