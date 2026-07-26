@@ -3330,14 +3330,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     final now = DateTime.now();
     final difference = now.difference(date);
 
-    if (difference.inDays > 365) {
-      final years = (difference.inDays / 365).floor();
-      return 'منذ $years سنة';
-    } else if (difference.inDays > 30) {
-      final months = (difference.inDays / 30).floor();
-      return 'منذ $months شهر';
-    } else if (difference.inDays > 0) {
-      return 'منذ ${difference.inDays} يوم';
+    if (difference.inDays > 0) {
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
     } else if (difference.inHours > 0) {
       return 'منذ ${difference.inHours} ساعة';
     } else if (difference.inMinutes > 0) {

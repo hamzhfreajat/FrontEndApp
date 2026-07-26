@@ -149,7 +149,9 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
 
   String _formatTimeAgo(DateTime date) {
     final diff = DateTime.now().difference(date);
-    if (diff.inDays > 0) return 'منذ ${diff.inDays} يوم';
+    if (diff.inDays > 0) {
+      return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+    }
     if (diff.inHours > 0) return 'منذ ${diff.inHours} ساعة';
     if (diff.inMinutes > 0) return 'منذ ${diff.inMinutes} دقيقة';
     return 'الآن';
