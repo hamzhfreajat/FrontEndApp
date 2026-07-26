@@ -118,27 +118,39 @@ class FirebaseChatRepository {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
+    List<String> chatParticipants = [currentUserId, otherUserId];
+    Map<String, dynamic> usersMap = {
+      currentUserId: {
+        'name': currentUserName,
+        'avatar': currentUserAvatar,
+        'phone': currentUserPhone,
+        'unreadCount': 0,
+      },
+      otherUserId: {
+        'name': otherUserName,
+        'avatar': otherUserAvatar,
+        'phone': otherUserPhone,
+        'unreadCount': FieldValue.increment(1),
+      }
+    };
+
+    if (otherUserName.startsWith('user-') || otherUserName == 'ai_scraper') {
+      if (!chatParticipants.contains('admin')) {
+        chatParticipants.add('admin');
+      }
+      usersMap['admin'] = {
+        'unreadCount': FieldValue.increment(1),
+      };
+    }
+
     // Update the parent chat document with latest info for inbox lists
     await _firestore.collection('chats').doc(chatId).set({
       'adId': adId,
       'adTitle': adTitle,
       'adPrice': adPrice,
       'adImageUrl': adImageUrl,
-      'participants': [currentUserId, otherUserId],
-      'users': {
-        currentUserId: {
-          'name': currentUserName,
-          'avatar': currentUserAvatar,
-          'phone': currentUserPhone,
-          'unreadCount': 0,
-        },
-        otherUserId: {
-          'name': otherUserName,
-          'avatar': otherUserAvatar,
-          'phone': otherUserPhone,
-          'unreadCount': FieldValue.increment(1),
-        }
-      },
+      'participants': chatParticipants,
+      'users': usersMap,
       'lastMessage': message.type == MessageType.text 
           ? message.text 
           : (message.type == MessageType.audio ? '🎤 مقطع صوتي' : '📷 صورة'),
