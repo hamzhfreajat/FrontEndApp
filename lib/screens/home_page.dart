@@ -709,10 +709,15 @@ class _PremiumHorizontalListState extends State<_PremiumHorizontalList> {
 
   Future<void> _fetchAds() async {
     try {
-      final ads = await ApiService().fetchAds(limit: 10, skip: 0, categoryId: widget.categoryId, sortBy: widget.sortBy);
+      final fetchedAds = await ApiService().fetchAds(limit: 30, skip: 0, categoryId: widget.categoryId, sortBy: widget.sortBy);
+      final validAds = fetchedAds.where((ad) => 
+          (ad.images != null && ad.images!.isNotEmpty) && 
+          (ad.price != null && ad.price! > 0)
+      ).take(10).toList();
+
       if (mounted) {
         setState(() {
-          _ads = ads;
+          _ads = validAds;
           _isLoading = false;
         });
       }
