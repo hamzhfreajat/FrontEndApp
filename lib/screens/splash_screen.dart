@@ -135,38 +135,85 @@ class _SplashScreenState extends State<SplashScreen> {
       builder: (BuildContext context) {
         return WillPopScope(
           onWillPop: () async => !isMandatory,
-          child: AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            title: const Text('تحديث جديد متاح 🎉', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-            content: Text(
-              isMandatory 
-                  ? 'هذا التحديث ضروري جداً ($latestVersion) لضمان عمل التطبيق بشكل صحيح. يرجى التحديث الآن.' 
-                  : 'يتوفر إصدار جديد ($latestVersion) من التطبيق. يرجى التحديث للحصول على أحدث الميزات والإصلاحات.',
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-            ),
-            actions: [
-              if (!isMandatory)
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('لاحقاً', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
-                ),
-              ElevatedButton(
-                onPressed: () async {
-                  final uri = Uri.parse(url);
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                  if (!isMandatory) {
-                    Navigator.of(context).pop(true);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                child: const Text('تحديث الآن', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+          child: Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            backgroundColor: Colors.white,
+            elevation: 10,
+            child: Padding(
+              padding: const EdgeInsets.all(28.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Premium Icon header
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)], // Premium blue gradient
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF3B82F6).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        )
+                      ]
+                    ),
+                    child: const Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 40),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'تحديث جديد متاح 🎉',
+                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w900, fontSize: 24, color: Color(0xFF0F172A)),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    isMandatory 
+                        ? 'هذا التحديث ضروري جداً (إصدار $latestVersion) لضمان عمل التطبيق بشكل صحيح ومستقر. يرجى التحديث الآن لتجربة أفضل.' 
+                        : 'يتوفر إصدار جديد ($latestVersion) من التطبيق يضم ميزات وإصلاحات جديدة لضمان أفضل تجربة لك.',
+                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 15, color: Color(0xFF64748B), height: 1.5, fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 36),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                        if (!isMandatory) {
+                          Navigator.of(context).pop(true);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A), // Dark slate, premium feel
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shadowColor: const Color(0xFF0F172A).withOpacity(0.4),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('تحديث التطبيق الآن', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ),
+                  if (!isMandatory) ...[
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xFF94A3B8)),
+                      child: const Text('التذكير لاحقاً', style: TextStyle(fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.w600)),
+                    ),
+                  ]
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
