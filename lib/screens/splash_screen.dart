@@ -55,14 +55,25 @@ class _SplashScreenState extends State<SplashScreen> {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
 
-      String latestVersion = versionInfo['latest_ios'] ?? currentVersion;
-      String testflightUrl = versionInfo['testflight_url'] ?? '';
+      String latestVersion = versionInfo['latest_version'] ?? currentVersion;
+      String minRequiredVersion = versionInfo['min_required_version'] ?? '0.0.0';
+      String storeUrlAndroid = versionInfo['store_url_android'] ?? '';
+      String storeUrlIos = versionInfo['store_url_ios'] ?? '';
 
-      if (Platform.isIOS && _isVersionOlder(currentVersion, latestVersion)) {
-        // Show update dialog
-        bool shouldUpdate = await _showUpdateDialog(latestVersion, testflightUrl);
+      String targetUrl = Platform.isIOS ? storeUrlIos : storeUrlAndroid;
+
+      bool isMandatory = _isVersionOlder(currentVersion, minRequiredVersion);
+      bool isOptional = _isVersionOlder(currentVersion, latestVersion);
+
+      if (isMandatory) {
+        // Show blocking dialog, do not proceed
+        await _showUpdateDialog(latestVersion, targetUrl, isMandatory: true);
+        return;
+      } else if (isOptional) {
+        // Show optional dialog
+        bool shouldUpdate = await _showUpdateDialog(latestVersion, targetUrl, isMandatory: false);
         if (shouldUpdate) {
-          final uri = Uri.parse(testflightUrl);
+          final uri = Uri.parse(targetUrl);
           if (await canLaunchUrl(uri)) {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           }
@@ -116,32 +127,47 @@ class _SplashScreenState extends State<SplashScreen> {
     return false;
   }
 
-  Future<bool> _showUpdateDialog(String latestVersion, String url) async {
+  Future<bool> _showUpdateDialog(String latestVersion, String url, {bool isMandatory = false}) async {
     return await showDialog<bool>(
       context: context,
       barrierDismissible: false,
+      // Prevent Android back button from closing it if mandatory
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('تحديث جديد متاح 🎉', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
-          content: Text(
-            'يتوفر إصدار جديد ($latestVersion) من التطبيق. يرجى التحديث من TestFlight للحصول على أحدث الميزات والإصلاحات.',
-            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('لاحقاً', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
+        return WillPopScope(
+          onWillPop: () async => !isMandatory,
+          child: AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Text('تحديث جديد متاح 🎉', style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
+            content: Text(
+              isMandatory 
+                  ? 'هذا التحديث ضروري جداً ($latestVersion) لضمان عمل التطبيق بشكل صحيح. يرجى التحديث الآن.' 
+                  : 'يتوفر إصدار جديد ($latestVersion) من التطبيق. يرجى التحديث للحصول على أحدث الميزات والإصلاحات.',
+              style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            actions: [
+              if (!isMandatory)
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('لاحقاً', style: TextStyle(fontFamily: 'Cairo', color: Colors.grey)),
+                ),
+              ElevatedButton(
+                onPressed: () async {
+                  final uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                  if (!isMandatory) {
+                    Navigator.of(context).pop(true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F172A),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('تحديث الآن', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
               ),
-              child: const Text('تحديث الآن', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
-            ),
-          ],
+            ],
+          ),
         );
       },
     ) ?? false;
