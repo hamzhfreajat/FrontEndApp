@@ -198,8 +198,8 @@ class FirebaseChatRepository {
         final data = chatDoc.data();
         if (data != null && data.containsKey('lastAutoReplyTime')) {
           final lastAutoReplyTime = (data['lastAutoReplyTime'] as Timestamp?)?.toDate();
-          // Send auto-reply only if it's been more than 2 hours since the last one
-          if (lastAutoReplyTime != null && DateTime.now().difference(lastAutoReplyTime).inHours < 2) {
+          // Send auto-reply only if it's been more than 7 days since the last one
+          if (lastAutoReplyTime != null && DateTime.now().difference(lastAutoReplyTime).inDays < 7) {
             shouldSendAutoReply = false;
           }
         }
