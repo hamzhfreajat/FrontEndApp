@@ -206,16 +206,6 @@ void main() async {
     RemoteNotification? notification = message.notification;
     AndroidNotification? android = message.notification?.android;
 
-    // Show a snackbar so we know the message actually reached Dart
-    if (navigatorKey.currentContext != null) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          content: Text('Foreground message received: ${notification?.title ?? "data-only"}'),
-          backgroundColor: Colors.purple,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
 
     if (notification != null && android != null) {
       flutterLocalNotificationsPlugin.show(
