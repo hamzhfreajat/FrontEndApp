@@ -1829,6 +1829,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
     String agentType = 'مستخدم';
     if (ad.attributes != null && ad.attributes!['advertiser_type'] != null) {
       agentType = ad.attributes!['advertiser_type'].toString();
+    } else if (ad.ownerType != null) {
+      if (ad.ownerType == 'dealer') agentType = 'وسيط';
+      else if (ad.ownerType == 'company') agentType = 'شركة';
+      else if (ad.ownerType == 'private') agentType = 'مالك';
     }
 
     return GestureDetector(

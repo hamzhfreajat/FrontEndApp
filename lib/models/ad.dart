@@ -21,6 +21,7 @@ class Ad {
   final SharedRoomDetails? sharedRoomDetails;
   final Map<String, dynamic>? attributes;
   final String? ownerName;
+  final String? ownerType;
   final int? userId;
   bool isSaved;
   final DateTime? lastRepublishedAt;
@@ -45,6 +46,7 @@ class Ad {
     this.sharedRoomDetails,
     this.attributes,
     this.ownerName,
+    this.ownerType,
     this.userId,
     this.isSaved = false,
     this.lastRepublishedAt,
@@ -176,6 +178,7 @@ class Ad {
         }
         return name;
       }(),
+      ownerType: json['owner'] != null ? json['owner']['user_type']?.toString() : null,
       userId: json['user_id'] != null ? (int.tryParse(json['user_id'].toString()) ?? 0) : null,
       isSaved: json['is_saved'] == true || json['is_saved'] == 'true' || json['is_saved'] == 1,
       lastRepublishedAt: json['last_republished_at'] != null ? DateTime.tryParse(json['last_republished_at'].toString()) : null,
