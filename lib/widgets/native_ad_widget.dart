@@ -9,13 +9,17 @@ class NativeAdWidget extends StatefulWidget {
   State<NativeAdWidget> createState() => _NativeAdWidgetState();
 }
 
-class _NativeAdWidgetState extends State<NativeAdWidget> {
+class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAliveClientMixin {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
+  bool _isAdFailed = false;
 
   final String _adUnitId = Platform.isAndroid
       ? 'ca-app-pub-2993417564924380/4129879862'
       : 'ca-app-pub-2993417564924380/7271314451';
+
+  @override
+  bool get wantKeepAlive => true; // Prevent disposing when scrolling off-screen (fixes lag)
 
   @override
   void initState() {
@@ -30,13 +34,21 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       listener: NativeAdListener(
         onAdLoaded: (ad) {
           debugPrint('$NativeAd loaded.');
-          setState(() {
-            _isAdLoaded = true;
-          });
+          if (mounted) {
+            setState(() {
+              _isAdLoaded = true;
+              _isAdFailed = false;
+            });
+          }
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('$NativeAd failed to load: $error');
           ad.dispose();
+          if (mounted) {
+            setState(() {
+              _isAdFailed = true;
+            });
+          }
         },
       ),
       request: const AdRequest(),
@@ -78,8 +90,25 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+
+    if (_isAdFailed) {
+      return const SizedBox.shrink(); // Hide if failed
+    }
+
     if (!_isAdLoaded) {
-      return const SizedBox(height: 0); // Hide until loaded
+      // Return a fixed height placeholder while loading to prevent layout jumps (which cause scroll lag)
+      return Container(
+        height: 120, // Approximate height of the small native ad
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+        ),
+      );
     }
 
     return Container(
