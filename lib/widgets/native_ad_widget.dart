@@ -59,22 +59,22 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
         cornerRadius: 16.0,
         callToActionTextStyle: NativeTemplateTextStyle(
           textColor: Colors.white,
-          backgroundColor: const Color(0xFF2E3B5C), // Premium deep blue
+          backgroundColor: const Color(0xFF0075FF), // App's primary brand color
           style: NativeTemplateFontStyle.bold,
           size: 14.0,
         ),
         primaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.black87,
+          textColor: const Color(0xFF1E1E2C), // Deeper premium text
           style: NativeTemplateFontStyle.bold,
           size: 15.0,
         ),
         secondaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.grey.shade600,
+          textColor: const Color(0xFF64748B), // Slate gray
           style: NativeTemplateFontStyle.normal,
           size: 13.0,
         ),
         tertiaryTextStyle: NativeTemplateTextStyle(
-          textColor: Colors.grey.shade500,
+          textColor: const Color(0xFF94A3B8), // Lighter slate
           style: NativeTemplateFontStyle.normal,
           size: 12.0,
         ),
@@ -115,39 +115,43 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20.0), // More rounded, matching premium cards
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.06), // Slightly deeper, softer shadow
+            blurRadius: 24,
+            offset: const Offset(0, 8),
           ),
         ],
-        border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        // Removed the hard border for a softer, cleaner elevated look
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 12.0, right: 12.0, top: 8.0, bottom: 2.0),
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.amber.withOpacity(0.3), width: 1),
+                    color: const Color(0xFFF1F5F9), // Very subtle slate gray background
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 12),
-                      const SizedBox(width: 4),
-                      const Text(
-                        'إعلان ممول',
-                        style: TextStyle(fontSize: 10, color: Colors.amber, fontWeight: FontWeight.bold),
+                      Icon(Icons.auto_awesome_rounded, color: Colors.grey.shade500, size: 12),
+                      const SizedBox(width: 6),
+                      Text(
+                        'إعلان',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ],
                   ),
@@ -156,13 +160,13 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(left: 4.0, right: 4.0, bottom: 4.0),
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 minWidth: 320,
                 minHeight: 120, // Small template needs around 120dp height
-                maxWidth: 400,
-                maxHeight: 200, // Increased to prevent bottom overflow
+                maxWidth: double.infinity, // Let it expand naturally to fill horizontal space
+                maxHeight: 200, // Prevent bottom overflow
               ),
               child: AdWidget(ad: _nativeAd!),
             ),
