@@ -1826,9 +1826,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
   // 14. SELLER INFO
   // ═══════════════════════════════════════════════
   Widget _buildSellerCard() {
-    final r = Random(ad.id);
-    final types = ['Owner', 'Agent', 'Company'];
-    final agentType = types[r.nextInt(3)];
+    String agentType = 'مستخدم';
+    if (ad.attributes != null && ad.attributes!['advertiser_type'] != null) {
+      agentType = ad.attributes!['advertiser_type'].toString();
+    }
 
     return GestureDetector(
       onTap: () {
