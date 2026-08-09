@@ -56,29 +56,29 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
       request: const AdRequest(),
       // Use the built-in NativeTemplateStyle (Small template) for a premium, non-intrusive look
       nativeTemplateStyle: NativeTemplateStyle(
-        templateType: TemplateType.small,
+        templateType: TemplateType.medium,
         mainBackgroundColor: Colors.transparent,
         cornerRadius: 16.0,
         callToActionTextStyle: NativeTemplateTextStyle(
           textColor: Colors.white,
           backgroundColor: const Color(0xFF25D366), // Matches app's Call/WhatsApp green
           style: NativeTemplateFontStyle.bold,
-          size: 14.0,
+          size: 15.0,
         ),
         primaryTextStyle: NativeTemplateTextStyle(
           textColor: const Color(0xFF1E1E2C), // Deeper premium text
           style: NativeTemplateFontStyle.bold,
-          size: 15.0,
+          size: 16.0,
         ),
         secondaryTextStyle: NativeTemplateTextStyle(
           textColor: const Color(0xFF64748B), // Slate gray
           style: NativeTemplateFontStyle.normal,
-          size: 13.0,
+          size: 14.0,
         ),
         tertiaryTextStyle: NativeTemplateTextStyle(
           textColor: const Color(0xFF94A3B8), // Lighter slate
           style: NativeTemplateFontStyle.normal,
-          size: 12.0,
+          size: 13.0,
         ),
       ),
     )..load();
@@ -100,8 +100,8 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
 
     if (!_isAdLoaded || _adWidget == null) {
       return Container(
-        height: 120,
-        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        height: 340, // Height for medium template with large image
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16.0),
@@ -113,16 +113,16 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
     }
 
     return Container(
-      height: 120, // Standard exact height for small template
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      height: 340, // Height for medium template with large image
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
