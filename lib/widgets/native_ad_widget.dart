@@ -11,6 +11,7 @@ class NativeAdWidget extends StatefulWidget {
 
 class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAliveClientMixin {
   NativeAd? _nativeAd;
+  AdWidget? _adWidget;
   bool _isAdLoaded = false;
   bool _isAdFailed = false;
 
@@ -38,6 +39,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
             setState(() {
               _isAdLoaded = true;
               _isAdFailed = false;
+              _adWidget = AdWidget(ad: _nativeAd!);
             });
           }
         },
@@ -96,7 +98,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
       return const SizedBox.shrink(); // Hide if failed
     }
 
-    if (!_isAdLoaded) {
+    if (!_isAdLoaded || _adWidget == null) {
       return Container(
         height: 120,
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -124,7 +126,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           ),
         ],
       ),
-      child: AdWidget(ad: _nativeAd!),
+      child: _adWidget,
     );
   }
 }
