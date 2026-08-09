@@ -113,7 +113,6 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
     }
 
     return Container(
-      height: 340, // Height for medium template with large image
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -126,7 +125,44 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           ),
         ],
       ),
-      child: _adWidget,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(), // pushes badge to the right in RTL
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7), // Light yellow
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'إعلان ممول',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: const Color(0xFFD97706), // Deep yellow/orange
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+            child: SizedBox(
+              height: 340, // Height for medium template
+              width: double.infinity,
+              child: _adWidget,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
