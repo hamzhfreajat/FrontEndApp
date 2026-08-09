@@ -124,8 +124,6 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           ),
         ],
       ),
-      // Clip to ensure the ad doesn't draw sharp corners outside our rounded box
-      clipBehavior: Clip.antiAlias,
       child: AdWidget(ad: _nativeAd!),
     );
   }
