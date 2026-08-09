@@ -160,9 +160,9 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
             child: ConstrainedBox(
               constraints: const BoxConstraints(
                 minWidth: 320,
-                minHeight: 120, // Small template needs around 90-120dp height
+                minHeight: 120, // Small template needs around 120dp height
                 maxWidth: 400,
-                maxHeight: 140,
+                maxHeight: 200, // Increased to prevent bottom overflow
               ),
               child: AdWidget(ad: _nativeAd!),
             ),

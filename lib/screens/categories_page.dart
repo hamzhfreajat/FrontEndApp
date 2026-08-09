@@ -329,15 +329,10 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ),
                 ),
               ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                fillOverscroll: true,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 24.0, top: 12.0),
-                    child: const NativeAdWidget(),
-                  ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 32.0, top: 16.0),
+                  child: const NativeAdWidget(),
                 ),
               ),
             ],
