@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../providers/app_provider.dart';
-import '../widgets/premium_search_header.dart';
 import '../widgets/native_ad_widget.dart';
 import '../widgets/shimmer_loading.dart';
 import '../models/metrics.dart';
