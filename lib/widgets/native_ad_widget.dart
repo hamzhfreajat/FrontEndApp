@@ -97,9 +97,8 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
     }
 
     if (!_isAdLoaded) {
-      // Return a fixed height placeholder while loading to prevent layout jumps (which cause scroll lag)
       return Container(
-        height: 135, // Exactly matches the ad height
+        height: 120,
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
@@ -112,63 +111,22 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
     }
 
     return Container(
+      height: 120, // Standard exact height for small template
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0), // More rounded, matching premium cards
+        borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06), // Slightly deeper, softer shadow
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-        // Removed the hard border for a softer, cleaner elevated look
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9), // Very subtle slate gray background
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.auto_awesome_rounded, color: Colors.grey.shade500, size: 12),
-                      const SizedBox(width: 6),
-                      Text(
-                        'إعلان ممول',
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey.shade700,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-            child: SizedBox(
-              height: 135, // Strict height adjusted to prevent bottom overflow
-              width: double.infinity,
-              child: AdWidget(ad: _nativeAd!),
-            ),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
+      // Clip to ensure the ad doesn't draw sharp corners outside our rounded box
+      clipBehavior: Clip.antiAlias,
+      child: AdWidget(ad: _nativeAd!),
     );
   }
 }
