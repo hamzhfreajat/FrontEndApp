@@ -34,6 +34,7 @@ import '../widgets/premium_real_estate_card.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../widgets/inline_banner_ad.dart';
 import '../widgets/premium_filter_bottom_sheet.dart';
+import '../widgets/native_ad_widget.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
   final Category category;
@@ -2852,12 +2853,19 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           (context, index) {
             if (index < displayAds.length) {
               final ad = displayAds[index];
+              final isAdSlot = (index > 0) && (index % 8 == 0);
+              
               return RepaintBoundary(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Column(
-                    children: [
-                      PremiumRealEstateCard(
+                child: Column(
+                  children: [
+                    if (isAdSlot)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: NativeAdWidget(),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: PremiumRealEstateCard(
                         ad: ad,
                         searchQuery: _searchQuery,
                         onTap: () {
@@ -2871,8 +2879,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           });
                         },
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               );
             }
