@@ -134,7 +134,6 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(), // pushes badge to the right in RTL
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -150,6 +149,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
                     ),
                   ),
                 ),
+                const SizedBox(), // pushes badge to the right in RTL
               ],
             ),
           ),
