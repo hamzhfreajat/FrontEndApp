@@ -7,7 +7,7 @@ import '../models/category.dart';
 import '../services/api_service.dart';
 import 'category_details_page.dart';
 import '../widgets/emoji_category_icon.dart';
-import '../widgets/inline_banner_ad.dart';
+import '../widgets/native_ad_widget.dart';
 
 import '../services/analytics_engine.dart';
 
@@ -329,23 +329,16 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   ),
                 ),
               ),
-              SliverLayoutBuilder(
-                builder: (BuildContext context, SliverConstraints constraints) {
-                  final remainingSpace = constraints.remainingPaintExtent;
-                  // Ad takes ~82px height (50px banner + 16px top margin + 16px bottom margin).
-                  // Divide by 85 to find how many can comfortably fit.
-                  int adCount = (remainingSpace / 85).floor();
-                  if (adCount < 4) adCount = 4; // User requested at least 4 ads
-                  if (adCount > 8) adCount = 8; // Cap to 8 ads max
-
-                  return SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(adCount, (index) => const InlineBannerAd()),
-                    ),
-                  );
-                },
+              SliverFillRemaining(
+                hasScrollBody: false,
+                fillOverscroll: true,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0, top: 12.0),
+                    child: const NativeAdWidget(),
+                  ),
+                ),
               ),
             ],
           ),

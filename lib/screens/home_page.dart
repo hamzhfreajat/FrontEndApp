@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../providers/app_provider.dart';
+import '../widgets/premium_search_header.dart';
+import '../widgets/native_ad_widget.dart';
 import '../widgets/shimmer_loading.dart';
 import '../models/metrics.dart';
 import '../models/ticker.dart';
@@ -187,11 +189,15 @@ class _HomePageState extends State<HomePage> {
                       _PremiumHorizontalList(key: ValueKey('slider_1_$_refreshKey'), title: 'الأكثر بحث', sortBy: 'popular'),
                       const SizedBox(height: 20),
                       _PremiumHorizontalList(key: ValueKey('slider_2_$_refreshKey'), title: 'الأكثر مشاهدة', sortBy: 'views'),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
+                      const NativeAdWidget(),
+                      const SizedBox(height: 12),
                       _PremiumHorizontalList(key: ValueKey('slider_3_$_refreshKey'), title: 'شقق ملائمة', categoryId: 301, showViewAll: false, allCategories: provider.categories),
                       const SizedBox(height: 20),
                       _PremiumHorizontalList(key: ValueKey('slider_4_$_refreshKey'), title: 'شقق للايجار', subtitle: 'أحدث الإعلانات من شقق للايجار', sortBy: 'newest', categoryId: 301, showViewAll: true, allCategories: provider.categories),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 12),
+                      const NativeAdWidget(),
+                      const SizedBox(height: 12),
                       _PremiumHorizontalList(key: ValueKey('slider_5_$_refreshKey'), title: 'شقق للبيع', subtitle: 'أحدث الإعلانات من شقق للبيع', sortBy: 'newest', categoryId: 10301, showViewAll: true, allCategories: provider.categories),
                       const SizedBox(height: 30),
                       const _HomeFooter(),
