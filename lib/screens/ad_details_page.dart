@@ -1826,13 +1826,9 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
   // 14. SELLER INFO
   // ═══════════════════════════════════════════════
   Widget _buildSellerCard() {
-    String agentType = 'مستخدم';
+    String? agentType;
     if (ad.attributes != null && ad.attributes!['advertiser_type'] != null) {
       agentType = ad.attributes!['advertiser_type'].toString();
-    } else if (ad.ownerType != null) {
-      if (ad.ownerType == 'dealer') agentType = 'وسيط';
-      else if (ad.ownerType == 'company') agentType = 'شركة';
-      else if (ad.ownerType == 'private') agentType = 'مالك';
     }
 
     return GestureDetector(
@@ -1878,7 +1874,10 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text('$agentType • يرد خلال 5 دقائق', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                    if (agentType != null)
+                      Text('$agentType • يرد خلال 5 دقائق', style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)))
+                    else
+                      const Text('يرد خلال 5 دقائق', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
                   ],
                 )
               ],
