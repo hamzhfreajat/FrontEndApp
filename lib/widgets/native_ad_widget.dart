@@ -59,7 +59,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
         cornerRadius: 16.0,
         callToActionTextStyle: NativeTemplateTextStyle(
           textColor: Colors.white,
-          backgroundColor: const Color(0xFF0075FF), // App's primary brand color
+          backgroundColor: const Color(0xFF25D366), // Matches app's Call/WhatsApp green
           style: NativeTemplateFontStyle.bold,
           size: 14.0,
         ),
@@ -145,7 +145,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
                       Icon(Icons.auto_awesome_rounded, color: Colors.grey.shade500, size: 12),
                       const SizedBox(width: 6),
                       Text(
-                        'إعلان',
+                        'إعلان ممول',
                         style: TextStyle(
                           fontSize: 10,
                           color: Colors.grey.shade700,
