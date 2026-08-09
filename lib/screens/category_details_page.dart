@@ -2853,7 +2853,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           (context, index) {
             if (index < displayAds.length) {
               final ad = displayAds[index];
-              final isAdSlot = (index > 0) && (index % 8 == 0);
+              final isAdSlot = (index > 0) && (index % 5 == 0);
               
               return RepaintBoundary(
                 child: Column(
