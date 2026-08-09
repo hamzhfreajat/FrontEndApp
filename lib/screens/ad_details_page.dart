@@ -1827,8 +1827,8 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
   // ═══════════════════════════════════════════════
   Widget _buildSellerCard() {
     String? agentType;
-    if (ad.attributes != null && ad.attributes!['advertiser_type'] != null) {
-      agentType = ad.attributes!['advertiser_type'].toString();
+    if (ad.attributes != null && ad.attributes!['dynamic_data'] is Map && (ad.attributes!['dynamic_data'] as Map)['advertiser_type'] != null) {
+      agentType = (ad.attributes!['dynamic_data'] as Map)['advertiser_type'].toString();
     } else if (ad.ownerType != null) {
       if (ad.ownerType == 'dealer') agentType = 'وسيط';
       else if (ad.ownerType == 'company') agentType = 'شركة';
