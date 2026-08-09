@@ -99,7 +99,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
     if (!_isAdLoaded) {
       // Return a fixed height placeholder while loading to prevent layout jumps (which cause scroll lag)
       return Container(
-        height: 105, // Exactly matches the ad height
+        height: 135, // Exactly matches the ad height
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
@@ -162,7 +162,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           Padding(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
             child: SizedBox(
-              height: 105, // Strict height for Small Template to prevent huge white spaces
+              height: 135, // Strict height adjusted to prevent bottom overflow
               width: double.infinity,
               child: AdWidget(ad: _nativeAd!),
             ),
