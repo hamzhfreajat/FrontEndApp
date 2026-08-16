@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:shimmer/shimmer.dart';
 
 class NativeAdWidget extends StatefulWidget {
   const NativeAdWidget({Key? key}) : super(key: key);
@@ -14,6 +16,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
   AdWidget? _adWidget;
   bool _isAdLoaded = false;
   bool _isAdFailed = false;
+  bool _isLoading = false;
 
   final String _adUnitId = Platform.isAndroid
       ? 'ca-app-pub-2993417564924380/4129879862'
@@ -25,10 +28,12 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
   @override
   void initState() {
     super.initState();
-    _loadAd();
   }
 
   void _loadAd() {
+    if (_isLoading || _isAdLoaded) return;
+    _isLoading = true;
+
     _nativeAd = NativeAd(
       adUnitId: _adUnitId,
       factoryId: '', // Not needed when using NativeTemplateStyle
@@ -38,6 +43,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           if (mounted) {
             setState(() {
               _isAdLoaded = true;
+              _isLoading = false;
               _isAdFailed = false;
               _adWidget = AdWidget(ad: _nativeAd!);
             });
@@ -49,6 +55,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
           if (mounted) {
             setState(() {
               _isAdFailed = true;
+              _isLoading = false;
             });
           }
         },
@@ -98,71 +105,111 @@ class _NativeAdWidgetState extends State<NativeAdWidget> with AutomaticKeepAlive
       return const SizedBox.shrink(); // Hide if failed
     }
 
+    Widget adContent;
+
     if (!_isAdLoaded || _adWidget == null) {
-      return Container(
+      adContent = Container(
         height: 340, // Height for medium template with large image
         margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
         ),
-        child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.grey),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
+                child: Container(
+                  width: 80,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      adContent = Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: Colors.grey.shade200, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3C7), // Light yellow
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'إعلان ممول',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFFD97706), // Deep yellow/orange
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(), // pushes badge to the right in RTL
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
+              child: SizedBox(
+                height: 340, // Height for medium template
+                width: double.infinity,
+                child: _adWidget,
+              ),
+            ),
+          ],
         ),
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF3C7), // Light yellow
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    'إعلان ممول',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: const Color(0xFFD97706), // Deep yellow/orange
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(), // pushes badge to the right in RTL
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 8.0),
-            child: SizedBox(
-              height: 340, // Height for medium template
-              width: double.infinity,
-              child: _adWidget,
-            ),
-          ),
-        ],
-      ),
+    return VisibilityDetector(
+      key: Key('native-ad-'),
+      onVisibilityChanged: (VisibilityInfo info) {
+        if (info.visibleFraction > 0.0) {
+          _loadAd();
+        }
+      },
+      child: adContent,
     );
   }
 }
