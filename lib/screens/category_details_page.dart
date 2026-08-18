@@ -2889,10 +2889,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: InlineBannerAd(),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: InlineBannerAd(),
-                      ),
                     ],
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
