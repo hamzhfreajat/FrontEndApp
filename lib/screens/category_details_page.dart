@@ -606,20 +606,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               fillOverscroll: false,
               child: Builder(
                 builder: (context) {
-                  if (_isLoadingAds) return const SizedBox.shrink();
-                  return LayoutBuilder(
-                    builder: (context, constraints) {
-                      if (!constraints.hasBoundedHeight) return const SizedBox.shrink();
-                      final int bannerCount = (constraints.maxHeight / 85).floor();
-                      if (bannerCount <= 0) return const SizedBox.shrink();
-                      
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: List.generate(bannerCount > 10 ? 10 : bannerCount, (index) {
-                          return const InlineBannerAd();
-                        }),
-                      );
-                    }
+                  if (_isLoadingAds || _ads.isNotEmpty) return const SizedBox.shrink();
+                  return const Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      InlineBannerAd(),
+                      InlineBannerAd(),
+                      InlineBannerAd(),
+                    ],
                   );
                 }
               ),
