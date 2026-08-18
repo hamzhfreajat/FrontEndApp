@@ -74,8 +74,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/regions/
-    - assets/images/
-    - assets/images/regions/real_estate/
+    - assets/images/real_estate/
     - assets/sounds/
     - assets/fonts/
 

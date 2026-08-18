@@ -1287,67 +1287,104 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   ] else ...[
                     // Premium UI for Amman East/West selection
                     if (selectedCityForFilter?.nameAr == 'عمان' && searchQuery.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  setModalState(() {
-                                    selectedRegionsForFilter.addAll(
-                                      filteredRegions.where((r) => _eastAmmanRegions.contains(r.nameAr))
-                                    );
-                                  });
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFF0075FF), Color(0xFF0052B4)],
+                      Builder(
+                        builder: (context) {
+                          final eastRegionsCount = filteredRegions.where((r) => _eastAmmanRegions.contains(r.nameAr)).length;
+                          final westRegionsCount = filteredRegions.where((r) => _westAmmanRegions.contains(r.nameAr)).length;
+                          
+                          final isEastAmmanSelected = selectedRegionsForFilter.isNotEmpty && 
+                              selectedRegionsForFilter.length >= eastRegionsCount && 
+                              selectedRegionsForFilter.every((r) => _eastAmmanRegions.contains(r.nameAr));
+                              
+                          final isWestAmmanSelected = selectedRegionsForFilter.isNotEmpty && 
+                              selectedRegionsForFilter.length >= westRegionsCount && 
+                              selectedRegionsForFilter.every((r) => _westAmmanRegions.contains(r.nameAr));
+
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      setModalState(() {
+                                        if (isEastAmmanSelected) {
+                                          selectedRegionsForFilter.clear();
+                                        } else {
+                                          selectedRegionsForFilter.clear();
+                                          selectedRegionsForFilter.addAll(
+                                            filteredRegions.where((r) => _eastAmmanRegions.contains(r.nameAr))
+                                          );
+                                        }
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: isEastAmmanSelected ? widget.brandColor : Colors.white,
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: isEastAmmanSelected ? widget.brandColor : Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'عمان الشرقية', 
+                                        style: TextStyle(
+                                          color: isEastAmmanSelected ? Colors.white : Colors.black87, 
+                                          fontWeight: FontWeight.bold, 
+                                          fontSize: 14
+                                        )
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(color: const Color(0xFF0075FF).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
-                                    ],
                                   ),
-                                  alignment: Alignment.center,
-                                  child: const Text('عمان الشرقية', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () {
-                                  setModalState(() {
-                                    selectedRegionsForFilter.addAll(
-                                      filteredRegions.where((r) => _westAmmanRegions.contains(r.nameAr))
-                                    );
-                                  });
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    image: const DecorationImage(
-                                      image: AssetImage('assets/images/regions/amman_west.jpg'),
-                                      fit: BoxFit.cover,
-                                      colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () {
+                                      setModalState(() {
+                                        if (isWestAmmanSelected) {
+                                          selectedRegionsForFilter.clear();
+                                        } else {
+                                          selectedRegionsForFilter.clear();
+                                          selectedRegionsForFilter.addAll(
+                                            filteredRegions.where((r) => _westAmmanRegions.contains(r.nameAr))
+                                          );
+                                        }
+                                      });
+                                    },
+                                    borderRadius: BorderRadius.circular(30),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 200),
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      decoration: BoxDecoration(
+                                        color: isWestAmmanSelected ? widget.brandColor : Colors.white,
+                                        borderRadius: BorderRadius.circular(30),
+                                        border: Border.all(
+                                          color: isWestAmmanSelected ? widget.brandColor : Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        'عمان الغربية', 
+                                        style: TextStyle(
+                                          color: isWestAmmanSelected ? Colors.white : Colors.black87, 
+                                          fontWeight: FontWeight.bold, 
+                                          fontSize: 14
+                                        )
+                                      ),
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
-                                    ],
                                   ),
-                                  alignment: Alignment.center,
-                                  child: const Text('عمان الغربية', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        }
                       ),
                     // Regions
                     Expanded(
