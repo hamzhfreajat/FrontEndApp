@@ -601,6 +601,31 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
             ),
             _buildCleanAdsList(),
+            SliverFillRemaining(
+              hasScrollBody: false,
+              fillOverscroll: false,
+              child: Builder(
+                builder: (context) {
+                  if (_isLoadingAds) return const SizedBox.shrink();
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final int bannerCount = (constraints.maxHeight / 116).floor();
+                      if (bannerCount <= 0) return const SizedBox.shrink();
+                      
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: List.generate(bannerCount, (index) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8),
+                            child: InlineBannerAd(),
+                          );
+                        }),
+                      );
+                    }
+                  );
+                }
+              ),
+            ),
             const SliverPadding(padding: EdgeInsets.only(bottom: 100)), // Space for the floating bottom bar
           ],
         ),
@@ -2858,11 +2883,20 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               return RepaintBoundary(
                 child: Column(
                   children: [
-                    if (isAdSlot)
+                    if (isAdSlot) ...[
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: InlineBannerAd(),
                       ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: InlineBannerAd(),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: InlineBannerAd(),
+                      ),
+                    ],
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: PremiumRealEstateCard(
