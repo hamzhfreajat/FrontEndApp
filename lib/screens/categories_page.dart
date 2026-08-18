@@ -352,6 +352,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
       case 10313: return 'assets/images/real_estate/land_land.png';
       case 10314: return 'assets/images/real_estate/sale_farm.png';
       case 10315: return 'assets/images/real_estate/sale_resort.png';
+      case 5050717: return 'assets/images/real_estate/apartment.png';
       
       // Rent Categories
       case 306: return 'assets/images/real_estate/shared_housing.png';
