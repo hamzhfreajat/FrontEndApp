@@ -1320,7 +1320,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                                     },
                                     borderRadius: BorderRadius.circular(30),
                                     child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
+                                      duration: const Duration(milliseconds: 0),
                                       padding: const EdgeInsets.symmetric(vertical: 10),
                                       decoration: BoxDecoration(
                                         color: isEastAmmanSelected ? widget.brandColor : Colors.white,
@@ -1359,7 +1359,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                                     },
                                     borderRadius: BorderRadius.circular(30),
                                     child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 200),
+                                      duration: const Duration(milliseconds: 0),
                                       padding: const EdgeInsets.symmetric(vertical: 10),
                                       decoration: BoxDecoration(
                                         color: isWestAmmanSelected ? widget.brandColor : Colors.white,
