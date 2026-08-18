@@ -337,6 +337,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       InlineBannerAd(),
                       InlineBannerAd(),
                       InlineBannerAd(),
+                      InlineBannerAd(),
                     ],
                   ),
                 ),

@@ -613,6 +613,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       InlineBannerAd(),
                       InlineBannerAd(),
                       InlineBannerAd(),
+                      InlineBannerAd(),
                     ],
                   );
                 }
@@ -2876,6 +2877,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Column(
                   children: [
                     if (isAdSlot) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: InlineBannerAd(),
+                      ),
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: InlineBannerAd(),
