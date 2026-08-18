@@ -6,7 +6,7 @@ import '../services/api_service.dart';
 import '../providers/app_provider.dart';
 import '../models/location.dart';
 import '../services/analytics_engine.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../utils/arabic_numbers_formatter.dart';
 
 const List<String> _westAmmanRegions = [
   'ابو نصير', 'الجبيهة', 'الدوار الثالث', 'الدوار الرابع', 'الدوار الخامس', 'الدوار السادس', 
@@ -1331,12 +1331,14 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(vertical: 12),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      colors: [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
-                                    ),
                                     borderRadius: BorderRadius.circular(12),
+                                    image: const DecorationImage(
+                                      image: AssetImage('assets/images/regions/amman_west.jpg'),
+                                      fit: BoxFit.cover,
+                                      colorFilter: ColorFilter.mode(Colors.black45, BlendMode.darken),
+                                    ),
                                     boxShadow: [
-                                      BoxShadow(color: const Color(0xFF8E2DE2).withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))
+                                      BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
                                     ],
                                   ),
                                   alignment: Alignment.center,
