@@ -8,6 +8,7 @@ import 'package:shimmer/shimmer.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../providers/app_provider.dart';
 import '../widgets/native_ad_widget.dart';
+import '../widgets/inline_banner_ad.dart';
 import '../widgets/shimmer_loading.dart';
 import '../models/metrics.dart';
 import '../models/ticker.dart';
@@ -189,7 +190,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 20),
                       _PremiumHorizontalList(key: ValueKey('slider_2_$_refreshKey'), title: 'الأكثر مشاهدة', sortBy: 'views'),
                       const SizedBox(height: 12),
-                      const NativeAdWidget(),
+                      const InlineBannerAd(),
                       const SizedBox(height: 12),
                       _PremiumHorizontalList(key: ValueKey('slider_3_$_refreshKey'), title: 'شقق ملائمة', categoryId: 301, showViewAll: false, allCategories: provider.categories),
                       const SizedBox(height: 20),
