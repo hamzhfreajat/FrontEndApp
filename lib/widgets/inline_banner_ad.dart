@@ -88,7 +88,7 @@ class _InlineBannerAdState extends State<InlineBannerAd> with AutomaticKeepAlive
         alignment: Alignment.center,
         width: _bannerAd!.size.width.toDouble(),
         height: _bannerAd!.size.height.toDouble(),
-        margin: const EdgeInsets.symmetric(vertical: 16.0),
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
         child: AdWidget(ad: _bannerAd!),
       );
     }

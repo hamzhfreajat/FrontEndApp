@@ -313,7 +313,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
                       return GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        padding: const EdgeInsets.fromLTRB(12, 24, 12, 40),
+                        padding: const EdgeInsets.fromLTRB(12, 24, 12, 12),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
                           childAspectRatio: 0.72,
