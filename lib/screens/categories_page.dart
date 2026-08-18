@@ -332,7 +332,13 @@ class _CategoriesPageState extends State<CategoriesPage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 32.0, top: 0.0),
-                  child: const InlineBannerAd(),
+                  child: Column(
+                    children: const [
+                      InlineBannerAd(),
+                      InlineBannerAd(),
+                      InlineBannerAd(),
+                    ],
+                  ),
                 ),
               ),
             ],
