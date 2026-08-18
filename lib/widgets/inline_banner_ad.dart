@@ -14,7 +14,7 @@ class _InlineBannerAdState extends State<InlineBannerAd> with AutomaticKeepAlive
   bool _isLoaded = false;
   bool _isLoadingAd = false;
   final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-2993417564924380/9946593618'
+      ? 'ca-app-pub-2993417564924380/9310381325'
       : 'ca-app-pub-2993417564924380/8456156193';
 
   @override

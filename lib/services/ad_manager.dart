@@ -8,7 +8,7 @@ class AdManager {
   static final AdManager instance = AdManager._privateConstructor();
 
   final String _adUnitId = Platform.isAndroid
-      ? 'ca-app-pub-2993417564924380/9946593618'
+      ? 'ca-app-pub-2993417564924380/9310381325'
       : 'ca-app-pub-2993417564924380/8456156193';
 
   // A queue of preloaded ads
