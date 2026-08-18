@@ -460,8 +460,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
 
                 // If no subcategory is selected, or if the current sub/category is Real Estate, show specific filters.
                 if (_isLands()) ...[
-                  _buildInputsRow('مساحة الأرض (متر مربع)', 'أدنى مساحة', 'أعلى مساحة', _minAreaController, _maxAreaController),
                   _buildInputsRow('السعر (دينار)', 'أدنى سعر', 'أعلى سعر', _minPriceController, _maxPriceController),
+                  _buildInputsRow('مساحة الأرض (متر مربع)', 'أدنى مساحة', 'أعلى مساحة', _minAreaController, _maxAreaController),
 
                   _buildMultiSelectSection('تصنيف التنظيم', ['سكن أ', 'سكن ب', 'سكن ج', 'سكن د', 'تجاري', 'زراعي', 'صناعي', 'أخرى'], _selectedZoningClassification, (val) { setState(() { _selectedZoningClassification.contains(val) ? _selectedZoningClassification.remove(val) : _selectedZoningClassification.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedZoningClassification.clear()); _triggerCountUpdate(); }),
                   _buildMultiSelectSection('الواجهة', ['شمالية', 'جنوبية', 'شرقية', 'غربية', 'شمالية شرقية', 'شمالية غربية', 'جنوبية شرقية', 'جنوبية غربية'], _selectedFacade, (val) { setState(() { _selectedFacade.contains(val) ? _selectedFacade.remove(val) : _selectedFacade.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedFacade.clear()); _triggerCountUpdate(); }),
@@ -472,8 +472,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   _buildMultiSelectSection('تخضع للرهن؟', ['نعم', 'لا'], _selectedIsMortgaged, (val) { setState(() { _selectedIsMortgaged.contains(val) ? _selectedIsMortgaged.remove(val) : _selectedIsMortgaged.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedIsMortgaged.clear()); _triggerCountUpdate(); }),
                   _buildMultiSelectSection('متاح بالأقساط؟', ['نعم', 'لا'], _selectedInstallmentPossible, (val) { setState(() { _selectedInstallmentPossible.contains(val) ? _selectedInstallmentPossible.remove(val) : _selectedInstallmentPossible.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedInstallmentPossible.clear()); _triggerCountUpdate(); }),
                 ] else if (_isRealEstate()) ...[
-                  _buildInputsRow('مساحة البناء', 'أدنى مساحة', 'أعلى مساحة', _minAreaController, _maxAreaController),
                   _buildInputsRow('السعر (دينار)', 'أدنى سعر', 'أعلى سعر', _minPriceController, _maxPriceController),
+                  _buildInputsRow('مساحة البناء', 'أدنى مساحة', 'أعلى مساحة', _minAreaController, _maxAreaController),
                   
                   if (!_isCommercial()) ...[
                     if (!_isStudio())
