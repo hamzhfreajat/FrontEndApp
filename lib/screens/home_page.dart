@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../providers/app_provider.dart';
-import '../widgets/native_ad_widget.dart';
 import '../widgets/inline_banner_ad.dart';
 import '../widgets/shimmer_loading.dart';
 import '../models/metrics.dart';
@@ -196,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 20),
                       _PremiumHorizontalList(key: ValueKey('slider_4_$_refreshKey'), title: 'شقق للايجار', subtitle: 'أحدث الإعلانات من شقق للايجار', sortBy: 'newest', categoryId: 301, showViewAll: true, allCategories: provider.categories),
                       const SizedBox(height: 12),
-                      const NativeAdWidget(),
+                      const InlineBannerAd(),
                       const SizedBox(height: 12),
                       _PremiumHorizontalList(key: ValueKey('slider_5_$_refreshKey'), title: 'شقق للبيع', subtitle: 'أحدث الإعلانات من شقق للبيع', sortBy: 'newest', categoryId: 10301, showViewAll: true, allCategories: provider.categories),
                       const SizedBox(height: 30),

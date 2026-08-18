@@ -7,7 +7,7 @@ import '../models/category.dart';
 import '../services/api_service.dart';
 import 'category_details_page.dart';
 import '../widgets/emoji_category_icon.dart';
-import '../widgets/native_ad_widget.dart';
+import '../widgets/inline_banner_ad.dart';
 
 import '../services/analytics_engine.dart';
 
@@ -332,7 +332,7 @@ class _CategoriesPageState extends State<CategoriesPage> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 32.0, top: 0.0),
-                  child: const NativeAdWidget(),
+                  child: const InlineBannerAd(),
                 ),
               ),
             ],

@@ -34,7 +34,7 @@ import '../widgets/premium_real_estate_card.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../widgets/inline_banner_ad.dart';
 import '../widgets/premium_filter_bottom_sheet.dart';
-import '../widgets/native_ad_widget.dart';
+import '../widgets/inline_banner_ad.dart';
 
 class CategoryDetailsPage extends StatefulWidget {
   final Category category;
@@ -2861,7 +2861,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     if (isAdSlot)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 8),
-                        child: NativeAdWidget(),
+                        child: InlineBannerAd(),
                       ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
