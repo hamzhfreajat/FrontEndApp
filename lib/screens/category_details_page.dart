@@ -609,12 +609,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   if (_isLoadingAds) return const SizedBox.shrink();
                   return LayoutBuilder(
                     builder: (context, constraints) {
+                      if (!constraints.hasBoundedHeight) return const SizedBox.shrink();
                       final int bannerCount = (constraints.maxHeight / 116).floor();
                       if (bannerCount <= 0) return const SizedBox.shrink();
                       
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: List.generate(bannerCount, (index) {
+                        children: List.generate(bannerCount > 10 ? 10 : bannerCount, (index) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8),
                             child: InlineBannerAd(),
