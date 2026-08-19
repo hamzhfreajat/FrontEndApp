@@ -605,7 +605,7 @@ class ApiService {
         request.files.add(await http.MultipartFile.fromPath('files', file.path));
       }
 
-      final response = await _client.send(request).timeout(const Duration(seconds: 45));
+      final response = await _client.send(request).timeout(const Duration(minutes: 5));
       if (response.statusCode == 200) {
         final respStr = await response.stream.bytesToString();
         final data = json.decode(respStr) as Map<String, dynamic>;
