@@ -45,11 +45,11 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
       if (picked != null) {
         final controller = VideoPlayerController.file(File(picked.path));
         await controller.initialize();
-        if (controller.value.duration.inSeconds > 120) {
+        if (controller.value.duration.inSeconds > 30) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('يجب أن لا تتجاوز مدة الفيديو 120 ثانية'),
+                content: Text('يجب أن لا تتجاوز مدة الفيديو 30 ثانية'),
                 backgroundColor: Colors.red,
               ),
             );
