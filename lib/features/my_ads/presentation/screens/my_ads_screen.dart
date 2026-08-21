@@ -976,20 +976,24 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
                 
                 IAPService().onPurchaseCompleted = (success) async {
                   if (success) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم شحن الرصيد بنجاح!')));
                     try {
                       await ApiService().setAdBid(widget.adId, widget.bidToRetry);
                       if (context.mounted) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
                         context.read<MyAdsBloc>().add(LoadDashboardData());
                       }
                     } catch (e) {
                       if (context.mounted) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
                       }
                     }
                   } else {
                     if (context.mounted) {
+                      ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
                     }
                   }
@@ -998,8 +1002,9 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
                 bool started = await IAPService().buyTopUp(_selectedProductId);
                 if (!started) {
                   if (context.mounted) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
                     ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('خدمة الدفع غير متوفرة حالياً (المنتج غير موجود في المتجر).')));
+                        const SnackBar(content: Text('خدمة الدفع غير متوفرة حالياً (المنتج غير موجود في المتجر، يجب تحميل التطبيق من متجر جوجل لتجربة الدفع).')));
                   }
                 }
               },
