@@ -14,6 +14,7 @@ class MyAdCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback? onRepublishTap;
   final VoidCallback? onPromoteTap;
+  final VoidCallback? onStopPromoteTap;
 
   const MyAdCard({
     Key? key,
@@ -25,6 +26,7 @@ class MyAdCard extends StatelessWidget {
     required this.onTap,
     this.onRepublishTap,
     this.onPromoteTap,
+    this.onStopPromoteTap,
   }) : super(key: key);
 
   @override
@@ -87,7 +89,8 @@ class MyAdCard extends StatelessWidget {
                 Expanded(
                   flex: 4,
                   child: PromoteAdButton(
-                    onPromote: onPromoteTap,
+                    isPromoted: ad.baseAd.cpcBid > 0,
+                    onPromote: ad.baseAd.cpcBid > 0 ? onStopPromoteTap : onPromoteTap,
                   ),
                 ),
               ],
@@ -441,8 +444,9 @@ class _RepublishTimerButtonState extends State<RepublishTimerButton> {
 
 class PromoteAdButton extends StatelessWidget {
   final VoidCallback? onPromote;
+  final bool isPromoted;
 
-  const PromoteAdButton({Key? key, this.onPromote}) : super(key: key);
+  const PromoteAdButton({Key? key, this.onPromote, this.isPromoted = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -451,14 +455,24 @@ class PromoteAdButton extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: isPromoted 
+            ? const LinearGradient(
+                colors: [Color(0xFFE53935), Color(0xFFEF5350)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : const LinearGradient(
+                colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
-            BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4))
+            BoxShadow(
+              color: (isPromoted ? const Color(0xFFE53935) : const Color(0xFFD4AF37)).withOpacity(0.4), 
+              blurRadius: 8, 
+              offset: const Offset(0, 4)
+            )
           ],
         ),
         child: Material(
@@ -470,19 +484,22 @@ class PromoteAdButton extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   Icon(
-                    Icons.trending_up,
+                    isPromoted ? Icons.stop_circle_outlined : Icons.trending_up,
                     color: Colors.white,
                     size: 18,
                   ),
-                  SizedBox(width: 6),
-                  Text(
-                    'ترويج',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      isPromoted ? 'إيقاف الترويج' : 'ترويج',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

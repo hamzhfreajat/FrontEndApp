@@ -2,7 +2,7 @@ name: classifieds_frontend
 description: A new Flutter project for Multi-vendor Classifieds App.
 
 publish_to: 'none'
-version: 1.0.18+28
+version: 1.0.19+29
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

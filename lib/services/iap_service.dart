@@ -15,7 +15,6 @@ class IAPService {
   late StreamSubscription<List<PurchaseDetails>> _subscription;
 
   bool _isAvailable = false;
-  final String _topUpProductId = 'wallet_topup_10';
   
   Function(bool success)? onPurchaseCompleted;
 
@@ -41,13 +40,13 @@ class IAPService {
     }
   }
 
-  Future<bool> buyTopUp() async {
+  Future<bool> buyTopUp(String productId) async {
     if (!_isAvailable) {
       debugPrint('IAP not available');
       return false;
     }
 
-    final ProductDetailsResponse productDetailResponse = await _inAppPurchase.queryProductDetails({_topUpProductId});
+    final ProductDetailsResponse productDetailResponse = await _inAppPurchase.queryProductDetails({productId});
     if (productDetailResponse.error != null || productDetailResponse.productDetails.isEmpty) {
       debugPrint('Product not found: ${productDetailResponse.error?.message}');
       return false;

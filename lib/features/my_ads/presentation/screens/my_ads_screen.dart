@@ -130,61 +130,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.account_balance_wallet, size: 64, color: Colors.blue),
-              const SizedBox(height: 16),
-              const Text('رصيد غير كافٍ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              const Text(
-                'تحتاج إلى رصيد 10 دنانير على الأقل للبدء بترويج الإعلانات. هل ترغب في شحن رصيدك الآن؟',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black87),
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري معالجة الدفع...')));
-                    IAPService().onPurchaseCompleted = (success) async {
-                      if (success) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم شحن الرصيد بنجاح!')));
-                        try {
-                          await ApiService().setAdBid(adId, bidToRetry);
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
-                          if (context.mounted) {
-                            context.read<MyAdsBloc>().add(LoadDashboardData());
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
-                      }
-                    };
-                    IAPService().buyTopUp();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text('شحن 10 JOD الآن', style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
-              ),
-            ],
-          ),
-        );
+        return _TopUpBottomSheet(adId: adId, bidToRetry: bidToRetry);
       }
     );
   }
@@ -636,6 +582,17 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                             onPromoteTap: () {
                               _showPromotionInfoDialog(context, ad.baseAd.id);
                             },
+                            onStopPromoteTap: () async {
+                              try {
+                                await ApiService().setAdBid(ad.baseAd.id, 0.0);
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم إيقاف الترويج بنجاح!')));
+                                context.read<MyAdsBloc>().add(LoadDashboardData());
+                              } catch (e) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل إيقاف الترويج: $e')));
+                              }
+                            },
                           ),
                         );
                       },
@@ -923,6 +880,142 @@ class _AnimatedInteractionMockupState extends State<AnimatedInteractionMockup> w
           Icon(icon, color: isSolid ? Colors.white : color, size: 16),
           const SizedBox(width: 4),
           Text(label, style: TextStyle(color: isSolid ? Colors.white : color, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: -0.3)),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopUpBottomSheet extends StatefulWidget {
+  final int adId;
+  final double bidToRetry;
+
+  const _TopUpBottomSheet({required this.adId, required this.bidToRetry});
+
+  @override
+  State<_TopUpBottomSheet> createState() => _TopUpBottomSheetState();
+}
+
+class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
+  String _selectedProductId = 'wallet_topup_10';
+
+  final List<Map<String, dynamic>> _options = [
+    {'id': 'wallet_topup_10', 'amount': 10, 'label': '10 JOD'},
+    {'id': 'wallet_topup_20', 'amount': 20, 'label': '20 JOD'},
+    {'id': 'wallet_topup_50', 'amount': 50, 'label': '50 JOD'},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.account_balance_wallet, size: 64, color: Colors.blue),
+          const SizedBox(height: 16),
+          const Text('شحن الرصيد', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          const Text(
+            'اختر قيمة الشحن المناسبة لك:',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Colors.black87),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: _options.map((option) {
+              final isSelected = _selectedProductId == option['id'];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedProductId = option['id'];
+                  });
+                },
+                child: Container(
+                  width: 100,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.white,
+                    border: Border.all(
+                      color: isSelected ? Colors.blue : Colors.grey.shade300,
+                      width: isSelected ? 2 : 1,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '${option['amount']}',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.blue : Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        'JOD',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isSelected ? Colors.blue : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري معالجة الدفع...')));
+                
+                IAPService().onPurchaseCompleted = (success) async {
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم شحن الرصيد بنجاح!')));
+                    try {
+                      await ApiService().setAdBid(widget.adId, widget.bidToRetry);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
+                        context.read<MyAdsBloc>().add(LoadDashboardData());
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
+                      }
+                    }
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
+                    }
+                  }
+                };
+
+                bool started = await IAPService().buyTopUp(_selectedProductId);
+                if (!started) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('خدمة الدفع غير متوفرة حالياً (المنتج غير موجود في المتجر).')));
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('شحن الرصيد الآن', style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء', style: TextStyle(color: Colors.grey, fontSize: 16)),
+          ),
         ],
       ),
     );

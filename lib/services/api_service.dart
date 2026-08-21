@@ -93,6 +93,11 @@ class AuthInterceptingClient extends http.BaseClient {
 
 final _client = AuthInterceptingClient();
 
+class InsufficientBalanceException implements Exception {
+  final String message;
+  InsufficientBalanceException([this.message = "Insufficient balance."]);
+}
+
 class ApiService {
   static String get searchApiUrl {
     return 'https://api-search.sooq-com.com';
