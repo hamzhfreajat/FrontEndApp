@@ -152,6 +152,7 @@ class MockProfileRepositoryImpl implements ProfileRepository {
     dealsCompleted: 15,
     cancellationRate: 2,
     buyerSatisfaction: 98,
+    walletBalance: 0.0,
   );
 
   final UserProfile _myAccountProfile = UserProfile(
@@ -187,9 +188,10 @@ class MockProfileRepositoryImpl implements ProfileRepository {
     bio: 'مهتم بالتقنية والأجهزة المستعملة بحالة ممتازة.',
     preferredContact: 'whatsapp',
     languagesSpoken: ['العربية', 'English'],
-    dealsCompleted: 11,
-    cancellationRate: 0,
-    buyerSatisfaction: 100,
+    dealsCompleted: 120,
+    cancellationRate: 1,
+    buyerSatisfaction: 99,
+    walletBalance: 25.50,
   );
 
   final Map<String, UserProfile> _mockProfiles = {};

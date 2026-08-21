@@ -25,6 +25,7 @@ class Ad {
   final int? userId;
   bool isSaved;
   final DateTime? lastRepublishedAt;
+  final double cpcBid;
 
   Ad({
     required this.id,
@@ -50,6 +51,7 @@ class Ad {
     this.userId,
     this.isSaved = false,
     this.lastRepublishedAt,
+    this.cpcBid = 0.0,
   });
 
   factory Ad.fromJson(Map<String, dynamic> json) {
@@ -182,6 +184,7 @@ class Ad {
       userId: json['user_id'] != null ? (int.tryParse(json['user_id'].toString()) ?? 0) : null,
       isSaved: json['is_saved'] == true || json['is_saved'] == 'true' || json['is_saved'] == 1,
       lastRepublishedAt: json['last_republished_at'] != null ? DateTime.tryParse(json['last_republished_at'].toString()) : null,
+      cpcBid: json['cpc_bid'] != null ? (double.tryParse(json['cpc_bid'].toString()) ?? 0.0) : 0.0,
     );
   }
   String get displayLocation {
@@ -213,6 +216,7 @@ class Ad {
       'category_id': categoryId,
       'created_at': createdAt?.toIso8601String(),
       'attributes': attributes,
+      'cpc_bid': cpcBid,
     };
   }
 }

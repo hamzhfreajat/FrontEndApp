@@ -1121,6 +1121,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               'ownership_type': 'نوع الملكية', 'is_mortgaged': 'مرهونة؟', 'topography': 'طبيعة الأرض',
               'mortgage_details': 'تفاصيل الرهن', 'shares_number': 'عدد الحصص', 'plot_number': 'رقم القطعة',
               'topography_notes': 'ملاحظات طبيعة الأرض', 'build_area': 'مساحة البناء', 'building_ratio': 'نسبة البناء',
+              'has_terrace': 'يوجد ترس', 'terrace_area': 'مساحة الترس',
               'geometric_shape': 'الشكل الهندسي', 'length': 'الطول', 'width': 'العرض',
               'allowed_floors': 'الطوابق المسموحة', 'soil_type': 'نوع التربة', 'irrigation_water': 'مياه الري',
               'electricity_capacity': 'قدرة الكهرباء', 'is_subdivided': 'مفرزة؟', 'has_blueprint': 'مخطط متوفر؟',
@@ -1664,6 +1665,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                 String waPhone = phone;
                 // Record interaction
                 ApiService().recordAdInteractionChat(ad.id);
+                ApiService().trackAdClick(ad.id, 'whatsapp');
                 AnalyticsEngine().logContactAgentInitiated(
                   propertyId: ad.id.toString(),
                   contactMethod: 'whatsapp',
@@ -1723,6 +1725,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
 
                   // Record interaction
                   ApiService().recordAdInteractionChat(ad.id);
+                  ApiService().trackAdClick(ad.id, 'chat');
                   AnalyticsEngine().logContactAgentInitiated(
                     propertyId: ad.id.toString(),
                     contactMethod: 'chat',
@@ -1769,6 +1772,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                     setState(() => _showPhone = true);
                     // Record interaction when they reveal the number
                     ApiService().recordAdInteractionPhone(ad.id);
+                    ApiService().trackAdClick(ad.id, 'call');
                     AnalyticsEngine().logContactAgentInitiated(
                       propertyId: ad.id.toString(),
                       contactMethod: 'phone_reveal',
@@ -1778,6 +1782,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                   
                   // Also record interaction when they actually dial
                   ApiService().recordAdInteractionPhone(ad.id);
+                  ApiService().trackAdClick(ad.id, 'call');
                   AnalyticsEngine().logContactAgentInitiated(
                     propertyId: ad.id.toString(),
                     contactMethod: 'phone_dial',

@@ -52,6 +52,7 @@ class UserProfile {
   final int dealsCompleted;
   final int cancellationRate;
   final int buyerSatisfaction;
+  final double walletBalance;
 
   UserProfile({
     required this.id,
@@ -91,6 +92,7 @@ class UserProfile {
     this.dealsCompleted = 0,
     this.cancellationRate = 0,
     this.buyerSatisfaction = 0,
+    this.walletBalance = 0.0,
   });
 
   bool get isBusiness => userType == 'dealer' || userType == 'company';

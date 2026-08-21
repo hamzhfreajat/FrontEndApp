@@ -169,6 +169,7 @@ class ApiProfileRepositoryImpl implements ProfileRepository {
       dealsCompleted: json['deals_completed'] ?? 0,
       cancellationRate: json['cancellation_rate'] ?? 0,
       buyerSatisfaction: json['buyer_satisfaction'] ?? 0,
+      walletBalance: json['wallet_balance'] != null ? (double.tryParse(json['wallet_balance'].toString()) ?? 0.0) : 0.0,
     );
   }
 

@@ -98,7 +98,8 @@ class ApiService {
     return 'https://api-search.sooq-com.com';
   }
   static String get baseUrl {
-    return 'https://api.sooq-com.com/api';
+    // return 'https://api.sooq-com.com/api';
+    return 'https://staging.sooq-com.com/api';
   }
 
   /// Check if an icon_name represents an image (URL, path, or data URI).
@@ -1337,6 +1338,70 @@ class ApiService {
       ).timeout(const Duration(seconds: 5));
     } catch (e) {
       debugPrint('Error deleting recent search: $e');
+    }
+  }
+  // ══════════════════════════════════════════════════════════════════════════
+  // Wallet & Bidding API
+  // ══════════════════════════════════════════════════════════════════════════
+
+  Future<void> topupWallet(String productId, String platform, String receiptData) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/wallet/topup'),
+      headers: await _getHeaders(),
+      body: jsonEncode({
+        'product_id': productId,
+        'platform': platform,
+        'receipt_data': receiptData,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to topup wallet: ${response.body}');
+    }
+  }
+
+  Future<List<dynamic>> getWalletTransactions() async {
+    final response = await _client.get(
+      Uri.parse('$baseUrl/wallet/transactions'),
+      headers: await _getHeaders(),
+    );
+    if (response.statusCode == 200) {
+      return jsonDecode(utf8.decode(response.bodyBytes)) as List<dynamic>;
+    } else {
+      throw Exception('Failed to fetch transactions');
+    }
+  }
+
+  Future<void> setAdBid(int adId, double bid) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/ads/$adId/bid'),
+      headers: await _getHeaders(),
+      body: jsonEncode({
+        'cpc_bid': bid,
+      }),
+    );
+    if (response.statusCode == 402) {
+      throw InsufficientBalanceException();
+    }
+    if (response.statusCode != 200) {
+      final body = jsonDecode(response.body);
+      throw Exception(body['detail'] ?? 'Failed to set bid');
+    }
+  }
+
+  Future<void> trackAdClick(int adId, String actionType) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/ads/$adId/track-click'),
+        headers: await _getHeaders(),
+        body: jsonEncode({
+          'action_type': actionType,
+        }),
+      );
+      if (response.statusCode != 200) {
+        debugPrint('Failed to track click: ${response.body}');
+      }
+    } catch (e) {
+      debugPrint('Error tracking ad click: $e');
     }
   }
 }

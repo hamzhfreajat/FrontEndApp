@@ -13,6 +13,7 @@ class MyAdCard extends StatelessWidget {
   final VoidCallback onLongPress;
   final VoidCallback onTap;
   final VoidCallback? onRepublishTap;
+  final VoidCallback? onPromoteTap;
 
   const MyAdCard({
     Key? key,
@@ -23,6 +24,7 @@ class MyAdCard extends StatelessWidget {
     required this.onLongPress,
     required this.onTap,
     this.onRepublishTap,
+    this.onPromoteTap,
   }) : super(key: key);
 
   @override
@@ -73,9 +75,22 @@ class MyAdCard extends StatelessWidget {
           _buildPerformanceRow(context),
           if (ad.status == 'Active') ...[
             const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-            RepublishTimerButton(
-              lastRepublishedAt: ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt ?? DateTime.now().subtract(const Duration(days: 1)),
-              onRepublish: onRepublishTap,
+            Row(
+              children: [
+                Expanded(
+                  flex: 5,
+                  child: RepublishTimerButton(
+                    lastRepublishedAt: ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt ?? DateTime.now().subtract(const Duration(days: 1)),
+                    onRepublish: onRepublishTap,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: PromoteAdButton(
+                    onPromote: onPromoteTap,
+                  ),
+                ),
+              ],
             ),
           ],
         ],
@@ -265,8 +280,10 @@ class ActionBottomSheet {
                 child: Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
               ),
               _Item(icon: Icons.edit_rounded, text: 'تعديل الإعلان', onTap: () { Navigator.pop(ctx); onActionSelected('edit'); }),
-              if (status != 'Paused' && status != 'Sold' && status != 'Expired')
+              if (status != 'Paused' && status != 'Sold' && status != 'Expired') ...[
+                _Item(icon: Icons.campaign_outlined, text: 'ترويج الإعلان', color: Colors.blue, onTap: () { Navigator.pop(ctx); onActionSelected('promote'); }),
                 _Item(icon: Icons.pause_circle_outline_rounded, text: 'إيقاف الإعلان', onTap: () { Navigator.pop(ctx); onActionSelected('pause'); }),
+              ],
               if (status == 'Paused' || status == 'Expired')
                 _Item(icon: Icons.play_circle_outline_rounded, text: 'تفعيل الإعلان', onTap: () { Navigator.pop(ctx); onActionSelected('resume'); }),
               if (status != 'Sold')
@@ -378,7 +395,7 @@ class _RepublishTimerButtonState extends State<RepublishTimerButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.only(right: 16, top: 12, bottom: 12, left: 4),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
@@ -408,6 +425,62 @@ class _RepublishTimerButtonState extends State<RepublishTimerButton> {
                     _canRepublish ? 'إعادة النشر الآن' : 'إعادة النشر متاح بعد ${_formatDuration(_remaining)}',
                     style: TextStyle(
                       color: _canRepublish ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class PromoteAdButton extends StatelessWidget {
+  final VoidCallback? onPromote;
+
+  const PromoteAdButton({Key? key, this.onPromote}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12, right: 4),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFD4AF37), Color(0xFFFFD700)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.4), blurRadius: 8, offset: const Offset(0, 4))
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPromote,
+            borderRadius: BorderRadius.circular(10),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.trending_up,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'ترويج',
+                    style: TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),

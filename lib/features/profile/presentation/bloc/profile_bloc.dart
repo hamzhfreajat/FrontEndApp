@@ -97,6 +97,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         dealsCompleted: state.profile!.dealsCompleted,
         cancellationRate: state.profile!.cancellationRate,
         buyerSatisfaction: state.profile!.buyerSatisfaction,
+        walletBalance: state.profile!.walletBalance,
       );
       emit(state.copyWith(profile: updatedProfile));
     } catch (e) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/entities/user_profile.dart';
 import '../../../../../screens/saved_ads_page.dart';
+import '../../../../../screens/wallet_page.dart';
 import 'package:provider/provider.dart';
 import '../../../../../providers/app_provider.dart';
 import '../../../../../providers/saved_search_provider.dart';
@@ -31,6 +32,12 @@ class ActivityHubSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
+                    _buildActivityCard(
+                      context, 'محفظتي', '${profile.walletBalance.toStringAsFixed(2)} JOD', Icons.account_balance_wallet_rounded, const Color(0xFF4CAF50),
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => WalletPage()));
+                      },
+                    ),
                     _buildActivityCard(
                       context, 'الإعلانات المحفوظة', '${appProvider.metrics?.savedItems ?? 0} إعلان', Icons.bookmark_rounded, const Color(0xFFE5B91A),
                       onTap: () {

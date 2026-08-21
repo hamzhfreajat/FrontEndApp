@@ -774,19 +774,17 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                 child: AnimatedContainer(
                   constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 64),
                   duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   decoration: BoxDecoration(
                     color: isChecked
-                        ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                        ? const Color(0xFF10B981).withValues(alpha: 0.05)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isChecked
-                          ? const Color(0xFF10B981)
+                          ? const Color(0xFF10B981).withValues(alpha: 0.3)
                           : Colors.grey.shade300,
-                      width: 1.5,
+                      width: 1,
                     ),
                   ),
                   child: Row(
@@ -794,8 +792,8 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                     children: [
                       Icon(
                         isChecked
-                            ? Icons.task_alt_rounded
-                            : Icons.radio_button_unchecked_rounded,
+                            ? Icons.check_box_rounded
+                            : Icons.check_box_outline_blank_rounded,
                         color: isChecked
                             ? const Color(0xFF10B981)
                             : Colors.grey.shade400,
@@ -810,8 +808,8 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                                 ? const Color(0xFF10B981)
                                 : Colors.black87,
                             fontWeight:
-                                isChecked ? FontWeight.w900 : FontWeight.w600,
-                            fontSize: 14,
+                                isChecked ? FontWeight.w700 : FontWeight.w500,
+                            fontSize: 13,
                           ),
                         ),
                       ),
@@ -1549,6 +1547,11 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
               if (widget.selectedLeafCategory.name.contains('مستقلة'))
                 _buildMeasurementField('مساحة الأرض', 'land_area', 'متر مربع',
                     icon: Icons.landscape_rounded),
+              _buildRadioChips('هل يوجد ترس؟', 'has_terrace', ['نعم', 'لا'],
+                  icon: Icons.deck_rounded),
+              if (_dynamicData['has_terrace'] == 'نعم')
+                _buildMeasurementField('مساحة الترس', 'terrace_area', 'متر مربع',
+                    icon: Icons.square_foot_rounded),
               if (!widget.selectedLeafCategory.name.contains('ستوديو') && !widget.selectedLeafCategory.name.contains('استوديو'))
                 _buildRadioChips('عدد الغرف', 'bedrooms',
                     ['1', '2', '3', '4', '5', '+6'],
@@ -1609,13 +1612,16 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                 'خزائن حائط',
                 'مسبح خاص',
                 'سخان شمسي',
-                'زجاج شبابيك مزدوج'
+                'زجاج شبابيك مزدوج',
+                'مطبخ راكب',
+                'صالون واسع',
+                'تأسيس تكييف'
               ]),
               _buildCheckboxGroup(
                   'المزايا الإضافية والمرافق', 'extra_features', [
                 'يوجد مصعد',
                 'حديقة',
-                'موقف سيارات',
+                'كراج',
                 'حارس / أمن وحماية',
                 'كراج تفك',
                 'منطقة شواء',
@@ -1639,6 +1645,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                   'الواجهة',
                   'facade',
                   [
+                    'شقة طابقية',
                     'شمالية',
                     'جنوبية',
                     'شرقية',
@@ -2023,6 +2030,11 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                   icon: Icons.landscape_rounded),
               _buildMeasurementField('مساحة البناء', 'build_area', 'متر مربع',
                   icon: Icons.square_foot_rounded),
+              _buildRadioChips('هل يوجد ترس؟', 'has_terrace', ['نعم', 'لا'],
+                  icon: Icons.deck_rounded),
+              if (_dynamicData['has_terrace'] == 'نعم')
+                _buildMeasurementField('مساحة الترس', 'terrace_area', 'متر مربع',
+                    icon: Icons.square_foot_rounded),
               _buildRadioChips('تصنيف الفيلا', 'villa_type',
                   ['متلاصقة', 'مستقلة', 'روف', 'تاون هاوس']),
               _buildRadioChips(

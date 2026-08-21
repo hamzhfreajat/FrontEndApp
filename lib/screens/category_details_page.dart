@@ -2957,10 +2957,16 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
-        // Removed border radius and shadow to make it a flat full-width block
-        border: !hasImages ? Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1.5)) : null,
+        color: ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
+        border: ad.cpcBid > 0 
+            ? Border.all(color: const Color(0xFFD4AF37), width: 2.0)
+            : (!hasImages ? Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1.5)) : null),
+        borderRadius: ad.cpcBid > 0 ? BorderRadius.circular(12) : null,
+        boxShadow: ad.cpcBid > 0 
+            ? [BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.2), blurRadius: 8, spreadRadius: 1)] 
+            : null,
       ),
+      margin: ad.cpcBid > 0 ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8) : EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
