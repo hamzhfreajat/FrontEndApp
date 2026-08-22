@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
+
 class ErrorHandler {
   static String getFriendlyError(dynamic error) {
+    debugPrint('ErrorHandler caught error: $error');
     String errorString = error.toString().toLowerCase();
 
     if (errorString.contains('failed to contact') || errorString.contains('timeout') || errorString.contains('socketexception') || errorString.contains('connection refused')) {
