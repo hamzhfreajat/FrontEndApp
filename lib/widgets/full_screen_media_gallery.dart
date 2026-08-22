@@ -569,6 +569,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
               } else {
                 await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
               }
+              ApiService().trackAdClick(widget.ad.id, 'whatsapp');
             } catch (e) {}
           },
           child: Container(
@@ -586,6 +587,11 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
               final authProvider = Provider.of<AuthProvider>(context, listen: false);
               final currentUserId = authProvider.userData?['sub']?.toString();
               if (currentUserId == null) return;
+              if (currentUserId == widget.ad.userId.toString()) {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
+                return;
+              }
+              ApiService().trackAdClick(widget.ad.id, 'chat');
               Navigator.push(context, MaterialPageRoute(
                 builder: (_) => PremiumChatScreen(
                   adId: widget.ad.id.toString(),
@@ -625,7 +631,10 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
               }
               final telUri = Uri.parse('tel:$phone');
               try {
-                if (await canLaunchUrl(telUri)) await launchUrl(telUri);
+                if (await canLaunchUrl(telUri)) {
+                  await launchUrl(telUri);
+                  ApiService().trackAdClick(widget.ad.id, 'call');
+                }
               } catch (e) {}
             },
             child: Container(height: 52,

@@ -867,6 +867,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
               return;
             }
+            ApiService().trackAdClick(widget.ad.id, 'chat');
             Navigator.push(context, MaterialPageRoute(
               builder: (_) => PremiumChatScreen(
                 adId: widget.ad.id.toString(),
@@ -912,6 +913,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
               if (!launched) {
                 await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
               }
+              ApiService().trackAdClick(widget.ad.id, 'whatsapp');
             } catch (e) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذر فتح واتساب')));
             }
@@ -938,6 +940,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
             try {
               if (await canLaunchUrl(uri)) {
                 await launchUrl(uri);
+                ApiService().trackAdClick(widget.ad.id, 'call');
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تعذر فتح تطبيق الاتصال')));
               }
