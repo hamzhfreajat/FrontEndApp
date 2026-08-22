@@ -119,11 +119,8 @@ class _WalletPageState extends State<WalletPage> {
 
   Future<void> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      final apiService = Provider.of<ApiService>(context, listen: false);
-      String platform = purchaseDetails.verificationData.source;
-      String receiptData = purchaseDetails.verificationData.serverVerificationData;
-      
-      await apiService.topupWallet(purchaseDetails.productID, platform, receiptData);
+      // The API call to topupWallet is handled by IAPService's _verifyPurchase method.
+      // We just need to update the local state when the purchase stream emits a success.
       
       // Update local profile balance and reload transactions
       context.read<ProfileBloc>().add(LoadProfile()); // Refresh profile to get new balance
