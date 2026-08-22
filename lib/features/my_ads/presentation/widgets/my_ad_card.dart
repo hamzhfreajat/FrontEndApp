@@ -77,21 +77,16 @@ class MyAdCard extends StatelessWidget {
           _buildPerformanceRow(context),
           if (ad.status == 'Active') ...[
             const Divider(height: 1, thickness: 1, color: Color(0xFFF0F0F0)),
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  flex: 5,
-                  child: RepublishTimerButton(
-                    lastRepublishedAt: ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt ?? DateTime.now().subtract(const Duration(days: 1)),
-                    onRepublish: onRepublishTap,
-                  ),
+                RepublishTimerButton(
+                  lastRepublishedAt: ad.baseAd.lastRepublishedAt ?? ad.baseAd.createdAt ?? DateTime.now().subtract(const Duration(days: 1)),
+                  onRepublish: onRepublishTap,
                 ),
-                Expanded(
-                  flex: 4,
-                  child: PromoteAdButton(
-                    isPromoted: ad.baseAd.cpcBid > 0,
-                    onPromote: ad.baseAd.cpcBid > 0 ? onStopPromoteTap : onPromoteTap,
-                  ),
+                PromoteAdButton(
+                  isPromoted: ad.baseAd.cpcBid > 0,
+                  onPromote: ad.baseAd.cpcBid > 0 ? onStopPromoteTap : onPromoteTap,
                 ),
               ],
             ),
@@ -398,7 +393,7 @@ class _RepublishTimerButtonState extends State<RepublishTimerButton> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 12, bottom: 12, left: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
@@ -451,7 +446,7 @@ class PromoteAdButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 12, bottom: 12, right: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8).copyWith(top: 0),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         decoration: BoxDecoration(
