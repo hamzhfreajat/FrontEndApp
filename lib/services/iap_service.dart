@@ -16,9 +16,13 @@ class IAPService {
 
   bool _isAvailable = false;
   
-  Function(bool success)? onPurchaseCompleted;
+  Function(bool success, String? productId, String? referenceId)? onPurchaseCompleted;
+
+  bool _isInitialized = false;
 
   void initialize() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     final Stream<List<PurchaseDetails>> purchaseUpdated = _inAppPurchase.purchaseStream;
     _subscription = purchaseUpdated.listen((purchaseDetailsList) {
       _listenToPurchaseUpdated(purchaseDetailsList);
@@ -26,7 +30,7 @@ class IAPService {
       _subscription.cancel();
     }, onError: (error) {
       debugPrint('IAP Error: $error');
-      onPurchaseCompleted?.call(false);
+      onPurchaseCompleted?.call(false, null, null);
     });
     
     initStoreInfo();
@@ -70,14 +74,14 @@ class IAPService {
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
           debugPrint('Purchase Error: ${purchaseDetails.error}');
-          onPurchaseCompleted?.call(false);
+          onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
         } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
           
           bool valid = await _verifyPurchase(purchaseDetails);
           if (valid) {
-            onPurchaseCompleted?.call(true);
+            onPurchaseCompleted?.call(true, purchaseDetails.productID, purchaseDetails.purchaseID);
           } else {
-            onPurchaseCompleted?.call(false);
+            onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
           }
         }
         
@@ -107,5 +111,6 @@ class IAPService {
 
   void dispose() {
     _subscription.cancel();
+    _isInitialized = false;
   }
 }

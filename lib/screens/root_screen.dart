@@ -398,37 +398,45 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
           ],
           body: Consumer<AuthProvider>(
             builder: (context, auth, child) {
+              if (auth.isAuthenticated) {
+                return MultiBlocProvider(
+                  providers: [
+                    BlocProvider(
+                      create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
+                    ),
+                    BlocProvider(
+                      create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl()),
+                    ),
+                  ],
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      const HomePage(),
+                      const CategoriesPage(),
+                      const MyAdsScreen(),
+                      const PrivateProfileScreen(),
+                    ],
+                  ),
+                );
+              }
+              
               return TabBarView(
                 controller: _tabController,
                 children: [
                   const HomePage(),
                   const CategoriesPage(),
-                  if (auth.isAuthenticated)
-                    BlocProvider(
-                      create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
-                      child: const MyAdsScreen(),
-                    )
-                  else
-                    GuestPromptWidget(
-                      icon: Icons.article_rounded,
-                      title: 'إعلاناتي',
-                      subtitle: 'سجل الدخول لعرض وإدارة إعلاناتك بكل سهولة',
-                      onLoginSuccess: () {
-                        // After login, auth provider updates and the view rebuilds automatically
-                      },
-                    ),
-                  if (auth.isAuthenticated)
-                    BlocProvider(
-                      create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl()),
-                      child: const PrivateProfileScreen(),
-                    )
-                  else
-                    GuestPromptWidget(
-                      icon: Icons.person_rounded,
-                      title: 'حسابي',
-                      subtitle: 'سجل الدخول للوصول إلى تفاصيل حسابك وإعداداتك',
-                      onLoginSuccess: () {},
-                    ),
+                  GuestPromptWidget(
+                    icon: Icons.article_rounded,
+                    title: 'إعلاناتي',
+                    subtitle: 'سجل الدخول لعرض وإدارة إعلاناتك بكل سهولة',
+                    onLoginSuccess: () {},
+                  ),
+                  GuestPromptWidget(
+                    icon: Icons.person_rounded,
+                    title: 'حسابي',
+                    subtitle: 'سجل الدخول للوصول إلى تفاصيل حسابك وإعداداتك',
+                    onLoginSuccess: () {},
+                  ),
                 ],
               );
             },

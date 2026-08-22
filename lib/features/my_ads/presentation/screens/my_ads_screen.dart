@@ -5,8 +5,10 @@ import '../bloc/my_ads_bloc.dart';
 import '../bloc/my_ads_event.dart';
 import '../bloc/my_ads_state.dart';
 import '../widgets/my_ads_header.dart';
-import '../widgets/my_ad_card.dart';
+import '../../../../widgets/payment_success_dialog.dart';
+import '../../../../models/ad.dart';
 import '../../../../models/category.dart';
+import '../widgets/my_ad_card.dart';
 import '../../../../providers/app_provider.dart';
 import '../../../../screens/add_ad_city.dart';
 import '../widgets/my_ads_skeleton.dart';
@@ -15,6 +17,10 @@ import '../../../../services/analytics_engine.dart';
 import '../../../../screens/add_ad_details.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/iap_service.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
+import '../../../profile/presentation/bloc/profile_event.dart';
+import '../../../../screens/wallet_page.dart';
 
 class MyAdsScreen extends StatefulWidget {
   final bool isStandalone;
@@ -130,27 +136,37 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (ctx) {
-        return _TopUpBottomSheet(adId: adId, bidToRetry: bidToRetry);
+        return _TopUpBottomSheet(adId: adId, bidToRetry: bidToRetry, parentContext: context);
       }
     );
   }
 
-  void _showBidBottomSheet(BuildContext context, int adId) {
+  Future<void> _showBidBottomSheet(BuildContext context, int adId) async {
     final state = context.read<MyAdsBloc>().state;
     final ad = state.ads.firstWhere((a) => a.baseAd.id == adId).baseAd;
     double currentBid = ad.cpcBid;
+    if (currentBid < 0.07) {
+      currentBid = 0.07;
+    }
 
-    // Get Category Name
-    final categories = context.read<AppProvider>().categories ?? [];
+    // Show loading overlay (optional, or just fetch quickly)
     String categoryName = 'القسم الحالي';
-    if (ad.categoryId != null && categories.isNotEmpty) {
+    if (ad.categoryId != null) {
       try {
-        categoryName = categories.firstWhere((c) => c.id == ad.categoryId).name;
+        final cat = await ApiService().fetchCategoryById(ad.categoryId!);
+        categoryName = cat.name;
       } catch (e) {
-        // Not found
+        final categories = context.read<AppProvider>().categories ?? [];
+        if (categories.isNotEmpty) {
+          try {
+            categoryName = categories.firstWhere((c) => c.id == ad.categoryId).name;
+          } catch (_) {}
+        }
       }
     }
     
+    if (!context.mounted) return;
+
     // Calculate average CPC from ads in the same category
     final categoryAds = state.ads.where((a) => a.baseAd.categoryId == ad.categoryId && a.baseAd.cpcBid > 0).toList();
     double avgCpc = 0.07; // Default minimum
@@ -467,11 +483,15 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             onRefresh: () async {
               final bloc = context.read<MyAdsBloc>();
               bloc.add(LoadDashboardData());
+              context.read<ProfileBloc>().add(LoadProfile()); // Refresh wallet balance
               // Wait until status changes from loading to loaded or error
               await bloc.stream.firstWhere((s) => s.status != MyAdsStatus.loading);
             },
             child: CustomScrollView(
               slivers: [
+                SliverToBoxAdapter(
+                  child: _buildWalletSummaryCard(),
+                ),
                 SliverToBoxAdapter(
                   child: FadeInDown(
                     duration: const Duration(milliseconds: 500),
@@ -615,6 +635,86 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             ),
           ],
         ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWalletSummaryCard() {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        final balance = state.profile?.walletBalance ?? 0.0;
+        return Container(
+          margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.account_balance_wallet, color: Colors.blue.shade700),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'رصيد المحفظة',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            '${balance.toStringAsFixed(2)} JOD',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  final profileBloc = context.read<ProfileBloc>();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (ctx) => BlocProvider.value(
+                        value: profileBloc,
+                        child: WalletPage(),
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.history, size: 16, color: Colors.blue),
+                label: const Text('المحفظة والسجل', style: TextStyle(color: Colors.blue)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade50,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -889,8 +989,9 @@ class _AnimatedInteractionMockupState extends State<AnimatedInteractionMockup> w
 class _TopUpBottomSheet extends StatefulWidget {
   final int adId;
   final double bidToRetry;
+  final BuildContext parentContext;
 
-  const _TopUpBottomSheet({required this.adId, required this.bidToRetry});
+  const _TopUpBottomSheet({required this.adId, required this.bidToRetry, required this.parentContext});
 
   @override
   State<_TopUpBottomSheet> createState() => _TopUpBottomSheetState();
@@ -900,101 +1001,229 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
   String _selectedProductId = 'wallet_topup_10';
 
   final List<Map<String, dynamic>> _options = [
-    {'id': 'wallet_topup_10', 'amount': 10, 'label': '10 JOD'},
-    {'id': 'wallet_topup_20', 'amount': 20, 'label': '20 JOD'},
-    {'id': 'wallet_topup_50', 'amount': 50, 'label': '50 JOD'},
+    {
+      'id': 'wallet_topup_10',
+      'amount': 10,
+      'title': 'رصيد أساسي',
+      'subtitle': 'اشحن محفظتك للبدء بترويج إعلاناتك',
+      'icon': Icons.rocket_launch_outlined,
+      'color': Colors.blue.shade600,
+    },
+    {
+      'id': 'wallet_topup_20',
+      'amount': 20,
+      'title': 'رصيد متقدم',
+      'subtitle': 'رصيد كافٍ لترويج إعلانات متعددة لفترة أطول',
+      'icon': Icons.trending_up_rounded,
+      'color': Colors.indigo.shade600,
+      'badge': 'الأكثر طلباً'
+    },
+    {
+      'id': 'wallet_topup_50',
+      'amount': 50,
+      'title': 'رصيد الأعمال',
+      'subtitle': 'الخيار الأفضل للتجار وللترويج المستمر بدون توقف',
+      'icon': Icons.diamond_outlined,
+      'color': Colors.purple.shade600,
+      'badge': 'أفضل قيمة'
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       padding: const EdgeInsets.all(24.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.account_balance_wallet, size: 64, color: Colors.blue),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.account_balance_wallet_rounded, size: 48, color: Colors.blue),
+          ),
           const SizedBox(height: 16),
-          const Text('شحن الرصيد', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 12),
+          const Text('شحن الرصيد', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+          const SizedBox(height: 8),
           const Text(
-            'اختر قيمة الشحن المناسبة لك:',
+            'اختر قيمة الشحن المناسبة لك لتفعيل الترويج:',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: Colors.black87),
+            style: TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Column(
             children: _options.map((option) {
               final isSelected = _selectedProductId == option['id'];
+              final themeColor = option['color'] as Color;
               return GestureDetector(
                 onTap: () {
                   setState(() {
-                    _selectedProductId = option['id'];
+                    _selectedProductId = option['id'] as String;
                   });
                 },
                 child: Container(
-                  width: 100,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.white,
+                    color: isSelected ? themeColor.withOpacity(0.04) : Colors.white,
+                    borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? Colors.blue : Colors.grey.shade300,
+                      color: isSelected ? themeColor : Colors.grey.shade200,
                       width: isSelected ? 2 : 1,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: isSelected ? themeColor.withOpacity(0.1) : Colors.black.withOpacity(0.02),
+                        blurRadius: isSelected ? 12 : 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: Column(
+                  child: Stack(
+                    clipBehavior: Clip.none,
                     children: [
-                      Text(
-                        '${option['amount']}',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.blue : Colors.black87,
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: themeColor.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(option['icon'] as IconData, color: themeColor, size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    option['title'] as String,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: isSelected ? themeColor : const Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    option['subtitle'] as String,
+                                    style: const TextStyle(fontSize: 11, color: Colors.grey, height: 1.3),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${option['amount']}',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? themeColor : const Color(0xFF1E293B),
+                                  ),
+                                ),
+                                Text(
+                                  'JOD',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? themeColor : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                              color: isSelected ? themeColor : Colors.grey.shade300,
+                            ),
+                          ],
                         ),
                       ),
-                      Text(
-                        'JOD',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isSelected ? Colors.blue : Colors.grey,
+                      if (option['badge'] != null)
+                        Positioned(
+                          top: -10,
+                          left: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.orange.shade400, Colors.deepOrange.shade500],
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.orange.withOpacity(0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              option['badge'] as String,
+                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
               );
             }).toList(),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
+                final parentCtx = widget.parentContext;
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('جاري معالجة الدفع...')));
                 
-                IAPService().onPurchaseCompleted = (success) async {
+                if (parentCtx.mounted) {
+                  ScaffoldMessenger.of(parentCtx).showSnackBar(const SnackBar(content: Text('جاري معالجة الدفع...')));
+                }
+                
+                IAPService().onPurchaseCompleted = (success, productId, referenceId) async {
                   if (success) {
-                    ScaffoldMessenger.of(context).clearSnackBars();
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم شحن الرصيد بنجاح!')));
+                    if (parentCtx.mounted) {
+                      ScaffoldMessenger.of(parentCtx).clearSnackBars();
+                    }
+                    
+                    double amount = 0;
+                    if (productId == 'wallet_topup_10') amount = 10;
+                    else if (productId == 'wallet_topup_20') amount = 20;
+                    else if (productId == 'wallet_topup_50') amount = 50;
+                    
+                    if (parentCtx.mounted) {
+                      PaymentSuccessDialog.show(parentCtx, amount: amount, referenceId: referenceId ?? 'N/A');
+                    }
+                    
                     try {
                       await ApiService().setAdBid(widget.adId, widget.bidToRetry);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
-                        context.read<MyAdsBloc>().add(LoadDashboardData());
+                      if (parentCtx.mounted) {
+                        ScaffoldMessenger.of(parentCtx).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
+                        parentCtx.read<MyAdsBloc>().add(LoadDashboardData());
+                        parentCtx.read<ProfileBloc>().add(LoadProfile()); // Refresh wallet balance
                       }
                     } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
+                      if (parentCtx.mounted) {
+                        ScaffoldMessenger.of(parentCtx).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
                       }
                     }
                   } else {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
+                    if (parentCtx.mounted) {
+                      ScaffoldMessenger.of(parentCtx).clearSnackBars();
+                      ScaffoldMessenger.of(parentCtx).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
                     }
                   }
                 };

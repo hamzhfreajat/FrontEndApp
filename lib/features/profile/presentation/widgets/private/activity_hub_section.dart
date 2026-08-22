@@ -6,6 +6,8 @@ import '../../../../../screens/wallet_page.dart';
 import 'package:provider/provider.dart';
 import '../../../../../providers/app_provider.dart';
 import '../../../../../providers/saved_search_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/profile_bloc.dart';
 
 class ActivityHubSection extends StatelessWidget {
   final UserProfile profile;
@@ -35,7 +37,13 @@ class ActivityHubSection extends StatelessWidget {
                     _buildActivityCard(
                       context, 'محفظتي', '${profile.walletBalance.toStringAsFixed(2)} JOD', Icons.account_balance_wallet_rounded, const Color(0xFF4CAF50),
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) => WalletPage()));
+                        final profileBloc = context.read<ProfileBloc>();
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: profileBloc,
+                            child: WalletPage(),
+                          ),
+                        ));
                       },
                     ),
                     _buildActivityCard(

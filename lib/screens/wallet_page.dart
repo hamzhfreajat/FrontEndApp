@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:provider/provider.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
-import '../features/profile/presentation/bloc/profile_state.dart';
 import '../features/profile/presentation/bloc/profile_event.dart';
+import '../features/profile/presentation/bloc/profile_state.dart';
+import '../widgets/payment_success_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/api_service.dart';
 import '../models/wallet_transaction.dart';
@@ -129,7 +130,15 @@ class _WalletPageState extends State<WalletPage> {
       await _fetchTransactions();
       
       setState(() => _isPurchasePending = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Top-up Successful!')));
+      
+      double amount = 0;
+      if (purchaseDetails.productID == 'wallet_topup_10') amount = 10;
+      else if (purchaseDetails.productID == 'wallet_topup_20') amount = 20;
+      else if (purchaseDetails.productID == 'wallet_topup_50') amount = 50;
+
+      if (context.mounted) {
+        PaymentSuccessDialog.show(context, amount: amount, referenceId: purchaseDetails.purchaseID ?? 'N/A');
+      }
     } catch (e) {
       setState(() => _isPurchasePending = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to verify top-up on server.')));
@@ -142,34 +151,46 @@ class _WalletPageState extends State<WalletPage> {
     _inAppPurchase.buyConsumable(purchaseParam: purchaseParam, autoConsume: true);
   }
 
+  String _cleanProductTitle(String rawTitle) {
+    String cleaned = rawTitle.replaceAll(RegExp(r'\(.*?\)'), '');
+    cleaned = cleaned.replaceAll('سوقكم)', '');
+    cleaned = cleaned.replaceAll('Sooqcom)', '');
+    return cleaned.trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: const Color(0xFFF4F6FA),
       appBar: AppBar(
-        title: Text('My Wallet', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        title: const Text('محفظتي', style: TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: IconThemeData(color: Colors.black),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Color(0xFF1E293B)),
       ),
       body: Stack(
         children: [
           SafeArea(
             child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildBalanceCard(),
+                  const SizedBox(height: 24),
                   _buildTopupSection(),
+                  const SizedBox(height: 24),
                   _buildTransactionHistory(),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
           ),
           if (_isPurchasePending)
             Container(
-              color: Colors.black.withOpacity(0.5),
-              child: Center(child: CircularProgressIndicator()),
+              color: Colors.white.withOpacity(0.7),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),
@@ -181,33 +202,80 @@ class _WalletPageState extends State<WalletPage> {
       builder: (context, state) {
         double balance = state.profile?.walletBalance ?? 0.0;
         return Container(
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.all(24),
+          margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue[800]!, Colors.blue[600]!],
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8), Color(0xFF1E40AF)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withOpacity(0.3),
-                blurRadius: 10,
-                offset: Offset(0, 5),
+                color: const Color(0xFF2563EB).withOpacity(0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
             ],
           ),
-          child: Column(
+          child: Stack(
             children: [
-              Text(
-                'Available Balance',
-                style: TextStyle(color: Colors.white70, fontSize: 16),
+              Positioned(
+                right: -30,
+                top: -30,
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white.withOpacity(0.1),
+                ),
               ),
-              SizedBox(height: 8),
-              Text(
-                '${balance.toStringAsFixed(2)} JOD',
-                style: TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold),
+              Positioned(
+                left: -20,
+                bottom: -40,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: Colors.white.withOpacity(0.1),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.account_balance_wallet_rounded, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'الرصيد المتاح',
+                        style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        balance.toStringAsFixed(2),
+                        style: const TextStyle(color: Colors.white, fontSize: 44, fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                      ),
+                      const SizedBox(width: 8),
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          'JOD',
+                          style: TextStyle(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),
@@ -218,46 +286,140 @@ class _WalletPageState extends State<WalletPage> {
 
   Widget _buildTopupSection() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Top-up Wallet',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          const Text(
+            'باقات شحن الرصيد',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (_isLoadingProducts)
-            Center(child: CircularProgressIndicator())
+            const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator()))
           else if (_products.isEmpty)
-            Text('No top-up packages available at the moment.', style: TextStyle(color: Colors.grey))
+            const Center(child: Padding(padding: EdgeInsets.all(20), child: Text('لا توجد باقات شحن متاحة حالياً', style: TextStyle(color: Colors.grey))))
           else
-            Row(
+            Column(
               children: _products.map((product) {
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.blue,
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                
+                // Determine marketing text based on product ID or price
+                String title = 'باقة الشحن';
+                String subtitle = 'اشحن رصيدك الآن لترويج إعلاناتك بسهولة';
+                IconData icon = Icons.add_card_rounded;
+                Color themeColor = Colors.blue.shade600;
+                String? badge;
+
+                if (product.id.contains('10') || product.price.contains('10')) {
+                  title = 'رصيد أساسي';
+                  subtitle = 'اشحن محفظتك للبدء بترويج إعلاناتك';
+                  icon = Icons.rocket_launch_outlined;
+                  themeColor = Colors.blue.shade600;
+                } else if (product.id.contains('20') || product.price.contains('20')) {
+                  title = 'رصيد متقدم';
+                  subtitle = 'رصيد كافٍ لترويج إعلانات متعددة لفترة أطول';
+                  icon = Icons.trending_up_rounded;
+                  themeColor = Colors.indigo.shade600;
+                  badge = 'الأكثر طلباً';
+                } else if (product.id.contains('50') || product.price.contains('50')) {
+                  title = 'رصيد الأعمال';
+                  subtitle = 'الخيار الأفضل للتجار وللترويج المستمر بدون توقف';
+                  icon = Icons.diamond_outlined;
+                  themeColor = Colors.purple.shade600;
+                  badge = 'أفضل قيمة';
+                }
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: themeColor.withOpacity(0.3), width: 1.5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: themeColor.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
                       ),
-                      onPressed: () => _buyProduct(product),
-                      child: Column(
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () => _buyProduct(product),
+                      child: Stack(
+                        clipBehavior: Clip.none,
                         children: [
-                          Text(
-                            product.title.replaceAll('(Classifieds App)', '').trim(),
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87),
-                            textAlign: TextAlign.center,
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: themeColor.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(icon, color: themeColor, size: 28),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: themeColor),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        subtitle,
+                                        style: const TextStyle(fontSize: 13, color: Colors.grey, height: 1.3),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  decoration: BoxDecoration(
+                                    color: themeColor,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    product.price,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            product.price,
-                            style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                          ),
+                          if (badge != null)
+                            Positioned(
+                              top: -12,
+                              left: 20, // Positioned on the left side since app is RTL
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.orange.shade400, Colors.deepOrange.shade500],
+                                  ),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(0.4),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  badge,
+                                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -272,56 +434,92 @@ class _WalletPageState extends State<WalletPage> {
 
   Widget _buildTransactionHistory() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 16),
-          Text(
-            'Transaction History',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          const Text(
+            'سجل العمليات',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 16),
           if (_isLoadingTransactions)
-            Center(child: CircularProgressIndicator())
+            const Center(child: Padding(padding: EdgeInsets.all(30), child: CircularProgressIndicator()))
           else if (_transactions.isEmpty)
             Center(
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
-                child: Text('No transactions yet.', style: TextStyle(color: Colors.grey)),
+                padding: const EdgeInsets.all(40.0),
+                child: Column(
+                  children: [
+                    Icon(Icons.receipt_long_rounded, size: 60, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text('لا يوجد عمليات حتى الآن', style: TextStyle(color: Colors.grey.shade500, fontSize: 16)),
+                  ],
+                ),
               ),
             )
           else
             ListView.builder(
               shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: _transactions.length,
               itemBuilder: (context, index) {
                 final tx = _transactions[index];
                 bool isAddition = tx.amount > 0;
-                return Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  margin: EdgeInsets.only(bottom: 8),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isAddition ? Colors.green[100] : Colors.red[100],
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isAddition ? Colors.green.shade50 : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                       child: Icon(
-                        isAddition ? Icons.arrow_downward : Icons.arrow_upward,
-                        color: isAddition ? Colors.green : Colors.red,
+                        isAddition ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                        color: isAddition ? Colors.green.shade600 : Colors.red.shade600,
                       ),
                     ),
-                    title: Text(tx.transactionType),
-                    subtitle: Text(
-                      '${DateFormat.yMMMd().format(tx.createdAt)} • ${tx.description ?? ''}',
-                      style: TextStyle(fontSize: 12),
+                    title: Text(
+                      tx.transactionType,
+                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                     ),
-                    trailing: Text(
-                      '${isAddition ? '+' : ''}${tx.amount.toStringAsFixed(2)} JOD',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isAddition ? Colors.green : Colors.red,
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        '${DateFormat('d MMM yyyy, h:mm a').format(tx.createdAt)}\n${tx.description ?? ''}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
                       ),
+                    ),
+                    isThreeLine: tx.description != null && tx.description!.isNotEmpty,
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '${isAddition ? '+' : ''}${tx.amount.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: isAddition ? Colors.green.shade600 : Colors.red.shade600,
+                          ),
+                        ),
+                        const Text(
+                          'JOD',
+                          style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold),
+                        ),
+                      ],
                     ),
                   ),
                 );
