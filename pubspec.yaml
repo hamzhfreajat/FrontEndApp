@@ -60,6 +60,9 @@ dependencies:
   flutter_secure_storage: ^10.3.1
   app_tracking_transparency: ^2.0.7
   in_app_purchase: ^3.1.18
+  gma_mediation_meta: ^1.6.0
+  gma_mediation_unity: ^1.9.0
+  gma_mediation_inmobi: ^2.3.0
 
 dev_dependencies:
   flutter_test:
