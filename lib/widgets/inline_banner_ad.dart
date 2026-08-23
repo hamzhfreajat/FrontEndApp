@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import '../services/ad_manager.dart';
 
 class InlineBannerAd extends StatefulWidget {
   const InlineBannerAd({super.key});
@@ -31,38 +32,21 @@ class _InlineBannerAdState extends State<InlineBannerAd> with AutomaticKeepAlive
   Future<void> _loadAd() async {
     _isLoadingAd = true;
     final double width = MediaQuery.of(context).size.width;
-    final AdSize size = (await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width.truncate())) ?? AdSize.banner;
-    
-    final BannerAd ad = BannerAd(
-      adUnitId: _adUnitId,
-      request: const AdRequest(),
-      size: size,
-      listener: BannerAdListener(
-        onAdLoaded: (loadedAd) {
-          if (mounted) {
-            setState(() {
-              _bannerAd = loadedAd as BannerAd;
-              _isLoaded = true;
-              _isLoadingAd = false;
-            });
-          } else {
-            loadedAd.dispose();
-          }
-        },
-        onAdFailedToLoad: (failedAd, err) {
-          debugPrint('InlineBannerAd failed to load: $err');
-          failedAd.dispose();
-          if (mounted) {
-            setState(() {
-              _isLoadingAd = false;
-            });
-          }
-        },
-      ),
-    );
     
     try {
-      await ad.load();
+      final ad = await AdManager.instance.getAd(width);
+      
+      if (mounted) {
+        setState(() {
+          if (ad != null) {
+            _bannerAd = ad;
+            _isLoaded = true;
+          }
+          _isLoadingAd = false;
+        });
+      } else {
+        ad?.dispose();
+      }
     } catch (e) {
       debugPrint('InlineBannerAd load exception: $e');
       if (mounted) {

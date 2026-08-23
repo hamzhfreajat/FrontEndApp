@@ -21,6 +21,7 @@ import '../features/my_ads/data/repositories/my_ads_repository_impl.dart';
 import '../services/api_service.dart';
 import '../features/profile/presentation/screens/private_profile_screen.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
+import '../features/profile/presentation/bloc/profile_event.dart';
 import '../features/profile/data/repositories/api_profile_repository.dart';
 import '../providers/app_provider.dart';
 import '../providers/saved_search_provider.dart';
@@ -405,7 +406,7 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                       create: (_) => MyAdsBloc(repository: MyAdsRepositoryImpl(ApiService())),
                     ),
                     BlocProvider(
-                      create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl()),
+                      create: (_) => ProfileBloc(repository: ApiProfileRepositoryImpl())..add(LoadProfile()),
                     ),
                   ],
                   child: TabBarView(

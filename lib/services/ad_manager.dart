@@ -23,11 +23,7 @@ class AdManager {
     _isLoading = true;
 
     try {
-      final AdSize? size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width.truncate());
-      if (size == null) {
-        _isLoading = false;
-        return;
-      }
+      final AdSize size = AdSize.mediumRectangle;
 
       final BannerAd ad = BannerAd(
         adUnitId: _adUnitId,
@@ -68,7 +64,7 @@ class AdManager {
     }
     
     // If no ad is ready, we have to create one on the spot
-    final AdSize size = (await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width.truncate())) ?? AdSize.banner;
+    final AdSize size = AdSize.mediumRectangle;
     
     final completer = Completer<BannerAd?>();
     final BannerAd ad = BannerAd(

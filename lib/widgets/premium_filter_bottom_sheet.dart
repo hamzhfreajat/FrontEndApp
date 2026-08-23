@@ -484,7 +484,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   _buildMultiSelectSection('مفروشة؟', ['مفروشة', 'غير مفروشة', 'مفروش جزئياً'], _selectedFurnished, (val) { setState(() { _selectedFurnished.contains(val) ? _selectedFurnished.remove(val) : _selectedFurnished.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedFurnished.clear()); _triggerCountUpdate(); }),
                   
                   if (!_isIndependentHouse())
-                    _buildMultiSelectSection('الطابق', ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7'], _selectedFloor, (val) { setState(() { _selectedFloor.contains(val) ? _selectedFloor.remove(val) : _selectedFloor.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedFloor.clear()); _triggerCountUpdate(); }),
+                    _buildMultiSelectSection('الطابق', ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7', 'طابق أخير', 'روف', 'طابق أخير مع روف'], _selectedFloor, (val) { setState(() { _selectedFloor.contains(val) ? _selectedFloor.remove(val) : _selectedFloor.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedFloor.clear()); _triggerCountUpdate(); }),
                   
                   if (_isRent())
                     _buildMultiSelectSection('مدة الإيجار', ['يومي', 'أسبوعي', 'شهري', 'كل 3 أشهر', 'كل أربع أشهر', 'كل 5 أشهر', 'كل 6 أشهر', 'سنوي'], _selectedRentDuration, (val) { setState(() { _selectedRentDuration.contains(val) ? _selectedRentDuration.remove(val) : _selectedRentDuration.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedRentDuration.clear()); _triggerCountUpdate(); }),
@@ -1116,6 +1116,19 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
             final filteredCities = searchQuery.isEmpty
                 ? cities
                 : cities.where((c) => _normalizeArabic(c.nameAr).contains(normalizedSearch)).toList();
+                
+            final allRegionsGlobally = searchQuery.isEmpty
+                ? <Region>[]
+                : cities.expand((c) => c.regions).where((r) => _normalizeArabic(r.nameAr).contains(normalizedSearch)).toList();
+            
+            final Map<String, int> globalRegionNameCounts = {};
+            if (searchQuery.isNotEmpty) {
+              for (var c in cities) {
+                for (var r in c.regions) {
+                  globalRegionNameCounts[r.nameAr] = (globalRegionNameCounts[r.nameAr] ?? 0) + 1;
+                }
+              }
+            }
 
             final regions = selectedCityForFilter?.regions ?? [];
             final filteredRegions = searchQuery.isEmpty
@@ -1131,7 +1144,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
               ),
               child: Column(
                 children: [
-                   Padding(
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0),
                     child: Row(
                       children: [
@@ -1166,82 +1179,99 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          )
-                        ],
-                      ),
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: (value) => setModalState(() => searchQuery = value),
-                        decoration: InputDecoration(
-                          hintText: selectedCityForFilter == null ? 'ابحث عن مدينة...' : 'ابحث عن منطقة...',
-                          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
-                          prefixIcon: Icon(Icons.search_rounded, color: widget.brandColor),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                        ),
-                      )
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 36,
-                      child: selectedRegionsForFilter.isEmpty
-                          ? const SizedBox.shrink()
-                          : SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: selectedRegionsForFilter.map((r) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Chip(
-                                      label: Text(r.nameAr, style: TextStyle(color: widget.brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                                      backgroundColor: widget.brandColor.withOpacity(0.1),
-                                      deleteIcon: Icon(Icons.close, size: 16, color: widget.brandColor),
-                                      onDeleted: () {
-                                        setModalState(() {
-                                          selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
-                                        });
-                                        setState(() {
-                                          if (selectedRegionsForFilter.isEmpty) {
-                                            _selectedCityId = selectedCityForFilter?.id;
-                                            _selectedRegionIds.clear();
-                                          } else {
-                                            _selectedCityId = selectedCityForFilter?.id ?? selectedRegionsForFilter.first.cityId;
-                                            _selectedRegionIds = selectedRegionsForFilter.map((r) => r.id).toSet();
-                                          }
-                                        });
-                                        _triggerCountUpdate();
-                                      },
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: BorderSide(color: widget.brandColor.withOpacity(0.2)),
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                )
+                              ],
                             ),
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (value) => setModalState(() => searchQuery = value),
+                              decoration: InputDecoration(
+                                hintText: selectedCityForFilter == null ? 'ابحث عن مدينة...' : 'ابحث عن منطقة...',
+                                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
+                                prefixIcon: Icon(Icons.search_rounded, color: widget.brandColor),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                              ),
+                            )
+                          ),
+                        ),
+                        if (searchQuery.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () {
+                              setModalState(() {
+                                searchController.clear();
+                                searchQuery = '';
+                              });
+                            },
+                            child: Text('مسح', style: TextStyle(color: widget.brandColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
+                  if (selectedRegionsForFilter.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 36,
+                        child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: selectedRegionsForFilter.map((r) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Chip(
+                                        label: Text(r.nameAr, style: TextStyle(color: widget.brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                        backgroundColor: widget.brandColor.withOpacity(0.1),
+                                        deleteIcon: Icon(Icons.close, size: 16, color: widget.brandColor),
+                                        onDeleted: () {
+                                          setModalState(() {
+                                            selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                          });
+                                          setState(() {
+                                            if (selectedRegionsForFilter.isEmpty) {
+                                              _selectedCityId = selectedCityForFilter?.id;
+                                              _selectedRegionIds.clear();
+                                            } else {
+                                              _selectedCityId = selectedCityForFilter?.id ?? selectedRegionsForFilter.first.cityId;
+                                              _selectedRegionIds = selectedRegionsForFilter.map((r) => r.id).toSet();
+                                            }
+                                          });
+                                          _triggerCountUpdate();
+                                        },
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          side: BorderSide(color: widget.brandColor.withOpacity(0.2)),
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
                   
                   if (selectedCityForFilter == null) ...[
                     // Cities
                     Expanded(
                       child: ListView.separated(
-                        itemCount: filteredCities.length + (searchQuery.isEmpty ? 1 : 0),
+                        itemCount: (searchQuery.isEmpty ? 1 : 0) + filteredCities.length + allRegionsGlobally.length,
                         separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         itemBuilder: (context, index) {
                           if (searchQuery.isEmpty && index == 0) {
@@ -1262,25 +1292,69 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                             );
                           }
                           
-                          final c = filteredCities[searchQuery.isEmpty ? index - 1 : index];
-                          return Container(
-                            color: Colors.white,
-                            child: ListTile(
-                              title: Text(c.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                              trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
-                              onTap: () {
-                                setState(() {
-                                  _selectedCityId = c.id;
-                                });
-                                _triggerCountUpdate();
-                                setModalState(() {
-                                  selectedCityForFilter = c;
-                                  searchQuery = '';
-                                  searchController.clear();
-                                });
-                              },
-                            ),
-                          );
+                          int adjustedIndex = searchQuery.isEmpty ? index - 1 : index;
+                          if (adjustedIndex < filteredCities.length) {
+                            final c = filteredCities[adjustedIndex];
+                            return Container(
+                              color: Colors.white,
+                              child: ListTile(
+                                title: Text(c.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedCityId = c.id;
+                                  });
+                                  _triggerCountUpdate();
+                                  setModalState(() {
+                                    selectedCityForFilter = c;
+                                    searchQuery = '';
+                                    searchController.clear();
+                                  });
+                                },
+                              ),
+                            );
+                          } else {
+                            final r = allRegionsGlobally[adjustedIndex - filteredCities.length];
+                            final city = cities.firstWhere((c) => c.id == r.cityId);
+                            final bool hasDuplicate = (globalRegionNameCounts[r.nameAr] ?? 0) > 1;
+                            
+                            return Container(
+                              color: Colors.white,
+                              child: ListTile(
+                                title: Row(
+                                  children: [
+                                    Text(r.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                    if (hasDuplicate) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.grey.shade300)
+                                        ),
+                                        child: Text(city.nameAr, style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                                      ),
+                                    ]
+                                  ],
+                                ),
+                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
+                                onTap: () {
+                                  setState(() {
+                                    _selectedCityId = city.id;
+                                    _selectedRegionIds = {r.id};
+                                  });
+                                  _triggerCountUpdate();
+                                  setModalState(() {
+                                    selectedCityForFilter = city;
+                                    selectedRegionsForFilter = {r};
+                                    searchQuery = '';
+                                    searchController.clear();
+                                  });
+                                },
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),

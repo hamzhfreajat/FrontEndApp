@@ -26,6 +26,7 @@ class Ad {
   bool isSaved;
   final DateTime? lastRepublishedAt;
   final double cpcBid;
+  final bool isFeatured;
 
   Ad({
     required this.id,
@@ -52,6 +53,7 @@ class Ad {
     this.isSaved = false,
     this.lastRepublishedAt,
     this.cpcBid = 0.0,
+    this.isFeatured = false,
   });
 
   factory Ad.fromJson(Map<String, dynamic> json) {
@@ -185,13 +187,14 @@ class Ad {
       isSaved: json['is_saved'] == true || json['is_saved'] == 'true' || json['is_saved'] == 1,
       lastRepublishedAt: json['last_republished_at'] != null ? DateTime.tryParse(json['last_republished_at'].toString()) : null,
       cpcBid: json['cpc_bid'] != null ? (double.tryParse(json['cpc_bid'].toString()) ?? 0.0) : 0.0,
+      isFeatured: json['is_featured'] == true || json['is_featured'] == 'true' || json['is_featured'] == 1,
     );
   }
   String get displayLocation {
     final city = attributes?['city']?.toString();
     final region = attributes?['region']?.toString();
     if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
-      return '$region، $city';
+      return '$city، $region';
     } else if (region != null && region.isNotEmpty) {
       return region;
     } else {

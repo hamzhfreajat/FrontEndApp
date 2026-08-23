@@ -16,7 +16,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onLoadProfile(LoadProfile event, Emitter<ProfileState> emit) async {
     try {
-      emit(const ProfileState(status: ProfileStatus.loading));
+      emit(state.copyWith(status: ProfileStatus.loading));
       
       final profile = targetUserId == null 
           ? await repository.getPrivateProfile()

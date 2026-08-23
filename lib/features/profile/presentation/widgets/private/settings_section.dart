@@ -157,7 +157,14 @@ class SettingsSection extends StatelessWidget {
                   final user = auth.userData;
                   if (user == null) return;
                   
-                  final currentUserId = user['sub']?.toString() ?? '';
+                  final currentUserId = user['id']?.toString() ?? user['sub']?.toString() ?? '';
+                  if (currentUserId.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(context.tr('login_required') ?? 'يرجى تسجيل الدخول أولاً'), backgroundColor: Colors.red),
+                    );
+                    return;
+                  }
+                  
                   final currentUserName = user['full_name'] ?? user['username'] ?? user['mobile_number'] ?? 'مستخدم';
                   final currentUserPhone = user['mobile_number'];
 

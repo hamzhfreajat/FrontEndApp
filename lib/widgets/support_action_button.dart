@@ -12,7 +12,7 @@ class SupportActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
+        final currentUserId = authProvider.userData?['id']?.toString() ?? authProvider.userData?['sub']?.toString() ?? '';
         return IconButton(
           icon: Icon(Icons.support_agent_rounded, color: iconColor, size: 24),
           onPressed: () {

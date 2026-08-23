@@ -335,9 +335,6 @@ class _CategoriesPageState extends State<CategoriesPage> {
                   child: Column(
                     children: const [
                       InlineBannerAd(),
-                      InlineBannerAd(),
-                      InlineBannerAd(),
-                      InlineBannerAd(),
                     ],
                   ),
                 ),

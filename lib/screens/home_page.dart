@@ -2296,7 +2296,7 @@ class _HomeFooter extends StatelessWidget {
                     }),
                     _footerLink('خدمة العملاء (الدعم الفني)', onTap: () {
                       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                      final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
+                      final currentUserId = authProvider.userData?['id']?.toString() ?? authProvider.userData?['sub']?.toString() ?? '';
                       
                       if (currentUserId.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(

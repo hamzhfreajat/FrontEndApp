@@ -611,9 +611,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       InlineBannerAd(),
-                      InlineBannerAd(),
-                      InlineBannerAd(),
-                      InlineBannerAd(),
                     ],
                   );
                 }
@@ -799,7 +796,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         // Support Chat Action
         Consumer<AuthProvider>(
           builder: (context, authProvider, child) {
-            final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
+            final currentUserId = authProvider.userData?['id']?.toString() ?? authProvider.userData?['sub']?.toString() ?? '';
             return IconButton(
               icon: const Icon(Icons.support_agent_rounded, color: Colors.black87, size: 24),
               onPressed: () {
@@ -1129,6 +1126,19 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ? dbCities 
               : dbCities.where((c) => _normalizeArabic(c.nameAr).contains(normalizedSearch)).toList();
               
+            final allRegionsGlobally = searchQuery.isEmpty
+                ? <Region>[]
+                : dbCities.expand((c) => c.regions).where((r) => _normalizeArabic(r.nameAr).contains(normalizedSearch)).toList();
+            
+            final Map<String, int> globalRegionNameCounts = {};
+            if (searchQuery.isNotEmpty) {
+              for (var c in dbCities) {
+                for (var r in c.regions) {
+                  globalRegionNameCounts[r.nameAr] = (globalRegionNameCounts[r.nameAr] ?? 0) + 1;
+                }
+              }
+            }
+              
             final filteredRegions = selectedCityForFilter == null || searchQuery.isEmpty 
               ? selectedCityForFilter?.regions ?? []
               : selectedCityForFilter!.regions.where((r) => _normalizeArabic(r.nameAr).contains(normalizedSearch)).toList();
@@ -1144,125 +1154,139 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: Row(
+                        children: [
+                          if (selectedCityForFilter != null)
+                            IconButton(
+                              icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
+                              onPressed: () => setModalState(() {
+                                selectedCityForFilter = null;
+                                searchQuery = '';
+                                searchController.clear();
+                              }),
+                            )
+                          else
+                            IconButton(
+                              icon: const Icon(Icons.close_rounded, color: Colors.black87),
+                              onPressed: () => Navigator.pop(ctx),
+                            ),
+                          Expanded(
+                            child: Text(
+                              selectedCityForFilter == null ? 'اختر المدينة' : 'مناطق ${selectedCityForFilter!.nameAr}', 
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: brandColor)
+                            ),
+                          ),
+                          const SizedBox(width: 48),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
                     child: Row(
                       children: [
-                        if (selectedCityForFilter != null)
-                          IconButton(
-                            icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87),
-                            onPressed: () => setModalState(() {
-                              selectedCityForFilter = null;
-                              searchQuery = '';
-                              searchController.clear();
-                            }),
-                          )
-                        else
-                          IconButton(
-                            icon: const Icon(Icons.close_rounded, color: Colors.black87),
-                            onPressed: () => Navigator.pop(ctx),
-                          ),
-
                         Expanded(
-                          child: Text(
-                            selectedCityForFilter == null ? 'اختر المدينة' : 'مناطق ${selectedCityForFilter!.nameAr}', 
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: brandColor)
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                )
+                              ],
+                            ),
+                            child: TextField(
+                              controller: searchController,
+                              onChanged: (value) {
+                                setModalState(() {
+                                  searchQuery = value;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                hintText: selectedCityForFilter == null ? 'ابحث عن مدينة...' : 'ابحث عن منطقة...',
+                                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
+                                prefixIcon: Icon(Icons.search_rounded, color: brandColor),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                              ),
+                            )
                           ),
                         ),
-                        
-                        const SizedBox(width: 48),
+                        if (searchQuery.isNotEmpty) ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: () {
+                              setModalState(() {
+                                searchController.clear();
+                                searchQuery = '';
+                              });
+                            },
+                            child: Text('مسح', style: TextStyle(color: brandColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          )
-                        ],
-                      ),
-                      child: TextField(
-                        controller: searchController,
-                        onChanged: (value) {
-                          setModalState(() {
-                            searchQuery = value;
-                          });
-                        },
-                        decoration: InputDecoration(
-                          hintText: selectedCityForFilter == null ? 'ابحث عن مدينة...' : 'ابحث عن منطقة...',
-                          hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
-                          prefixIcon: Icon(Icons.search_rounded, color: brandColor),
-                          border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                        ),
-                      )
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 36,
-                      child: selectedRegionsForFilter.isEmpty
-                          ? const SizedBox.shrink()
-                          : SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: selectedRegionsForFilter.map((r) {
-                                  return Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Chip(
-                                      label: Text(r.nameAr, style: TextStyle(color: brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
-                                      backgroundColor: brandColor.withOpacity(0.1),
-                                      deleteIcon: Icon(Icons.close, size: 16, color: brandColor),
-                                      onDeleted: () async {
-                                        setModalState(() {
-                                          selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
-                                        });
-                                        final appProvider = Provider.of<AppProvider>(context, listen: false);
-                                        if (selectedRegionsForFilter.isEmpty) {
-                                          await appProvider.setLocation(selectedCityForFilter, null, null);
-                                          setState(() { _locationsFilter = selectedCityForFilter != null ? [selectedCityForFilter!.nameAr] : null; });
-                                        } else {
-                                          Set<City> involvedCities = {};
-                                          if (appProvider.dbCities != null) {
-                                            for (var reg in selectedRegionsForFilter) {
-                                              try { involvedCities.add(appProvider.dbCities!.firstWhere((c) => c.id == reg.cityId)); } catch (_) {}
+                  if (selectedRegionsForFilter.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 36,
+                        child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: selectedRegionsForFilter.map((r) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Chip(
+                                        label: Text(r.nameAr, style: TextStyle(color: brandColor, fontSize: 13, fontWeight: FontWeight.bold)),
+                                        backgroundColor: brandColor.withOpacity(0.1),
+                                        deleteIcon: Icon(Icons.close, size: 16, color: brandColor),
+                                        onDeleted: () async {
+                                          setModalState(() {
+                                            selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                          });
+                                          final appProvider = Provider.of<AppProvider>(context, listen: false);
+                                          if (selectedRegionsForFilter.isEmpty) {
+                                            await appProvider.setLocation(selectedCityForFilter, null, null);
+                                            setState(() { _locationsFilter = selectedCityForFilter != null ? [selectedCityForFilter!.nameAr] : null; });
+                                          } else {
+                                            Set<City> involvedCities = {};
+                                            if (appProvider.dbCities != null) {
+                                              for (var reg in selectedRegionsForFilter) {
+                                                try { involvedCities.add(appProvider.dbCities!.firstWhere((c) => c.id == reg.cityId)); } catch (_) {}
+                                              }
                                             }
+                                            await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : null, selectedRegionsForFilter.toList(), null);
+                                            setState(() { _locationsFilter = selectedRegionsForFilter.map((r) => r.nameAr).toList(); });
                                           }
-                                          await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : null, selectedRegionsForFilter.toList(), null);
-                                          setState(() { _locationsFilter = selectedRegionsForFilter.map((r) => r.nameAr).toList(); });
-                                        }
-                                        _fetchAds();
-                                      },
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(16),
-                                        side: BorderSide(color: brandColor.withOpacity(0.2)),
+                                          _fetchAds();
+                                        },
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                          side: BorderSide(color: brandColor.withOpacity(0.2)),
+                                        ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
+                                    );
+                                  }).toList(),
+                                ),
                               ),
-                            ),
+                      ),
                     ),
-                  ),
-                  
+                  ],
                   if (selectedCityForFilter == null) ...[
                     // Step 1: Cities
                     Expanded(
                       child: ListView.separated(
-                        itemCount: filteredCities.length + (searchQuery.isEmpty ? 1 : 0),
+                        itemCount: (searchQuery.isEmpty ? 1 : 0) + filteredCities.length + allRegionsGlobally.length,
                         separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFEEEEEE)),
                         itemBuilder: (context, index) {
                           if (searchQuery.isEmpty && index == 0) {
@@ -1282,21 +1306,60 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             );
                           }
                           
-                          final c = filteredCities[searchQuery.isEmpty ? index - 1 : index];
-                          return Container(
-                            color: Colors.white,
-                            child: ListTile(
-                              title: Text(c.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                              trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
-                              onTap: () {
-                                setModalState(() {
-                                  selectedCityForFilter = c;
-                                  searchQuery = '';
-                                  searchController.clear();
-                                });
-                              },
-                            ),
-                          );
+                          int adjustedIndex = searchQuery.isEmpty ? index - 1 : index;
+                          if (adjustedIndex < filteredCities.length) {
+                            final c = filteredCities[adjustedIndex];
+                            return Container(
+                              color: Colors.white,
+                              child: ListTile(
+                                title: Text(c.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
+                                onTap: () {
+                                  setModalState(() {
+                                    selectedCityForFilter = c;
+                                    searchQuery = '';
+                                    searchController.clear();
+                                  });
+                                },
+                              ),
+                            );
+                          } else {
+                            final r = allRegionsGlobally[adjustedIndex - filteredCities.length];
+                            final city = dbCities.firstWhere((c) => c.id == r.cityId);
+                            final bool hasDuplicate = (globalRegionNameCounts[r.nameAr] ?? 0) > 1;
+                            
+                            return Container(
+                              color: Colors.white,
+                              child: ListTile(
+                                title: Row(
+                                  children: [
+                                    Text(r.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                    if (hasDuplicate) ...[
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(color: Colors.grey.shade300)
+                                        ),
+                                        child: Text(city.nameAr, style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                                      ),
+                                    ]
+                                  ],
+                                ),
+                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
+                                onTap: () {
+                                  setModalState(() {
+                                    selectedCityForFilter = city;
+                                    selectedRegionsForFilter = [r];
+                                    searchQuery = '';
+                                    searchController.clear();
+                                  });
+                                },
+                              ),
+                            );
+                          }
                         },
                       ),
                     ),
@@ -1387,6 +1450,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       ),
                     ),
                   ],
+
                 ],
               ),
             );
@@ -2323,7 +2387,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         const SizedBox(height: 12),
         _buildFilterRow('الفرش', 'furnished', ['مفروشة', 'غير مفروشة', 'مفروش جزئياً'], brandColor),
         const SizedBox(height: 12),
-        _buildFilterRow('الطابق', 'floor', ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7'], brandColor),
+        _buildFilterRow('الطابق', 'floor', ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7', 'طابق أخير', 'روف', 'طابق أخير مع روف'], brandColor),
       ]
     );
   }
@@ -2881,14 +2945,6 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         padding: EdgeInsets.symmetric(vertical: 8),
                         child: InlineBannerAd(),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: InlineBannerAd(),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8),
-                        child: InlineBannerAd(),
-                      ),
                     ],
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -2957,16 +3013,16 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     
     return Container(
       decoration: BoxDecoration(
-        color: ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
-        border: ad.cpcBid > 0 
+        color: ad.isFeatured || ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
+        border: ad.isFeatured || ad.cpcBid > 0 
             ? Border.all(color: const Color(0xFFD4AF37), width: 2.0)
             : (!hasImages ? Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1.5)) : null),
-        borderRadius: ad.cpcBid > 0 ? BorderRadius.circular(12) : null,
-        boxShadow: ad.cpcBid > 0 
+        borderRadius: ad.isFeatured || ad.cpcBid > 0 ? BorderRadius.circular(12) : null,
+        boxShadow: ad.isFeatured || ad.cpcBid > 0 
             ? [BoxShadow(color: const Color(0xFFD4AF37).withOpacity(0.2), blurRadius: 8, spreadRadius: 1)] 
             : null,
       ),
-      margin: ad.cpcBid > 0 ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8) : EdgeInsets.zero,
+      margin: ad.isFeatured || ad.cpcBid > 0 ? const EdgeInsets.symmetric(horizontal: 16, vertical: 8) : EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -3071,7 +3127,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                 final region = ad.attributes?['region']?.toString();
                                 String locationText;
                                 if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
-                                  locationText = '$region، $city';
+                                  locationText = '$city، $region';
                                 } else if (region != null && region.isNotEmpty) {
                                   locationText = region;
                                 } else {
@@ -3548,6 +3604,32 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       Icon(Icons.local_fire_department, color: Colors.white, size: 12),
                       SizedBox(width: 4),
                       Text('مطلوب', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
+                    ],
+                  ),
+                ),
+              if (ad.isFeatured)
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(10)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.white, size: 12),
+                      SizedBox(width: 4),
+                      Text('مميز', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
+                    ],
+                  ),
+                ),
+              if (ad.cpcBid > 0)
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.blueAccent, borderRadius: BorderRadius.circular(10)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.campaign, color: Colors.white, size: 12),
+                      SizedBox(width: 4),
+                      Text('ممول', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
                     ],
                   ),
                 )

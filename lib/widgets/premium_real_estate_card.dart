@@ -162,7 +162,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
     final city = widget.ad.attributes?['city']?.toString();
     final region = widget.ad.attributes?['region']?.toString();
     if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
-      return '$region، $city';
+      return '$city، $region';
     } else if (region != null && region.isNotEmpty) {
       return region;
     }
@@ -183,16 +183,16 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
         margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
         padding: const EdgeInsets.all(2), // small padding inside the border
         decoration: BoxDecoration(
-          color: widget.ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
+          color: widget.ad.isFeatured || widget.ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: widget.ad.cpcBid > 0 
+            color: widget.ad.isFeatured || widget.ad.cpcBid > 0 
                 ? const Color(0xFFD4AF37) // Premium Gold
                 : Colors.grey.shade200, 
-            width: widget.ad.cpcBid > 0 ? 2.0 : 1.5,
+            width: widget.ad.isFeatured || widget.ad.cpcBid > 0 ? 2.0 : 1.5,
           ),
           boxShadow: [
-            if (widget.ad.cpcBid > 0)
+            if (widget.ad.isFeatured || widget.ad.cpcBid > 0)
               BoxShadow(
                 color: const Color(0xFFD4AF37).withOpacity(_isHovered ? 0.3 : 0.15),
                 blurRadius: _isHovered ? 20 : 12,
@@ -299,7 +299,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                           ],
                         ),
                       ),
-                    if (widget.ad.cpcBid > 0)
+                    if (widget.ad.isFeatured)
                       _buildBlurBadge(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -307,6 +307,17 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                             Icon(Icons.star, color: Colors.amber, size: 14),
                             SizedBox(width: 4),
                             Text('مميز', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
+                    if (widget.ad.cpcBid > 0)
+                      _buildBlurBadge(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.campaign, color: Colors.blueAccent, size: 14),
+                            SizedBox(width: 4),
+                            Text('ممول', style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold)),
                           ],
                         ),
                       ),

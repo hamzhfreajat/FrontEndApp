@@ -808,7 +808,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               final region = ad.attributes?['region']?.toString();
               String locationText;
               if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
-                locationText = '$region، $city';
+                locationText = '$city، $region';
               } else if (region != null && region.isNotEmpty) {
                 locationText = region;
               } else {
@@ -1310,6 +1310,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
           'system_compatibility': 'توافق النظام', 'item_features': 'ميزات السلعة',
           'facade': 'الواجهة',
           'water_supply': 'مصادر المياه', 'meters_setup': 'العدادات',
+          'rent_duration': 'مدة الإيجار',
           'cooling_features': 'التبريد', 'heating_features': 'التدفئة',
           'water_heating_features': 'تسخين المياه',
           'interior_features_1': 'أنظمة الراحة والمقاعد', 'interior_features_2': 'الزجاج والإكسسوارات',

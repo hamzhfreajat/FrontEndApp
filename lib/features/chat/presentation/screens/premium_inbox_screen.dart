@@ -219,7 +219,7 @@ class _InboxViewState extends State<_InboxView> {
                         icon: Icon(Icons.support_agent_rounded, color: isDark ? Colors.white : Colors.black87), 
                         onPressed: () {
                           final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                          final currentUserId = authProvider.userData?['sub']?.toString() ?? '';
+                          final currentUserId = authProvider.userData?['id']?.toString() ?? authProvider.userData?['sub']?.toString() ?? '';
                           if (currentUserId.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('يرجى تسجيل الدخول أولاً'), backgroundColor: Colors.red),
