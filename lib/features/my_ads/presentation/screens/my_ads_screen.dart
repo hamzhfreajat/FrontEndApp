@@ -681,11 +681,20 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                             'رصيد المحفظة',
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
-                          Text(
-                            '${balance.toStringAsFixed(2)} JOD',
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                          state.status == ProfileStatus.loading
+                              ? const Padding(
+                                  padding: EdgeInsets.only(top: 4.0),
+                                  child: SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                )
+                              : Text(
+                                  '${balance.toStringAsFixed(2)} JOD',
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                         ],
                       ),
                     ),
