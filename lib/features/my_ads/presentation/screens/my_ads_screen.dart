@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../main.dart' show navigatorKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:animate_do/animate_do.dart';
 import '../bloc/my_ads_bloc.dart';
@@ -1265,9 +1266,11 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
                 }
                 
                 IAPService().onPurchaseCompleted = (success, productId, referenceId) async {
+                  final BuildContext? activeCtx = parentCtx.mounted ? parentCtx : navigatorKey.currentContext;
+                  
                   if (success) {
-                    if (parentCtx.mounted) {
-                      ScaffoldMessenger.of(parentCtx).clearSnackBars();
+                    if (activeCtx != null && activeCtx.mounted) {
+                      ScaffoldMessenger.of(activeCtx).clearSnackBars();
                     }
                     
                     double amount = 0;
@@ -1275,26 +1278,26 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
                     else if (productId == 'wallet_topup_20') amount = 20;
                     else if (productId == 'wallet_topup_50') amount = 50;
                     
-                    if (parentCtx.mounted) {
-                      PaymentSuccessDialog.show(parentCtx, amount: amount, referenceId: referenceId ?? 'N/A');
+                    if (activeCtx != null && activeCtx.mounted) {
+                      PaymentSuccessDialog.show(activeCtx, amount: amount, referenceId: referenceId ?? 'N/A');
                     }
                     
                     try {
                       await ApiService().setAdBid(widget.adId, widget.bidToRetry);
-                      if (parentCtx.mounted) {
-                        ScaffoldMessenger.of(parentCtx).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
-                        parentCtx.read<MyAdsBloc>().add(LoadDashboardData());
-                        parentCtx.read<ProfileBloc>().add(LoadProfile()); // Refresh wallet balance
+                      if (activeCtx != null && activeCtx.mounted) {
+                        ScaffoldMessenger.of(activeCtx).showSnackBar(const SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
+                        activeCtx.read<MyAdsBloc>().add(LoadDashboardData());
+                        activeCtx.read<ProfileBloc>().add(LoadProfile()); // Refresh wallet balance
                       }
                     } catch (e) {
-                      if (parentCtx.mounted) {
-                        ScaffoldMessenger.of(parentCtx).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
+                      if (activeCtx != null && activeCtx.mounted) {
+                        ScaffoldMessenger.of(activeCtx).showSnackBar(SnackBar(content: Text('فشل تفعيل الترويج: $e')));
                       }
                     }
                   } else {
-                    if (parentCtx.mounted) {
-                      ScaffoldMessenger.of(parentCtx).clearSnackBars();
-                      ScaffoldMessenger.of(parentCtx).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
+                    if (activeCtx != null && activeCtx.mounted) {
+                      ScaffoldMessenger.of(activeCtx).clearSnackBars();
+                      ScaffoldMessenger.of(activeCtx).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
                     }
                   }
                 };
