@@ -3013,7 +3013,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     
     return Container(
       decoration: BoxDecoration(
-        color: ad.isFeatured || ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
+        color: Colors.white,
         border: ad.isFeatured || ad.cpcBid > 0 
             ? Border.all(color: const Color(0xFFD4AF37), width: 2.0)
             : (!hasImages ? Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1.5)) : null),

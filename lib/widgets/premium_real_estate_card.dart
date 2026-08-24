@@ -192,7 +192,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
         margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 5),
         padding: const EdgeInsets.all(2), // small padding inside the border
         decoration: BoxDecoration(
-          color: widget.ad.isFeatured || widget.ad.cpcBid > 0 ? const Color(0xFFFFFAEB) : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: widget.ad.isFeatured || widget.ad.cpcBid > 0 
