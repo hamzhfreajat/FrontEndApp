@@ -159,7 +159,7 @@ class _PremiumLoginBottomSheetState extends State<PremiumLoginBottomSheet> {
         scopes: [AppleIDAuthorizationScopes.email, AppleIDAuthorizationScopes.fullName],
         webAuthenticationOptions: WebAuthenticationOptions(
           clientId: 'com.sooqcom.app.service',
-          redirectUri: Uri.parse('https://api.sooq-com.com/api/auth/apple/callback'),
+          redirectUri: Uri.parse('${ApiService.baseUrl}/auth/apple/callback'),
         ),
       );
 
