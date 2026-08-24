@@ -302,7 +302,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                               }
                               await ApiService().setAdBid(adId, currentBid);
                               Navigator.pop(ctx);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('تم تفعيل الترويج بنجاح!')));
+                              _showSuccessDialog(context);
                               context.read<MyAdsBloc>().add(LoadDashboardData());
                             } on InsufficientBalanceException {
                               Navigator.pop(ctx);
@@ -342,6 +342,58 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           ),
         );
       },
+    );
+  }
+
+  void _showSuccessDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 64),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'تهانينا!',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'تم تفعيل الترويج بنجاح. إعلانك الآن يظهر للمزيد من المشترين المهتمين.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('حسناً', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
     );
   }
 
