@@ -265,6 +265,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                               onChanged: (val) {
                                 double? parsed = double.tryParse(val);
                                 if (parsed != null) {
+                                  if (parsed > 10.0) parsed = 10.0;
                                   currentBid = parsed;
                                 }
                               },
@@ -272,6 +273,9 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                                 double? parsed = double.tryParse(val);
                                 if (parsed == null || parsed < 0.07) {
                                   parsed = 0.07;
+                                }
+                                if (parsed > 10.0) {
+                                  parsed = 10.0;
                                 }
                                 setState(() {
                                   currentBid = double.parse(parsed!.toStringAsFixed(2));
@@ -283,10 +287,13 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                           IconButton(
                             icon: Icon(Icons.add_circle_outline),
                             onPressed: () {
-                              setState(() {
-                                currentBid = double.parse((currentBid + 0.01).toStringAsFixed(2));
-                                _bidController.text = currentBid.toStringAsFixed(2);
-                              });
+                              if (currentBid < 10.0) {
+                                setState(() {
+                                  currentBid = double.parse((currentBid + 0.01).toStringAsFixed(2));
+                                  if (currentBid > 10.0) currentBid = 10.0;
+                                  _bidController.text = currentBid.toStringAsFixed(2);
+                                });
+                              }
                             },
                           ),
                         ],
@@ -299,6 +306,9 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                             try {
                               if (currentBid < 0.07) {
                                 currentBid = 0.07;
+                              }
+                              if (currentBid > 10.0) {
+                                currentBid = 10.0;
                               }
                               await ApiService().setAdBid(adId, currentBid);
                               Navigator.pop(ctx);
