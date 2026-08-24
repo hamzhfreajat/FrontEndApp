@@ -114,8 +114,8 @@ class ApiService {
     return 'https://api-search.sooq-com.com';
   }
   static String get baseUrl {
-    // return 'https://api.sooq-com.com/api';
-    return 'https://staging.sooq-com.com/api';
+    return 'https://api.sooq-com.com/api';
+    // return 'https://staging.sooq-com.com/api';
   }
 
   /// Check if an icon_name represents an image (URL, path, or data URI).
