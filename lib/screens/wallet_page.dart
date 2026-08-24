@@ -430,6 +430,37 @@ class _WalletPageState extends State<WalletPage> {
     );
   }
 
+  String _getArabicTransactionType(String type) {
+    switch (type.toUpperCase()) {
+      case 'TOPUP':
+        return 'شحن رصيد';
+      case 'CLICK_DEDUCTION':
+        return 'خصم تفاعل مع إعلان';
+      case 'PROMOTION':
+        return 'ترويج إعلان';
+      default:
+        return type;
+    }
+  }
+
+  String _getArabicDescription(String? description) {
+    if (description == null) return '';
+    String desc = description;
+    
+    // Top-ups
+    desc = desc.replaceAll('In-App Purchase Top-up (android)', 'شحن رصيد داخل التطبيق (أندرويد)');
+    desc = desc.replaceAll('In-App Purchase Top-up (ios)', 'شحن رصيد داخل التطبيق (iOS)');
+    
+    // Interactions
+    if (desc.startsWith('Action: ')) {
+      desc = desc.replaceFirst('Action: call on Ad', 'اتصال على إعلان');
+      desc = desc.replaceFirst('Action: view on Ad', 'مشاهدة إعلان');
+      desc = desc.replaceFirst('Action: chat on Ad', 'محادثة على إعلان');
+    }
+    
+    return desc;
+  }
+
   Widget _buildTransactionHistory() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -491,13 +522,13 @@ class _WalletPageState extends State<WalletPage> {
                       ),
                     ),
                     title: Text(
-                      tx.transactionType,
+                      _getArabicTransactionType(tx.transactionType),
                       style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
                     ),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
-                        '${DateFormat('d MMM yyyy, h:mm a').format(tx.createdAt)}\n${tx.description ?? ''}',
+                        '${DateFormat('yyyy/MM/dd, hh:mm a').format(tx.createdAt)}\n${_getArabicDescription(tx.description)}',
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade600, height: 1.4),
                       ),
                     ),
