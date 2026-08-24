@@ -60,16 +60,18 @@ class _WalletPageState extends State<WalletPage> {
       final data = await Provider.of<ApiService>(context, listen: false).getWalletTransactions();
       if (mounted) {
         setState(() {
-          _transactions = data.map((json) => WalletTransaction.fromJson(json)).toList();
+          _transactions = data.map<WalletTransaction>((json) => WalletTransaction.fromJson(json)).toList();
           _isLoadingTransactions = false;
         });
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
+      print('Error loading transactions: $e');
+      print(stacktrace);
       if (mounted) {
         setState(() {
           _isLoadingTransactions = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load transactions')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load transactions: $e')));
       }
     }
   }
