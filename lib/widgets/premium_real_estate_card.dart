@@ -11,6 +11,8 @@ import 'premium_video_player.dart';
 import 'full_screen_media_gallery.dart';
 import '../providers/app_provider.dart';
 import 'premium_share_bottom_sheet.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import '../services/impression_tracker.dart';
 
 class PremiumRealEstateCard extends StatefulWidget {
   final Ad ad;
@@ -171,9 +173,16 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.ad.images.isNotEmpty ? widget.onTap : widget.onTap,
-      onTapDown: (_) => setState(() => _isHovered = true),
+    return VisibilityDetector(
+      key: Key('ad_visibility_${widget.ad.id}'),
+      onVisibilityChanged: (VisibilityInfo info) {
+        if (!widget.isPreview && info.visibleFraction >= 0.5) {
+          ImpressionTracker().trackImpression(widget.ad.id);
+        }
+      },
+      child: GestureDetector(
+        onTap: widget.ad.images.isNotEmpty ? widget.onTap : widget.onTap,
+        onTapDown: (_) => setState(() => _isHovered = true),
       onTapUp: (_) => setState(() => _isHovered = false),
       onTapCancel: () => setState(() => _isHovered = false),
       child: AnimatedContainer(

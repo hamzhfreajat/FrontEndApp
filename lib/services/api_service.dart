@@ -815,6 +815,22 @@ class ApiService {
     }
   }
 
+  Future<void> recordBulkAdViews(List<int> adIds) async {
+    if (adIds.isEmpty) return;
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/ads/interactions/bulk-views'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'ad_ids': adIds}),
+      ).timeout(const Duration(seconds: 10));
+      if (response.statusCode != 200) {
+        debugPrint('Failed to record bulk ad views on backend');
+      }
+    } catch (_) {
+      // Fail silently for passive tracking
+    }
+  }
+
   Future<void> recordAdInteractionPhone(int adId) async {
     try {
       final response = await _client.post(
