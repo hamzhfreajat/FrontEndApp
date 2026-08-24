@@ -450,7 +450,9 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
           ),
       ],
     );
+    );
   }
+
 
   Widget _buildBlurBadge({required Widget child, EdgeInsetsGeometry? padding}) {
     return ClipRRect(
