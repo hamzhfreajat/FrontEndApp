@@ -21,7 +21,7 @@ import '../providers/auth_provider.dart';
 
 class AuthInterceptingClient extends http.BaseClient {
   final http.Client _inner = http.Client();
-  bool _isRefreshing = false;
+  Future<bool>? _refreshFuture;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
@@ -33,35 +33,16 @@ class AuthInterceptingClient extends http.BaseClient {
       final refreshToken = await storage.read(key: 'refresh_token');
       
       if (refreshToken != null) {
-        if (!_isRefreshing) {
-          _isRefreshing = true;
-          try {
-            final refreshResponse = await _inner.post(
-              Uri.parse('${ApiService.baseUrl}/auth/refresh'),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({'refresh_token': refreshToken})
-            );
-            
-            if (refreshResponse.statusCode == 200) {
-              final data = jsonDecode(refreshResponse.body);
-              await storage.write(key: 'jwt_token', value: data['token']);
-              if (data['refresh_token'] != null) {
-                 await storage.write(key: 'refresh_token', value: data['refresh_token']);
-              }
-              
-              final context = navigatorKey.currentContext;
-              if (context != null) {
-                Provider.of<AuthProvider>(context, listen: false).login(data['token']);
-              }
-              
-              requestClone.headers['Authorization'] = 'Bearer ${data['token']}';
-              _isRefreshing = false;
-              return await _inner.send(requestClone);
-            }
-          } catch (e) {
-            debugPrint("Refresh token failed: $e");
-          }
-          _isRefreshing = false;
+        if (_refreshFuture == null) {
+          _refreshFuture = _refreshToken(storage, refreshToken);
+        }
+        
+        final success = await _refreshFuture!;
+        
+        if (success) {
+          final newToken = await storage.read(key: 'jwt_token');
+          requestClone.headers['Authorization'] = 'Bearer $newToken';
+          return await _inner.send(requestClone);
         }
       }
       
@@ -71,6 +52,36 @@ class AuthInterceptingClient extends http.BaseClient {
       }
     }
     return response;
+  }
+  
+  Future<bool> _refreshToken(FlutterSecureStorage storage, String refreshToken) async {
+    try {
+      final refreshResponse = await _inner.post(
+        Uri.parse('${ApiService.baseUrl}/auth/refresh'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refresh_token': refreshToken})
+      );
+      
+      if (refreshResponse.statusCode == 200) {
+        final data = jsonDecode(refreshResponse.body);
+        await storage.write(key: 'jwt_token', value: data['token']);
+        if (data['refresh_token'] != null) {
+           await storage.write(key: 'refresh_token', value: data['refresh_token']);
+        }
+        
+        final context = navigatorKey.currentContext;
+        if (context != null) {
+          Provider.of<AuthProvider>(context, listen: false).login(data['token']);
+        }
+        
+        _refreshFuture = null;
+        return true;
+      }
+    } catch (e) {
+      debugPrint("Refresh token failed: $e");
+    }
+    _refreshFuture = null;
+    return false;
   }
   
   http.BaseRequest _copyRequest(http.BaseRequest request) {

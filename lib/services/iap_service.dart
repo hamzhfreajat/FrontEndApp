@@ -80,13 +80,16 @@ class IAPService {
           bool valid = await _verifyPurchase(purchaseDetails);
           if (valid) {
             onPurchaseCompleted?.call(true, purchaseDetails.productID, purchaseDetails.purchaseID);
+            // SECURITY: Only complete the purchase after successful server verification.
+            // If we complete before verification, the user loses money on verification failure.
+            if (purchaseDetails.pendingCompletePurchase) {
+              await _inAppPurchase.completePurchase(purchaseDetails);
+            }
           } else {
             onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
+            // Do NOT complete the purchase here - let StoreKit retry on next app launch
+            debugPrint('Purchase verification failed - NOT completing purchase to allow retry');
           }
-        }
-        
-        if (purchaseDetails.pendingCompletePurchase) {
-          await _inAppPurchase.completePurchase(purchaseDetails);
         }
       }
     }
