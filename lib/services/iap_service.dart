@@ -9,6 +9,7 @@ import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../features/profile/presentation/bloc/profile_event.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../main.dart' show navigatorKey;
+import '../widgets/payment_fail_dialog.dart';
 
 class IAPService {
   static final IAPService _instance = IAPService._internal();
@@ -78,6 +79,10 @@ class IAPService {
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
           debugPrint('Purchase Error: ${purchaseDetails.error}');
+          final activeCtx = navigatorKey.currentContext;
+          if (activeCtx != null && activeCtx.mounted) {
+            PaymentFailDialog.show(activeCtx);
+          }
           onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
         } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
           
@@ -96,6 +101,10 @@ class IAPService {
               await _inAppPurchase.completePurchase(purchaseDetails);
             }
           } else {
+            final activeCtx = navigatorKey.currentContext;
+            if (activeCtx != null && activeCtx.mounted) {
+              PaymentFailDialog.show(activeCtx, errorMessage: 'فشل التحقق من صحة عملية الدفع.');
+            }
             onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
             // Do NOT complete the purchase here - let StoreKit retry on next app launch
             debugPrint('Purchase verification failed - NOT completing purchase to allow retry');

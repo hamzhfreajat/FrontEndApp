@@ -1297,7 +1297,6 @@ class _TopUpBottomSheetState extends State<_TopUpBottomSheet> {
                   } else {
                     if (activeCtx != null && activeCtx.mounted) {
                       ScaffoldMessenger.of(activeCtx).clearSnackBars();
-                      ScaffoldMessenger.of(activeCtx).showSnackBar(const SnackBar(content: Text('فشلت عملية الدفع أو تم إلغاؤها.')));
                     }
                   }
                 };

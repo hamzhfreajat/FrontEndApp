@@ -106,7 +106,6 @@ class _WalletPageState extends State<WalletPage> {
       } else {
         if (purchaseDetails.status == PurchaseStatus.error) {
           setState(() => _isPurchasePending = false);
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Purchase Failed')));
         } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
           await _verifyPurchase(purchaseDetails);
         }
