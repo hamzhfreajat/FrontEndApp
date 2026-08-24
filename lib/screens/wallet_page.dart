@@ -57,7 +57,7 @@ class _WalletPageState extends State<WalletPage> {
 
   Future<void> _fetchTransactions() async {
     try {
-      final data = await Provider.of<ApiService>(context, listen: false).getWalletTransactions();
+      final data = await ApiService().getWalletTransactions();
       if (mounted) {
         setState(() {
           _transactions = data.map<WalletTransaction>((json) => WalletTransaction.fromJson(json)).toList();
