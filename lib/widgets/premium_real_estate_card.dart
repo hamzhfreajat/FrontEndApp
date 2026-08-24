@@ -226,6 +226,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -449,7 +450,6 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
             ),
           ),
       ],
-    );
     );
   }
 
