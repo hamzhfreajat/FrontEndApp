@@ -1,13 +1,11 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:provider/provider.dart';
-import '../features/profile/presentation/bloc/profile_bloc.dart';
-import '../features/profile/presentation/bloc/profile_event.dart';
 import '../features/profile/presentation/bloc/profile_state.dart';
+import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../widgets/payment_success_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../services/api_service.dart';
+import '../services/iap_service.dart';
 import '../models/wallet_transaction.dart';
 import 'package:intl/intl.dart';
 
@@ -17,9 +15,6 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
-  final InAppPurchase _inAppPurchase = InAppPurchase.instance;
-  late StreamSubscription<List<PurchaseDetails>> _subscription;
-  
   List<ProductDetails> _products = [];
   List<WalletTransaction> _transactions = [];
   bool _isLoadingProducts = true;
@@ -32,18 +27,36 @@ class _WalletPageState extends State<WalletPage> {
     'wallet_topup_50',
   ];
 
+  // Store the previous callback so we can restore it on dispose
+  Function(bool success, String? productId, String? referenceId)? _previousCallback;
+
   @override
   void initState() {
     super.initState();
-    final purchaseUpdated = _inAppPurchase.purchaseStream;
-    _subscription = purchaseUpdated.listen((purchaseDetailsList) {
-      _listenToPurchaseUpdated(purchaseDetailsList);
-    }, onDone: () {
-      _subscription.cancel();
-    }, onError: (error) {
-      // handle error here.
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Purchase Error: $error')));
-    });
+
+    // Save the previous callback and register our own for wallet-specific UI updates.
+    // IAPService is the SINGLE source of truth for purchase stream events and server verification.
+    _previousCallback = IAPService().onPurchaseCompleted;
+    IAPService().onPurchaseCompleted = (success, productId, referenceId) async {
+      if (!mounted) return;
+      
+      setState(() => _isPurchasePending = false);
+
+      if (success) {
+        // Refresh transactions list 
+        await _fetchTransactions();
+        
+        double amount = 0;
+        if (productId == 'wallet_topup_10') amount = 10;
+        else if (productId == 'wallet_topup_20') amount = 20;
+        else if (productId == 'wallet_topup_50') amount = 50;
+
+        if (mounted && context.mounted) {
+          PaymentSuccessDialog.show(context, amount: amount, referenceId: referenceId ?? 'N/A');
+        }
+      }
+      // Failure dialog is already shown by IAPService itself — no duplicate here.
+    };
     
     _initStoreInfo();
     _fetchTransactions();
@@ -51,7 +64,9 @@ class _WalletPageState extends State<WalletPage> {
 
   @override
   void dispose() {
-    _subscription.cancel();
+    // Restore the previous callback so other screens (like my_ads) 
+    // can set their own when they become active.
+    IAPService().onPurchaseCompleted = _previousCallback;
     super.dispose();
   }
 
@@ -77,7 +92,7 @@ class _WalletPageState extends State<WalletPage> {
   }
 
   Future<void> _initStoreInfo() async {
-    final bool isAvailable = await _inAppPurchase.isAvailable();
+    final bool isAvailable = await InAppPurchase.instance.isAvailable();
     if (!isAvailable) {
       setState(() {
         _isLoadingProducts = false;
@@ -85,7 +100,7 @@ class _WalletPageState extends State<WalletPage> {
       return;
     }
 
-    ProductDetailsResponse productDetailResponse = await _inAppPurchase.queryProductDetails(_kProductIds.toSet());
+    ProductDetailsResponse productDetailResponse = await InAppPurchase.instance.queryProductDetails(_kProductIds.toSet());
     if (productDetailResponse.error != null || productDetailResponse.productDetails.isEmpty) {
       setState(() {
         _isLoadingProducts = false;
@@ -101,52 +116,11 @@ class _WalletPageState extends State<WalletPage> {
     });
   }
 
-  Future<void> _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
-    for (var purchaseDetails in purchaseDetailsList) {
-      if (purchaseDetails.status == PurchaseStatus.pending) {
-        setState(() => _isPurchasePending = true);
-      } else {
-        if (purchaseDetails.status == PurchaseStatus.error) {
-          setState(() => _isPurchasePending = false);
-        } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
-          await _verifyPurchase(purchaseDetails);
-        }
-        if (purchaseDetails.pendingCompletePurchase) {
-          await _inAppPurchase.completePurchase(purchaseDetails);
-        }
-      }
-    }
-  }
-
-  Future<void> _verifyPurchase(PurchaseDetails purchaseDetails) async {
-    try {
-      // The API call to topupWallet is handled by IAPService's _verifyPurchase method.
-      // We just need to update the local state when the purchase stream emits a success.
-      
-      // Update local profile balance and reload transactions
-      context.read<ProfileBloc>().add(LoadProfile()); // Refresh profile to get new balance
-      await _fetchTransactions();
-      
-      setState(() => _isPurchasePending = false);
-      
-      double amount = 0;
-      if (purchaseDetails.productID == 'wallet_topup_10') amount = 10;
-      else if (purchaseDetails.productID == 'wallet_topup_20') amount = 20;
-      else if (purchaseDetails.productID == 'wallet_topup_50') amount = 50;
-
-      if (context.mounted) {
-        PaymentSuccessDialog.show(context, amount: amount, referenceId: purchaseDetails.purchaseID ?? 'N/A');
-      }
-    } catch (e) {
-      setState(() => _isPurchasePending = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to verify top-up on server.')));
-    }
-  }
-
   void _buyProduct(ProductDetails product) {
-    late PurchaseParam purchaseParam;
-    purchaseParam = PurchaseParam(productDetails: product);
-    _inAppPurchase.buyConsumable(purchaseParam: purchaseParam, autoConsume: true);
+    setState(() => _isPurchasePending = true);
+    // Delegate to IAPService which handles the purchase stream, 
+    // server verification, and completePurchase in one place.
+    IAPService().buyTopUp(product.id);
   }
 
   String _cleanProductTitle(String rawTitle) {
