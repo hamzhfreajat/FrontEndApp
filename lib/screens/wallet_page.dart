@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import '../features/profile/presentation/bloc/profile_state.dart';
+import '../features/profile/presentation/bloc/profile_event.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../widgets/payment_success_dialog.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,6 +46,13 @@ class _WalletPageState extends State<WalletPage> {
       if (success) {
         // Refresh transactions list 
         await _fetchTransactions();
+        
+        // Refresh wallet balance
+        if (mounted && context.mounted) {
+          try {
+            context.read<ProfileBloc>().add(LoadProfile());
+          } catch (_) {}
+        }
         
         double amount = 0;
         if (productId == 'wallet_topup_10') amount = 10;

@@ -1143,8 +1143,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ? selectedCityForFilter?.regions ?? []
               : selectedCityForFilter!.regions.where((r) => _normalizeArabic(r.nameAr).contains(normalizedSearch)).toList();
 
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.8,
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              height: MediaQuery.of(context).size.height * 0.8 + (selectedRegionsForFilter.isNotEmpty ? 60 : 0),
               padding: const EdgeInsets.only(top: 24),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -1330,7 +1332,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             
                             return Container(
                               color: Colors.white,
-                              child: ListTile(
+                              child: CheckboxListTile(
                                 title: Row(
                                   children: [
                                     Text(r.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
@@ -1348,13 +1350,15 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                     ]
                                   ],
                                 ),
-                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
-                                onTap: () {
+                                value: selectedRegionsForFilter.any((reg) => reg.id == r.id),
+                                activeColor: brandColor,
+                                onChanged: (bool? value) {
                                   setModalState(() {
-                                    selectedCityForFilter = city;
-                                    selectedRegionsForFilter = [r];
-                                    searchQuery = '';
-                                    searchController.clear();
+                                    if (value == true) {
+                                      selectedRegionsForFilter.add(r);
+                                    } else {
+                                      selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                    }
                                   });
                                 },
                               ),
@@ -1373,10 +1377,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           if (searchQuery.isEmpty && index == 0) {
                             return Container(
                               color: Colors.white,
-                              child: ListTile(
+                              child: CheckboxListTile(
                                 title: Text('كل مناطق ${selectedCityForFilter!.nameAr}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
-                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
-                                onTap: () async {
+                                value: false,
+                                activeColor: brandColor,
+                                onChanged: (bool? value) async {
                                   final appProvider = Provider.of<AppProvider>(context, listen: false);
                                   await appProvider.setLocation(selectedCityForFilter, null, null);
                                   setState(() { _locationsFilter = [selectedCityForFilter!.nameAr]; });
@@ -1409,47 +1414,48 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: brandColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () async {
-                            final appProvider = Provider.of<AppProvider>(context, listen: false);
-                            if (selectedRegionsForFilter.isEmpty) {
-                              await appProvider.setLocation(selectedCityForFilter, null, null);
-                              setState(() { _locationsFilter = [selectedCityForFilter!.nameAr]; });
-                            } else {
-                              Set<City> involvedCities = {};
-                              if (appProvider.dbCities != null) {
-                                for (var r in selectedRegionsForFilter) {
-                                  try {
-                                    final city = appProvider.dbCities!.firstWhere((c) => c.id == r.cityId);
-                                    involvedCities.add(city);
-                                  } catch (_) {}
-                                }
-                              }
-                              await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : selectedCityForFilter, selectedRegionsForFilter, null);
-                              setState(() { 
-                                _locationsFilter = [
-                                  ...involvedCities.map((c) => c.nameAr),
-                                  ...selectedRegionsForFilter.map((r) => r.nameAr)
-                                ]; 
-                              });
-                            }
-                            Navigator.pop(ctx);
-                            _fetchAds();
-                          },
-                          child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                  // Always show apply button
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: brandColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
+                        onPressed: () async {
+                          final appProvider = Provider.of<AppProvider>(context, listen: false);
+                          if (selectedRegionsForFilter.isEmpty) {
+                            await appProvider.setLocation(selectedCityForFilter, null, null);
+                            setState(() { _locationsFilter = selectedCityForFilter != null ? [selectedCityForFilter!.nameAr] : null; });
+                          } else {
+                            Set<City> involvedCities = {};
+                            if (appProvider.dbCities != null) {
+                              for (var r in selectedRegionsForFilter) {
+                                try {
+                                  final city = appProvider.dbCities!.firstWhere((c) => c.id == r.cityId);
+                                  involvedCities.add(city);
+                                } catch (_) {}
+                              }
+                            }
+                            await appProvider.setLocation(involvedCities.isNotEmpty ? involvedCities.first : selectedCityForFilter, selectedRegionsForFilter.toList(), null);
+                            setState(() { 
+                              _locationsFilter = [
+                                ...involvedCities.map((c) => c.nameAr),
+                                ...selectedRegionsForFilter.map((r) => r.nameAr)
+                              ]; 
+                            });
+                          }
+                          Navigator.pop(ctx);
+                          _fetchAds();
+                        },
+                        child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
-                  ],
+                  ),
 
                 ],
               ),

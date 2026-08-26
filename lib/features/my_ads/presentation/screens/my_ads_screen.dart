@@ -119,7 +119,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
             }
           });
         } else if (action == 'promote') {
-          _showBidBottomSheet(context, adId);
+          _showPromotionInfoDialog(context, adId);
         } else {
           AnalyticsEngine().logButtonTapped(buttonName: 'single_$action', location: 'my_ads_screen');
           context.read<MyAdsBloc>().add(PerformSingleAction(adId, action));
@@ -777,11 +777,12 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.history, size: 16, color: Colors.blue),
-                label: const Text('المحفظة والسجل', style: TextStyle(color: Colors.blue)),
+                icon: const Icon(Icons.add_circle_outline, size: 18, color: Colors.white),
+                label: const Text('الشحن والسجل', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade50,
-                  elevation: 0,
+                  backgroundColor: Colors.blue,
+                  elevation: 2,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 ),
               ),

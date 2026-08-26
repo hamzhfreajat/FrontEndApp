@@ -1135,8 +1135,10 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                 ? regions
                 : regions.where((r) => _normalizeArabic(r.nameAr).contains(normalizedSearch)).toList();
 
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.8,
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              height: MediaQuery.of(context).size.height * 0.8 + (selectedRegionsForFilter.isNotEmpty ? 60 : 0),
               padding: const EdgeInsets.only(top: 24),
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -1320,7 +1322,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                             
                             return Container(
                               color: Colors.white,
-                              child: ListTile(
+                              child: CheckboxListTile(
                                 title: Row(
                                   children: [
                                     Text(r.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
@@ -1338,18 +1340,15 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                                     ]
                                   ],
                                 ),
-                                trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
-                                onTap: () {
-                                  setState(() {
-                                    _selectedCityId = city.id;
-                                    _selectedRegionIds = {r.id};
-                                  });
-                                  _triggerCountUpdate();
+                                value: selectedRegionsForFilter.any((reg) => reg.id == r.id),
+                                activeColor: widget.brandColor,
+                                onChanged: (bool? value) {
                                   setModalState(() {
-                                    selectedCityForFilter = city;
-                                    selectedRegionsForFilter = {r};
-                                    searchQuery = '';
-                                    searchController.clear();
+                                    if (value == true) {
+                                      selectedRegionsForFilter.add(r);
+                                    } else {
+                                      selectedRegionsForFilter.removeWhere((reg) => reg.id == r.id);
+                                    }
                                   });
                                 },
                               ),
@@ -1506,31 +1505,41 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                         },
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: widget.brandColor,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              if (selectedCityForFilter != null) {
-                                _selectedCityId = selectedCityForFilter!.id;
-                              }
-                              _selectedRegionIds = selectedRegionsForFilter.map((e) => e.id).toSet();
-                            });
-                            _triggerCountUpdate();
-                            Navigator.pop(ctx);
-                          },
-                          child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                  // Always show apply button
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: widget.brandColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
+                        onPressed: () {
+                          setState(() {
+                            if (selectedCityForFilter != null) {
+                              _selectedCityId = selectedCityForFilter!.id;
+                            } else if (selectedRegionsForFilter.isNotEmpty) {
+                              // Derive city from first region if we selected regions globally
+                              final appProvider = Provider.of<AppProvider>(context, listen: false);
+                              if (appProvider.dbCities != null) {
+                                try {
+                                  final city = appProvider.dbCities!.firstWhere((c) => c.id == selectedRegionsForFilter.first.cityId);
+                                  _selectedCityId = city.id;
+                                } catch (_) {}
+                              }
+                            }
+                            _selectedRegionIds = selectedRegionsForFilter.map((e) => e.id).toSet();
+                          });
+                          _triggerCountUpdate();
+                          Navigator.pop(ctx);
+                        },
+                        child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
-                  ],
+                  ),
                 ],
               ),
             );

@@ -74,6 +74,8 @@ class IAPService {
 
   void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) async {
     for (var purchaseDetails in purchaseDetailsList) {
+      debugPrint('IAP Event: Product ${purchaseDetails.productID}, Status: ${purchaseDetails.status}');
+      
       if (purchaseDetails.status == PurchaseStatus.pending) {
         debugPrint('Purchase pending...');
       } else {
@@ -84,21 +86,35 @@ class IAPService {
             PaymentFailDialog.show(activeCtx);
           }
           onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
+        } else if (purchaseDetails.status == PurchaseStatus.canceled) {
+          debugPrint('Purchase Canceled by user');
+          onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
         } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
           
+          debugPrint('Purchase successful, starting backend verification...');
           bool valid = await _verifyPurchase(purchaseDetails);
+          debugPrint('Backend verification result: $valid');
+          
           if (valid) {
             // Globally update wallet balance since purchase was valid
             final activeCtx = navigatorKey.currentContext;
             if (activeCtx != null && activeCtx.mounted) {
-              activeCtx.read<ProfileBloc>().add(LoadProfile());
+              try {
+                activeCtx.read<ProfileBloc>().add(LoadProfile());
+              } catch (e) {
+                debugPrint('Could not read ProfileBloc from navigator context: $e');
+              }
             }
 
+            debugPrint('Triggering success callback to UI...');
             onPurchaseCompleted?.call(true, purchaseDetails.productID, purchaseDetails.purchaseID);
+            
             // SECURITY: Only complete the purchase after successful server verification.
             // If we complete before verification, the user loses money on verification failure.
             if (purchaseDetails.pendingCompletePurchase) {
+              debugPrint('Completing purchase with StoreKit/PlayStore...');
               await _inAppPurchase.completePurchase(purchaseDetails);
+              debugPrint('Purchase completed with store.');
             }
           } else {
             final activeCtx = navigatorKey.currentContext;
