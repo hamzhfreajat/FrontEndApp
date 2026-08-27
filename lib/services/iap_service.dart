@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
+import 'package:in_app_purchase_storekit/store_kit_wrappers.dart';
 import 'api_service.dart';
 import '../features/profile/presentation/bloc/profile_bloc.dart';
 import '../features/profile/presentation/bloc/profile_event.dart';
@@ -132,13 +133,38 @@ class IAPService {
 
   Future<bool> _verifyPurchase(PurchaseDetails purchaseDetails) async {
     try {
-      String receiptData = purchaseDetails.verificationData.serverVerificationData;
-      if (receiptData.isEmpty) {
-        receiptData = purchaseDetails.verificationData.localVerificationData;
+      String receiptData;
+      String platform;
+      
+      if (Platform.isIOS) {
+        platform = 'ios';
+        // StoreKit 2 returns a JWS token in serverVerificationData,
+        // but Apple's legacy verifyReceipt API expects the App Store receipt (base64).
+        // Use SKReceiptManager to get the correct receipt format.
+        try {
+          receiptData = await SKReceiptManager.retrieveReceiptData();
+          debugPrint('iOS receipt retrieved via SKReceiptManager, length: ${receiptData.length}');
+        } catch (e) {
+          debugPrint('SKReceiptManager failed: $e, falling back to verificationData');
+          receiptData = purchaseDetails.verificationData.serverVerificationData;
+          if (receiptData.isEmpty) {
+            receiptData = purchaseDetails.verificationData.localVerificationData;
+          }
+        }
+      } else {
+        platform = 'android';
+        receiptData = purchaseDetails.verificationData.serverVerificationData;
+        if (receiptData.isEmpty) {
+          receiptData = purchaseDetails.verificationData.localVerificationData;
+        }
       }
       
-      String platform = Platform.isIOS ? 'ios' : 'android';
+      if (receiptData.isEmpty) {
+        debugPrint('Receipt data is empty! Cannot verify purchase.');
+        return false;
+      }
       
+      debugPrint('Sending receipt to backend. Platform: $platform, Product: ${purchaseDetails.productID}, Receipt length: ${receiptData.length}');
       await ApiService().topupWallet(purchaseDetails.productID, platform, receiptData);
       return true;
     } catch (e) {
