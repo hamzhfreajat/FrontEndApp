@@ -87,9 +87,15 @@ class IAPService {
             PaymentFailDialog.show(activeCtx);
           }
           onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
+          if (purchaseDetails.pendingCompletePurchase) {
+            await _inAppPurchase.completePurchase(purchaseDetails);
+          }
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
           debugPrint('Purchase Canceled by user');
           onPurchaseCompleted?.call(false, purchaseDetails.productID, purchaseDetails.purchaseID);
+          if (purchaseDetails.pendingCompletePurchase) {
+            await _inAppPurchase.completePurchase(purchaseDetails);
+          }
         } else if (purchaseDetails.status == PurchaseStatus.purchased || purchaseDetails.status == PurchaseStatus.restored) {
           
           debugPrint('Purchase successful, starting backend verification...');
