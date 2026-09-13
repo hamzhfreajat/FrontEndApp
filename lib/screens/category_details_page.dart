@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../models/category.dart';
@@ -159,7 +159,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       finalUrl += '?' + queryParams.join('&');
     }
 
-    String shareTitle = 'إعلانات قسم ${widget.category.name}';
+    String shareTitle = 'Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ù‚Ø³Ù… ${widget.category.name}';
     
     List<String> previewImages = [];
     for (var ad in _ads) {
@@ -212,7 +212,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       _locationsFilter!.addAll(appProvider.selectedRegions!.map((r) => r.nameAr));
     } else if (appProvider.selectedCity != null) {
       _locationsFilter = [appProvider.selectedCity!.nameAr];
-    } else if (appProvider.rawLocationFallback != null && appProvider.rawLocationFallback != 'كل الأردن') {
+    } else if (appProvider.rawLocationFallback != null && appProvider.rawLocationFallback != 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†') {
       _locationsFilter = [appProvider.rawLocationFallback!];
     } else {
       _locationsFilter = null; // All Jordan
@@ -291,7 +291,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى تفعيل خدمات الموقع')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ÙŠØ±Ø¬Ù‰ ØªÙØ¹ÙŠÙ„ Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ù…ÙˆÙ‚Ø¹')));
         if (mounted) setState(() => _isLoadingAds = false);
         return;
       }
@@ -300,14 +300,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم رفض صلاحية الموقع')));
+          if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ØªÙ… Ø±ÙØ¶ ØµÙ„Ø§Ø­ÙŠØ© Ø§Ù„Ù…ÙˆÙ‚Ø¹')));
           if (mounted) setState(() => _isLoadingAds = false);
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تم رفض صلاحية الموقع نهائياً، يرجى تفعيلها من الإعدادات')));
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ØªÙ… Ø±ÙØ¶ ØµÙ„Ø§Ø­ÙŠØ© Ø§Ù„Ù…ÙˆÙ‚Ø¹ Ù†Ù‡Ø§Ø¦ÙŠØ§Ù‹ØŒ ÙŠØ±Ø¬Ù‰ ØªÙØ¹ÙŠÙ„Ù‡Ø§ Ù…Ù† Ø§Ù„Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª')));
         if (mounted) setState(() => _isLoadingAds = false);
         return;
       }
@@ -323,7 +323,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         _fetchAds();
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء جلب الموقع')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ø¬Ù„Ø¨ Ø§Ù„Ù…ÙˆÙ‚Ø¹')));
       if (mounted) setState(() => _isLoadingAds = false);
     }
   }
@@ -356,7 +356,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     try {
       final tags = _selectedTags.isNotEmpty ? _selectedTags : null;
 
-      final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('كل المدن') || _locationsFilter!.contains('كل الأردن'))) ? null : _locationsFilter;
+      final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('ÙƒÙ„ Ø§Ù„Ù…Ø¯Ù†') || _locationsFilter!.contains('ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†'))) ? null : _locationsFilter;
 
       // Recursively load the whole subtree (without blocking the ads fetching)
       // so we can surface only the "ended" (leaf) subcategories as chips.
@@ -502,7 +502,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     if (!mounted) return;
     setState(() => _isLoadingMore = true);
     try {
-      final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('كل المدن') || _locationsFilter!.contains('كل الأردن'))) ? null : _locationsFilter;
+      final cleanedLocations = (_locationsFilter != null && (_locationsFilter!.contains('ÙƒÙ„ Ø§Ù„Ù…Ø¯Ù†') || _locationsFilter!.contains('ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†'))) ? null : _locationsFilter;
 
       final fetchedAds = await _apiService.fetchAds(
         categoryId: widget.category.id, 
@@ -673,14 +673,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             children: [
               // Visually Right in RTL
               _buildPremiumAddButton(context, brandColor),
-              _bottomNavItem(Icons.home_outlined, 'الرئيسية', false, brandColor, () {
+              _bottomNavItem(Icons.home_outlined, 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©', false, brandColor, () {
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const RootScreen(initialIndex: 0)), (route) => false);
               }),
-              _bottomNavItem(Icons.grid_view_rounded, 'الأقسام', true, brandColor, null),
-              _bottomNavItem(Icons.article_outlined, 'إعلاناتي', false, brandColor, () {
+              _bottomNavItem(Icons.grid_view_rounded, 'Ø§Ù„Ø£Ù‚Ø³Ø§Ù…', true, brandColor, null),
+              _bottomNavItem(Icons.article_outlined, 'Ø¥Ø¹Ù„Ø§Ù†Ø§ØªÙŠ', false, brandColor, () {
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const RootScreen(initialIndex: 2)), (route) => false);
               }),
-              _bottomNavItem(Icons.person_outline_rounded, 'حسابي', false, brandColor, () {
+              _bottomNavItem(Icons.person_outline_rounded, 'Ø­Ø³Ø§Ø¨ÙŠ', false, brandColor, () {
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const RootScreen(initialIndex: 3)), (route) => false);
               }),
             ],
@@ -724,7 +724,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         if (currentUserId == null || currentUserId.isEmpty) {
           PremiumLoginBottomSheet.show(
             context, 
-            subtitle: 'يرجى تسجيل الدخول لإضافة إعلان جديد',
+            subtitle: 'ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ø¥Ø¶Ø§ÙØ© Ø¥Ø¹Ù„Ø§Ù† Ø¬Ø¯ÙŠØ¯',
             onLoginSuccess: () {
               Navigator.push(context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
             },
@@ -755,7 +755,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           children: [
             Icon(Icons.add_circle_outline_rounded, color: Colors.white, size: 20),
             SizedBox(width: 6),
-            Text('أضف إعلان', style: TextStyle(
+            Text('Ø£Ø¶Ù Ø¥Ø¹Ù„Ø§Ù†', style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 12
@@ -813,21 +813,21 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 if (currentUserId.isEmpty) {
                   PremiumLoginBottomSheet.show(
                     context, 
-                    subtitle: 'يرجى تسجيل الدخول للوصول لخدمة العملاء',
+                    subtitle: 'ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ù„ÙˆØµÙˆÙ„ Ù„Ø®Ø¯Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡',
                     onLoginSuccess: () {},
                   );
                   return;
                 }
                 Navigator.push(context, MaterialPageRoute(builder: (_) => PremiumChatScreen(
                   adId: 'support',
-                  adTitle: 'خدمة العملاء',
+                  adTitle: 'Ø®Ø¯Ù…Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡',
                   adPrice: '',
                   adImageUrl: '',
                   currentUserId: currentUserId,
-                  currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? authProvider.userData?['name']?.toString() ?? 'مستخدم',
+                  currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? authProvider.userData?['name']?.toString() ?? 'Ù…Ø³ØªØ®Ø¯Ù…',
                   currentUserPhone: authProvider.userData?['phone_number']?.toString(),
                   otherUserId: 'admin',
-                  otherUserName: 'فريق الدعم',
+                  otherUserName: 'ÙØ±ÙŠÙ‚ Ø§Ù„Ø¯Ø¹Ù…',
                   isSeller: false,
                 )));
               },
@@ -851,7 +851,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         if (currentUserId.isEmpty) {
                           PremiumLoginBottomSheet.show(
                             context, 
-                            subtitle: 'يرجى تسجيل الدخول لفتح الرسائل',
+                            subtitle: 'ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„ÙØªØ­ Ø§Ù„Ø±Ø³Ø§Ø¦Ù„',
                             onLoginSuccess: () {},
                           );
                           return;
@@ -918,7 +918,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     );
     Provider.of<SavedSearchProvider>(context, listen: false).saveSearch(newSearch);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم حفظ البحث بنجاح!', style: TextStyle(fontFamily: 'Tajawal')), backgroundColor: Colors.green),
+      const SnackBar(content: Text('ØªÙ… Ø­ÙØ¸ Ø§Ù„Ø¨Ø­Ø« Ø¨Ù†Ø¬Ø§Ø­!', style: TextStyle(fontFamily: 'Tajawal')), backgroundColor: Colors.green),
     );
   }
 
@@ -991,32 +991,32 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 children: [
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-                    child: Text('ترتيب حسب', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: Colors.black87)),
+                    child: Text('ØªØ±ØªÙŠØ¨ Ø­Ø³Ø¨', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: -0.5, color: Colors.black87)),
                   ),
                   const SizedBox(height: 12),
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0, bottom: 8.0, right: 8.0),
-                    child: Text('السعر', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
+                    child: Text('Ø§Ù„Ø³Ø¹Ø±', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
                   ),
-                  _buildSortOption(ctx, 'price_asc', 'من الأقل للأعلى', Icons.arrow_upward_rounded, Colors.green),
+                  _buildSortOption(ctx, 'price_asc', 'Ù…Ù† Ø§Ù„Ø£Ù‚Ù„ Ù„Ù„Ø£Ø¹Ù„Ù‰', Icons.arrow_upward_rounded, Colors.green),
                   const SizedBox(height: 4),
-                  _buildSortOption(ctx, 'price_desc', 'من الأعلى للأقل', Icons.arrow_downward_rounded, Colors.green.shade800),
+                  _buildSortOption(ctx, 'price_desc', 'Ù…Ù† Ø§Ù„Ø£Ø¹Ù„Ù‰ Ù„Ù„Ø£Ù‚Ù„', Icons.arrow_downward_rounded, Colors.green.shade800),
 
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0, bottom: 8.0, right: 8.0),
-                    child: Text('الوقت', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
+                    child: Text('Ø§Ù„ÙˆÙ‚Øª', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
                   ),
-                  _buildSortOption(ctx, 'newest', 'الأحدث أولاً', Icons.new_releases_rounded, Colors.blue),
+                  _buildSortOption(ctx, 'newest', 'Ø§Ù„Ø£Ø­Ø¯Ø« Ø£ÙˆÙ„Ø§Ù‹', Icons.new_releases_rounded, Colors.blue),
                   const SizedBox(height: 4),
-                  _buildSortOption(ctx, 'oldest', 'الأقدم أولاً', Icons.history_rounded, Colors.blueGrey),
+                  _buildSortOption(ctx, 'oldest', 'Ø§Ù„Ø£Ù‚Ø¯Ù… Ø£ÙˆÙ„Ø§Ù‹', Icons.history_rounded, Colors.blueGrey),
 
                   const Padding(
                     padding: EdgeInsets.only(top: 16.0, bottom: 8.0, right: 8.0),
-                    child: Text('الرائج', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
+                    child: Text('Ø§Ù„Ø±Ø§Ø¦Ø¬', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.black45)),
                   ),
-                  _buildSortOption(ctx, 'nearest', 'الأقرب إليك', Icons.location_on_rounded, Colors.red.shade400),
+                  _buildSortOption(ctx, 'nearest', 'Ø§Ù„Ø£Ù‚Ø±Ø¨ Ø¥Ù„ÙŠÙƒ', Icons.location_on_rounded, Colors.red.shade400),
                   const SizedBox(height: 4),
-                  _buildSortOption(ctx, 'most_viewed', 'الأكثر مشاهدة', Icons.local_fire_department_rounded, Colors.deepOrange),
+                  _buildSortOption(ctx, 'most_viewed', 'Ø§Ù„Ø£ÙƒØ«Ø± Ù…Ø´Ø§Ù‡Ø¯Ø©', Icons.local_fire_department_rounded, Colors.deepOrange),
                   const SizedBox(height: 8),
                 ],
               ),
@@ -1029,7 +1029,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   void _showFilterBottomSheet(Color brandColor) {
     final allCats = Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories;
-    // Only offer leaf ("ended") subcategories — never a category with children.
+    // Only offer leaf ("ended") subcategories â€” never a category with children.
     final subCategories = _collectLeafSubCategories(allCats, widget.category.id);
 
     showModalBottomSheet(
@@ -1038,7 +1038,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return PremiumFilterBottomSheet(
-          rootCategory: _getRootCategory(widget.category),
+          
           category: widget.category,
           subCategories: subCategories,
           brandColor: brandColor,
@@ -1107,11 +1107,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   }
   String _normalizeArabic(String text) {
     return text
-        .replaceAll('أ', 'ا')
-        .replaceAll('إ', 'ا')
-        .replaceAll('آ', 'ا')
-        .replaceAll('ة', 'ه')
-        .replaceAll('ى', 'ي');
+        .replaceAll('Ø£', 'Ø§')
+        .replaceAll('Ø¥', 'Ø§')
+        .replaceAll('Ø¢', 'Ø§')
+        .replaceAll('Ø©', 'Ù‡')
+        .replaceAll('Ù‰', 'ÙŠ');
   }
 
   void _showLocationBottomSheet(Color brandColor) {
@@ -1186,7 +1186,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             ),
                           Expanded(
                             child: Text(
-                              selectedCityForFilter == null ? 'اختر المدينة' : 'مناطق ${selectedCityForFilter!.nameAr}', 
+                              selectedCityForFilter == null ? 'Ø§Ø®ØªØ± Ø§Ù„Ù…Ø¯ÙŠÙ†Ø©' : 'Ù…Ù†Ø§Ø·Ù‚ ${selectedCityForFilter!.nameAr}', 
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: brandColor)
                             ),
@@ -1222,7 +1222,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                 });
                               },
                               decoration: InputDecoration(
-                                hintText: selectedCityForFilter == null ? 'ابحث عن مدينة...' : 'ابحث عن منطقة...',
+                                hintText: selectedCityForFilter == null ? 'Ø§Ø¨Ø­Ø« Ø¹Ù† Ù…Ø¯ÙŠÙ†Ø©...' : 'Ø§Ø¨Ø­Ø« Ø¹Ù† Ù…Ù†Ø·Ù‚Ø©...',
                                 hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
                                 prefixIcon: Icon(Icons.search_rounded, color: brandColor),
                                 border: InputBorder.none,
@@ -1240,7 +1240,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                 searchQuery = '';
                               });
                             },
-                            child: Text('مسح', style: TextStyle(color: brandColor, fontWeight: FontWeight.bold, fontSize: 16)),
+                            child: Text('Ù…Ø³Ø­', style: TextStyle(color: brandColor, fontWeight: FontWeight.bold, fontSize: 16)),
                           ),
                         ],
                       ],
@@ -1306,12 +1306,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             return Container(
                               color: Colors.white,
                               child: ListTile(
-                                title: const Text('كل الأردن', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                title: const Text('ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
                                 trailing: const Icon(Icons.chevron_left, size: 22, textDirection: TextDirection.ltr, color: Colors.grey),
                                 onTap: () async {
                                   final appProvider = Provider.of<AppProvider>(context, listen: false);
-                                  await appProvider.setLocation(null, null, 'كل الأردن');
-                                  setState(() { _locationsFilter = ['كل الأردن']; });
+                                  await appProvider.setLocation(null, null, 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†');
+                                  setState(() { _locationsFilter = ['ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†']; });
                                   Navigator.pop(ctx);
                                   _fetchAds();
                                 },
@@ -1389,7 +1389,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             return Container(
                               color: Colors.white,
                               child: CheckboxListTile(
-                                title: Text('كل مناطق ${selectedCityForFilter!.nameAr}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                title: Text('ÙƒÙ„ Ù…Ù†Ø§Ø·Ù‚ ${selectedCityForFilter!.nameAr}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
                                 value: false,
                                 activeColor: brandColor,
                                 onChanged: (bool? value) async {
@@ -1463,7 +1463,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           Navigator.pop(ctx);
                           _fetchAds();
                         },
-                        child: const Text('تطبيق', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: const Text('ØªØ·Ø¨ÙŠÙ‚', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ),
@@ -1481,21 +1481,21 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   Widget _buildSmartSummaryBar(Color brandColor) {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
-        String locationText = 'جاري التحديد...';
+        String locationText = 'Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ø¯ÙŠØ¯...';
         
         if (_locationsFilter != null && _locationsFilter!.isNotEmpty) {
-          locationText = _locationsFilter!.join('، ');
+          locationText = _locationsFilter!.join('ØŒ ');
         } else if (provider.rawLocationFallback != null) {
           locationText = provider.rawLocationFallback!;
         } else if (provider.selectedCity != null) {
           if (provider.selectedRegions != null && provider.selectedRegions!.isNotEmpty) {
-            final regionNames = provider.selectedRegions!.map((r) => r.nameAr).join('، ');
-            locationText = '$regionNames، ${provider.selectedCity!.nameAr}';
+            final regionNames = provider.selectedRegions!.map((r) => r.nameAr).join('ØŒ ');
+            locationText = '$regionNamesØŒ ${provider.selectedCity!.nameAr}';
           } else {
             locationText = provider.selectedCity!.nameAr;
           }
         } else {
-          locationText = 'كل الأردن';
+          locationText = 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†';
         }
 
         return GestureDetector(
@@ -1531,7 +1531,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('الموقع الحالي', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade500, letterSpacing: 0.2)),
+                      Text('Ø§Ù„Ù…ÙˆÙ‚Ø¹ Ø§Ù„Ø­Ø§Ù„ÙŠ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade500, letterSpacing: 0.2)),
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -1554,7 +1554,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   InkWell(
                     onTap: () async {
                       final appProvider = Provider.of<AppProvider>(context, listen: false);
-                      await appProvider.setLocation(null, null, 'كل الأردن');
+                      await appProvider.setLocation(null, null, 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†');
                       setState(() {
                         _selectedTags.clear();
                         _minPrice = null;
@@ -1646,7 +1646,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           Icon(Icons.format_list_bulleted_rounded, size: 18, color: brandColor),
                           const SizedBox(width: 6),
                           Text(
-                            '$_totalAdsCount إعلان',
+                            '$_totalAdsCount Ø¥Ø¹Ù„Ø§Ù†',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: brandColor),
                           ),
                         ],
@@ -1664,15 +1664,15 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             child: Row(
               children: [
                 Expanded(
-                  child: _buildActionPill(icon: Icons.tune, label: 'فلترة', badgeCount: (_minPrice != null || _maxPrice != null) ? 1 : 0, brandColor: brandColor, onTap: () => _showFilterBottomSheet(brandColor))
+                  child: _buildActionPill(icon: Icons.tune, label: 'ÙÙ„ØªØ±Ø©', badgeCount: (_minPrice != null || _maxPrice != null) ? 1 : 0, brandColor: brandColor, onTap: () => _showFilterBottomSheet(brandColor))
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Consumer<AppProvider>(
                     builder: (context, provider, child) {
                       final locName = _locationsFilter != null && _locationsFilter!.isNotEmpty 
-                        ? _locationsFilter!.join('، ') 
-                        : provider.rawLocationFallback ?? provider.selectedCity?.nameAr ?? 'الأردن';
+                        ? _locationsFilter!.join('ØŒ ') 
+                        : provider.rawLocationFallback ?? provider.selectedCity?.nameAr ?? 'Ø§Ù„Ø£Ø±Ø¯Ù†';
                       return _buildActionPill(
                         icon: Icons.location_on_outlined, 
                         label: locName, 
@@ -1693,7 +1693,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildQuickAction('🆕 جديد', _sortBy == 'newest', () {
+                _buildQuickAction('ðŸ†• Ø¬Ø¯ÙŠØ¯', _sortBy == 'newest', () {
                   setState(() {
                     _sortBy = 'newest';
                     _isHot = false;
@@ -1701,7 +1701,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   _fetchAds();
                 }),
                 const SizedBox(width: 8),
-                _buildQuickAction('🔥 الأكثر مشاهدة', _sortBy == 'most_viewed', () {
+                _buildQuickAction('ðŸ”¥ Ø§Ù„Ø£ÙƒØ«Ø± Ù…Ø´Ø§Ù‡Ø¯Ø©', _sortBy == 'most_viewed', () {
                   setState(() {
                     _sortBy = 'most_viewed';
                     _isHot = false;
@@ -1709,7 +1709,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   _fetchAds();
                 }),
                 const SizedBox(width: 8),
-                _buildQuickAction('💰 الأرخص', _sortBy == 'price_asc', () {
+                _buildQuickAction('ðŸ’° Ø§Ù„Ø£Ø±Ø®Øµ', _sortBy == 'price_asc', () {
                   setState(() {
                     _sortBy = 'price_asc';
                     _isHot = false;
@@ -1717,7 +1717,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   _fetchAds();
                 }),
                 const SizedBox(width: 8),
-                _buildQuickAction('📍 الأقرب اليك', _sortBy == 'nearest', () {
+                _buildQuickAction('ðŸ“ Ø§Ù„Ø£Ù‚Ø±Ø¨ Ø§Ù„ÙŠÙƒ', _sortBy == 'nearest', () {
                   _getCurrentLocation();
                 }),
               ],
@@ -1807,7 +1807,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Icon(Icons.verified, size: 12, color: Colors.green.shade700),
               ),
               const SizedBox(width: 6),
-              Text('80% موثقة', style: TextStyle(fontSize: 11, color: Colors.green.shade800, fontWeight: FontWeight.w700)),
+              Text('80% Ù…ÙˆØ«Ù‚Ø©', style: TextStyle(fontSize: 11, color: Colors.green.shade800, fontWeight: FontWeight.w700)),
             ],
           ),
           Container(width: 1, height: 16, color: Colors.grey.shade200),
@@ -1822,7 +1822,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Icon(Icons.local_fire_department, size: 12, color: Colors.orange.shade700),
               ),
               const SizedBox(width: 6),
-              Text('طلب عالي', style: TextStyle(fontSize: 11, color: Colors.orange.shade800, fontWeight: FontWeight.w700)),
+              Text('Ø·Ù„Ø¨ Ø¹Ø§Ù„ÙŠ', style: TextStyle(fontSize: 11, color: Colors.orange.shade800, fontWeight: FontWeight.w700)),
             ],
           ),
           Container(width: 1, height: 16, color: Colors.grey.shade200),
@@ -1837,7 +1837,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Icon(Icons.update, size: 12, color: Colors.blue.shade700),
               ),
               const SizedBox(width: 6),
-              Text('محدّث', style: TextStyle(fontSize: 11, color: Colors.blue.shade800, fontWeight: FontWeight.w700)),
+              Text('Ù…Ø­Ø¯Ù‘Ø«', style: TextStyle(fontSize: 11, color: Colors.blue.shade800, fontWeight: FontWeight.w700)),
             ],
           ),
         ],
@@ -1894,7 +1894,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           },
           decoration: InputDecoration(
             border: InputBorder.none,
-            hintText: 'البحث في ${widget.category.name}...',
+            hintText: 'Ø§Ù„Ø¨Ø­Ø« ÙÙŠ ${widget.category.name}...',
             hintStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.normal),
             prefixIcon: Icon(Icons.search, color: brandColor, size: 20),
             suffixIcon: _searchQuery.isNotEmpty 
@@ -1917,25 +1917,25 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   }
 
   String _getIconForTag(String tag) {
-    if (tag.contains('مصعد')) return '🛗';
-    if (tag.contains('حارس')) return '👮';
-    if (tag.contains('مفروش')) return '🛋️';
-    if (tag.contains('غرف')) return '🛏️';
-    if (tag.contains('مكيف')) return '❄️';
-    if (tag.contains('تدفئة')) return '🔥';
-    if (tag.contains('كراج') || tag.contains('سيارة')) return '🚗';
-    if (tag.contains('مسبح')) return '🏊';
-    if (tag.contains('بلكونة') || tag.contains('تراس') || tag.contains('ترس')) return '🪴';
-    if (tag.contains('جديد')) return '✨';
-    if (tag.contains('عرسان')) return '💍';
-    if (tag.contains('حديقة') || tag.contains('مشجر')) return '🌳';
-    if (tag.contains('مستودع')) return '📦';
-    if (tag.contains('كاميرات')) return '📹';
-    if (tag.contains('مطبخ')) return '🍳';
-    if (tag.contains('غسيل')) return '🧺';
-    if (tag.contains('اطلالة') || tag.contains('بحرية')) return '🌊';
-    if (tag.contains('استثمار') || tag.contains('تجاري')) return '📈';
-    if (tag.contains('شارع') || tag.contains('شارعين')) return '🛣️';
+    if (tag.contains('Ù…ØµØ¹Ø¯')) return 'ðŸ›—';
+    if (tag.contains('Ø­Ø§Ø±Ø³')) return 'ðŸ‘®';
+    if (tag.contains('Ù…ÙØ±ÙˆØ´')) return 'ðŸ›‹ï¸';
+    if (tag.contains('ØºØ±Ù')) return 'ðŸ›ï¸';
+    if (tag.contains('Ù…ÙƒÙŠÙ')) return 'â„ï¸';
+    if (tag.contains('ØªØ¯ÙØ¦Ø©')) return 'ðŸ”¥';
+    if (tag.contains('ÙƒØ±Ø§Ø¬') || tag.contains('Ø³ÙŠØ§Ø±Ø©')) return 'ðŸš—';
+    if (tag.contains('Ù…Ø³Ø¨Ø­')) return 'ðŸŠ';
+    if (tag.contains('Ø¨Ù„ÙƒÙˆÙ†Ø©') || tag.contains('ØªØ±Ø§Ø³') || tag.contains('ØªØ±Ø³')) return 'ðŸª´';
+    if (tag.contains('Ø¬Ø¯ÙŠØ¯')) return 'âœ¨';
+    if (tag.contains('Ø¹Ø±Ø³Ø§Ù†')) return 'ðŸ’';
+    if (tag.contains('Ø­Ø¯ÙŠÙ‚Ø©') || tag.contains('Ù…Ø´Ø¬Ø±')) return 'ðŸŒ³';
+    if (tag.contains('Ù…Ø³ØªÙˆØ¯Ø¹')) return 'ðŸ“¦';
+    if (tag.contains('ÙƒØ§Ù…ÙŠØ±Ø§Øª')) return 'ðŸ“¹';
+    if (tag.contains('Ù…Ø·Ø¨Ø®')) return 'ðŸ³';
+    if (tag.contains('ØºØ³ÙŠÙ„')) return 'ðŸ§º';
+    if (tag.contains('Ø§Ø·Ù„Ø§Ù„Ø©') || tag.contains('Ø¨Ø­Ø±ÙŠØ©')) return 'ðŸŒŠ';
+    if (tag.contains('Ø§Ø³ØªØ«Ù…Ø§Ø±') || tag.contains('ØªØ¬Ø§Ø±ÙŠ')) return 'ðŸ“ˆ';
+    if (tag.contains('Ø´Ø§Ø±Ø¹') || tag.contains('Ø´Ø§Ø±Ø¹ÙŠÙ†')) return 'ðŸ›£ï¸';
     return '';
   }
 
@@ -1981,20 +1981,20 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     List<String> priorityTags = [];
     final catName = widget.category.name;
     final rootCat = _getRootCategory(widget.category);
-    final isCar = rootCat.id == 1 || rootCat.name.contains('سيارات');
-    final isRealEstate = rootCat.id == 3 || rootCat.name.contains('عقارات');
+    final isCar = rootCat.id == 1 || rootCat.name.contains('Ø³ÙŠØ§Ø±Ø§Øª');
+    final isRealEstate = rootCat.id == 3 || rootCat.name.contains('Ø¹Ù‚Ø§Ø±Ø§Øª');
 
     if (isCar) {
-      priorityTags = ['أوتوماتيك', 'فحص كامل', 'فتحة سقف', 'جلد', 'ترخيص جديد', 'بدون حوادث', 'دهان الوكالة', 'بانوراما', 'بصمة', 'مثبت سرعة', 'كاميرا خلفية', 'تدفئة مقاعد', 'شاشة لمس'];
+      priorityTags = ['Ø£ÙˆØªÙˆÙ…Ø§ØªÙŠÙƒ', 'ÙØ­Øµ ÙƒØ§Ù…Ù„', 'ÙØªØ­Ø© Ø³Ù‚Ù', 'Ø¬Ù„Ø¯', 'ØªØ±Ø®ÙŠØµ Ø¬Ø¯ÙŠØ¯', 'Ø¨Ø¯ÙˆÙ† Ø­ÙˆØ§Ø¯Ø«', 'Ø¯Ù‡Ø§Ù† Ø§Ù„ÙˆÙƒØ§Ù„Ø©', 'Ø¨Ø§Ù†ÙˆØ±Ø§Ù…Ø§', 'Ø¨ØµÙ…Ø©', 'Ù…Ø«Ø¨Øª Ø³Ø±Ø¹Ø©', 'ÙƒØ§Ù…ÙŠØ±Ø§ Ø®Ù„ÙÙŠØ©', 'ØªØ¯ÙØ¦Ø© Ù…Ù‚Ø§Ø¹Ø¯', 'Ø´Ø§Ø´Ø© Ù„Ù…Ø³'];
     } else if (isRealEstate) {
-      if (catName.contains('أراضي') || catName.contains('أرض ') || catName.endsWith(' أرض') || catName == 'أرض' || catName.contains('مزرعة')) {
-        priorityTags = ['واصل خدمات', 'قوشان مستقل', 'على شارعين', 'أرض للاستثمار', 'من المالك مباشرة', 'أرض سكنية', 'أرض تجارية', 'جاهزة للبناء', 'داخل التنظيم', 'مفروزة', 'على شارع رئيسي', 'مطلة', 'أقساط'];
-      } else if (catName.contains('تجاري')) {
-        priorityTags = ['موقع حيوي', 'غرفة استقبال', 'بدون خلو', 'غرفتين مكتبيتين', 'مطبخ وحمام'];
-      } else if (catName.contains('العقبة')) {
-        priorityTags = ['اطلالة بحرية', 'كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
+      if (catName.contains('Ø£Ø±Ø§Ø¶ÙŠ') || catName.contains('Ø£Ø±Ø¶ ') || catName.endsWith(' Ø£Ø±Ø¶') || catName == 'Ø£Ø±Ø¶' || catName.contains('Ù…Ø²Ø±Ø¹Ø©')) {
+        priorityTags = ['ÙˆØ§ØµÙ„ Ø®Ø¯Ù…Ø§Øª', 'Ù‚ÙˆØ´Ø§Ù† Ù…Ø³ØªÙ‚Ù„', 'Ø¹Ù„Ù‰ Ø´Ø§Ø±Ø¹ÙŠÙ†', 'Ø£Ø±Ø¶ Ù„Ù„Ø§Ø³ØªØ«Ù…Ø§Ø±', 'Ù…Ù† Ø§Ù„Ù…Ø§Ù„Ùƒ Ù…Ø¨Ø§Ø´Ø±Ø©', 'Ø£Ø±Ø¶ Ø³ÙƒÙ†ÙŠØ©', 'Ø£Ø±Ø¶ ØªØ¬Ø§Ø±ÙŠØ©', 'Ø¬Ø§Ù‡Ø²Ø© Ù„Ù„Ø¨Ù†Ø§Ø¡', 'Ø¯Ø§Ø®Ù„ Ø§Ù„ØªÙ†Ø¸ÙŠÙ…', 'Ù…ÙØ±ÙˆØ²Ø©', 'Ø¹Ù„Ù‰ Ø´Ø§Ø±Ø¹ Ø±Ø¦ÙŠØ³ÙŠ', 'Ù…Ø·Ù„Ø©', 'Ø£Ù‚Ø³Ø§Ø·'];
+      } else if (catName.contains('ØªØ¬Ø§Ø±ÙŠ')) {
+        priorityTags = ['Ù…ÙˆÙ‚Ø¹ Ø­ÙŠÙˆÙŠ', 'ØºØ±ÙØ© Ø§Ø³ØªÙ‚Ø¨Ø§Ù„', 'Ø¨Ø¯ÙˆÙ† Ø®Ù„Ùˆ', 'ØºØ±ÙØªÙŠÙ† Ù…ÙƒØªØ¨ÙŠØªÙŠÙ†', 'Ù…Ø·Ø¨Ø® ÙˆØ­Ù…Ø§Ù…'];
+      } else if (catName.contains('Ø§Ù„Ø¹Ù‚Ø¨Ø©')) {
+        priorityTags = ['Ø§Ø·Ù„Ø§Ù„Ø© Ø¨Ø­Ø±ÙŠØ©', 'ÙƒØ±Ø§Ø¬ Ø®Ø§Øµ', 'Ù…ØµØ¹Ø¯', 'Ù…Ù† Ø§Ù„Ù…Ø§Ù„Ùƒ Ù…Ø¨Ø§Ø´Ø±Ø©', 'ÙŠÙˆØ¬Ø¯ Ø­Ø§Ø±Ø³', if (catName.contains('Ø§ÙŠØ¬Ø§Ø±') || catName.contains('Ø¥ÙŠØ¬Ø§Ø±')) 'Ø´Ø§Ù…Ù„ Ø§Ù„ØªØ£Ù…ÙŠÙ†', 'Ù…Ø´Ø¬Ø±', 'Ù…Ø³ÙˆØ±', 'Ù…Ø·Ø¨Ø® Ø±Ø§ÙƒØ¨', 'ØºØ±ÙØ© ØºØ³ÙŠÙ„', 'Ø³ÙˆØ¨Ø± Ø¯ÙŠÙ„ÙˆÙƒØ³', 'ÙƒØ§Ù…ÙŠØ±Ø§Øª Ù…Ø±Ø§Ù‚Ø¨Ø©', 'Ù…Ø³Ø¨Ø­', 'Ù…Ø³ØªÙˆØ¯Ø¹', 'Ø­Ø¯ÙŠÙ‚Ø©', 'Ø¨Ù„ÙƒÙˆÙ†Ø©', 'ØºØ±ÙØ© Ø®Ø§Ø¯Ù…Ø©', 'ØªØ±Ø³', 'Ø¯Ø¨Ù„ Ø¬Ù„Ø§Ø³', 'Ø¹Ø±Ø³Ø§Ù†', 'Ù…Ø¯Ø®Ù„ Ù…Ø³ØªÙ‚Ù„', 'Ø£Ø¨Ø§Ø¬ÙˆØ±Ø§Øª'];
       } else {
-        priorityTags = ['كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
+        priorityTags = ['ÙƒØ±Ø§Ø¬ Ø®Ø§Øµ', 'Ù…ØµØ¹Ø¯', 'Ù…Ù† Ø§Ù„Ù…Ø§Ù„Ùƒ Ù…Ø¨Ø§Ø´Ø±Ø©', 'ÙŠÙˆØ¬Ø¯ Ø­Ø§Ø±Ø³', if (catName.contains('Ø§ÙŠØ¬Ø§Ø±') || catName.contains('Ø¥ÙŠØ¬Ø§Ø±')) 'Ø´Ø§Ù…Ù„ Ø§Ù„ØªØ£Ù…ÙŠÙ†', 'Ù…Ø´Ø¬Ø±', 'Ù…Ø³ÙˆØ±', 'Ù…Ø·Ø¨Ø® Ø±Ø§ÙƒØ¨', 'ØºØ±ÙØ© ØºØ³ÙŠÙ„', 'Ø³ÙˆØ¨Ø± Ø¯ÙŠÙ„ÙˆÙƒØ³', 'ÙƒØ§Ù…ÙŠØ±Ø§Øª Ù…Ø±Ø§Ù‚Ø¨Ø©', 'Ù…Ø³Ø¨Ø­', 'Ù…Ø³ØªÙˆØ¯Ø¹', 'Ø­Ø¯ÙŠÙ‚Ø©', 'Ø¨Ù„ÙƒÙˆÙ†Ø©', 'ØºØ±ÙØ© Ø®Ø§Ø¯Ù…Ø©', 'ØªØ±Ø³', 'Ø¯Ø¨Ù„ Ø¬Ù„Ø§Ø³', 'Ø¹Ø±Ø³Ø§Ù†', 'Ù…Ø¯Ø®Ù„ Ù…Ø³ØªÙ‚Ù„', 'Ø£Ø¨Ø§Ø¬ÙˆØ±Ø§Øª'];
       }
     }
 
@@ -2042,13 +2042,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     Widget? tagsListWidget;
 
     if (validTags.isNotEmpty) {
-      List<String> tags = ['الكل', ...validTags];
+      List<String> tags = ['Ø§Ù„ÙƒÙ„', ...validTags];
 
       List<Widget> row1 = [];
 
       for (int i = 0; i < tags.length; i++) {
         final tag = tags[i];
-        final isSelected = tag == 'الكل' ? normalSelectedTags.isEmpty : normalSelectedTags.contains(tag);
+        final isSelected = tag == 'Ø§Ù„ÙƒÙ„' ? normalSelectedTags.isEmpty : normalSelectedTags.contains(tag);
         final widgetItem = Padding(
           padding: EdgeInsets.only(left: i < tags.length - 1 ? 8.0 : 0),
           child: _buildTagChip(tag, isSelected, brandColor),
@@ -2091,7 +2091,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   children: [
                     Icon(Icons.filter_list_rounded, size: 16, color: Colors.grey.shade500),
                     const SizedBox(width: 6),
-                    Text('عوامل التصفية النشطة:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
+                    Text('Ø¹ÙˆØ§Ù…Ù„ Ø§Ù„ØªØµÙÙŠØ© Ø§Ù„Ù†Ø´Ø·Ø©:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.grey.shade500)),
                   ],
                 ),
                 Row(
@@ -2116,7 +2116,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('تم حفظ البحث للفئة ${widget.category.name}'),
+                              content: Text('ØªÙ… Ø­ÙØ¸ Ø§Ù„Ø¨Ø­Ø« Ù„Ù„ÙØ¦Ø© ${widget.category.name}'),
                               behavior: SnackBarBehavior.floating,
                               backgroundColor: Theme.of(context).primaryColor,
                               duration: const Duration(seconds: 3),
@@ -2134,7 +2134,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           children: [
                             Icon(Icons.bookmark_border, size: 14, color: Theme.of(context).primaryColor),
                             const SizedBox(width: 4),
-                            Text('حفظ البحث', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor)),
+                            Text('Ø­ÙØ¸ Ø§Ù„Ø¨Ø­Ø«', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Theme.of(context).primaryColor)),
                           ],
                         ),
                       ),
@@ -2150,7 +2150,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           // If we are clearing location filters, also clear the global preference
                           if (_locationsFilter != null && _locationsFilter!.isNotEmpty) {
                             final appProvider = Provider.of<AppProvider>(context, listen: false);
-                            appProvider.setLocation(null, null, 'كل الأردن');
+                            appProvider.setLocation(null, null, 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†');
                           }
                           
                           _locationsFilter = null;
@@ -2163,7 +2163,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         _saveCurrentFilters();
                         _fetchAds();
                       },
-                      child: Text('مسح الكل', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red.shade500)),
+                      child: Text('Ù…Ø³Ø­ Ø§Ù„ÙƒÙ„', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.red.shade500)),
                     ),
                   ],
                 ),
@@ -2192,7 +2192,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         // Clear from AppProvider as well so it doesn't return
                         final appProvider = Provider.of<AppProvider>(context, listen: false);
                         if (appProvider.selectedCity?.nameAr == loc) {
-                          appProvider.setLocation(null, null, 'كل الأردن');
+                          appProvider.setLocation(null, null, 'ÙƒÙ„ Ø§Ù„Ø£Ø±Ø¯Ù†');
                         } else if (appProvider.selectedRegions != null) {
                           final updatedRegions = appProvider.selectedRegions!.where((r) => r.nameAr != loc).toList();
                           appProvider.setLocation(appProvider.selectedCity, updatedRegions.isEmpty ? null : updatedRegions, appProvider.rawLocationFallback);
@@ -2264,7 +2264,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               Icon(Icons.history_rounded, size: 20, color: brandColor),
               const SizedBox(width: 8),
               Expanded(
-                child: Text('يوجد فلاتر استخدمتها مسبقاً', style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade800, fontWeight: FontWeight.w700, fontFamily: 'Tajawal')),
+                child: Text('ÙŠÙˆØ¬Ø¯ ÙÙ„Ø§ØªØ± Ø§Ø³ØªØ®Ø¯Ù…ØªÙ‡Ø§ Ù…Ø³Ø¨Ù‚Ø§Ù‹', style: TextStyle(fontSize: 13, color: Colors.blueGrey.shade800, fontWeight: FontWeight.w700, fontFamily: 'Tajawal')),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -2272,7 +2272,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   color: brandColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text('استعادة الفلاتر ♻️', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
+                child: const Text('Ø§Ø³ØªØ¹Ø§Ø¯Ø© Ø§Ù„ÙÙ„Ø§ØªØ± â™»ï¸', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'Tajawal')),
               ),
             ],
           ),
@@ -2297,27 +2297,27 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     if (tag.startsWith('internal_location:')) return tag.substring(18);
     if (tag.startsWith('internal_min_price:')) {
       final val = double.tryParse(tag.substring(19))?.toInt() ?? 0;
-      return 'السعر من $val د.أ';
+      return 'Ø§Ù„Ø³Ø¹Ø± Ù…Ù† $val Ø¯.Ø£';
     }
     if (tag.startsWith('internal_max_price:')) {
       final val = double.tryParse(tag.substring(19))?.toInt() ?? 0;
-      return 'السعر إلى $val د.أ';
+      return 'Ø§Ù„Ø³Ø¹Ø± Ø¥Ù„Ù‰ $val Ø¯.Ø£';
     }
     if (tag.startsWith('bedrooms:')) {
       final val = tag.substring(9);
-      return val == 'ستوديو' ? 'ستوديو' : '$val غرف نوم';
+      return val == 'Ø³ØªÙˆØ¯ÙŠÙˆ' ? 'Ø³ØªÙˆØ¯ÙŠÙˆ' : '$val ØºØ±Ù Ù†ÙˆÙ…';
     }
-    if (tag.startsWith('bathrooms:')) return '${tag.substring(10)} حمامات';
+    if (tag.startsWith('bathrooms:')) return '${tag.substring(10)} Ø­Ù…Ø§Ù…Ø§Øª';
     if (tag.startsWith('floor:')) {
       final f = tag.substring(6);
-      if (f.contains('طابق') || f.contains('الطابق') || f.contains('أرضي') || f.contains('روف')) return f;
-      return 'طابق $f';
+      if (f.contains('Ø·Ø§Ø¨Ù‚') || f.contains('Ø§Ù„Ø·Ø§Ø¨Ù‚') || f.contains('Ø£Ø±Ø¶ÙŠ') || f.contains('Ø±ÙˆÙ')) return f;
+      return 'Ø·Ø§Ø¨Ù‚ $f';
     }
-    if (tag.startsWith('age:')) return 'عمر ${tag.substring(4)}';
-    if (tag.startsWith('min_area:')) return 'مساحة أكبر من ${tag.substring(9)}';
-    if (tag.startsWith('max_area:')) return 'مساحة أقل من ${tag.substring(9)}';
+    if (tag.startsWith('age:')) return 'Ø¹Ù…Ø± ${tag.substring(4)}';
+    if (tag.startsWith('min_area:')) return 'Ù…Ø³Ø§Ø­Ø© Ø£ÙƒØ¨Ø± Ù…Ù† ${tag.substring(9)}';
+    if (tag.startsWith('max_area:')) return 'Ù…Ø³Ø§Ø­Ø© Ø£Ù‚Ù„ Ù…Ù† ${tag.substring(9)}';
     
-    // For any other tag that has an English prefix (e.g., zoning_classification:سكن أ), just show the value
+    // For any other tag that has an English prefix (e.g., zoning_classification:Ø³ÙƒÙ† Ø£), just show the value
     if (tag.contains(':') && RegExp(r'^[a-zA-Z_]+$').hasMatch(tag.split(':').first)) {
       return tag.split(':').skip(1).join(':').trim();
     }
@@ -2327,12 +2327,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   Widget _buildTagChip(String tag, bool isSelected, Color brandColor) {
     final displayTag = _formatTagForDisplay(tag);
-    final iconStr = tag == 'الكل' ? '' : _getIconForTag(displayTag);
+    final iconStr = tag == 'Ø§Ù„ÙƒÙ„' ? '' : _getIconForTag(displayTag);
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (tag == 'الكل') {
+          if (tag == 'Ø§Ù„ÙƒÙ„') {
             _selectedTags.clear();
           } else {
             if (isSelected) {
@@ -2376,7 +2376,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 fontSize: 13,
               ),
             ),
-            if (isSelected && tag != 'الكل') ...[
+            if (isSelected && tag != 'Ø§Ù„ÙƒÙ„') ...[
               const SizedBox(width: 6),
               const Icon(Icons.close, size: 14, color: Colors.white),
             ]
@@ -2388,31 +2388,31 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   Widget _buildRealEstateQuickFilters(Color brandColor) {
     final catName = widget.category.name;
-    final isCommercial = catName.contains('محلات') || catName.contains('مكاتب') || catName.contains('تجاري') || catName.contains('مخازن') || catName.contains('عيادات') || catName.contains('معارض') || catName.contains('مستودع') || catName.contains('صناعي') || catName.contains('مبنى') || catName.contains('مباني') || catName.contains('مجمع');
+    final isCommercial = catName.contains('Ù…Ø­Ù„Ø§Øª') || catName.contains('Ù…ÙƒØ§ØªØ¨') || catName.contains('ØªØ¬Ø§Ø±ÙŠ') || catName.contains('Ù…Ø®Ø§Ø²Ù†') || catName.contains('Ø¹ÙŠØ§Ø¯Ø§Øª') || catName.contains('Ù…Ø¹Ø§Ø±Ø¶') || catName.contains('Ù…Ø³ØªÙˆØ¯Ø¹') || catName.contains('ØµÙ†Ø§Ø¹ÙŠ') || catName.contains('Ù…Ø¨Ù†Ù‰') || catName.contains('Ù…Ø¨Ø§Ù†ÙŠ') || catName.contains('Ù…Ø¬Ù…Ø¹');
     
     if (isCommercial) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildFilterRow('الفرش', 'furnished', ['مفروشة', 'غير مفروشة'], brandColor),
+          _buildFilterRow('Ø§Ù„ÙØ±Ø´', 'furnished', ['Ù…ÙØ±ÙˆØ´Ø©', 'ØºÙŠØ± Ù…ÙØ±ÙˆØ´Ø©'], brandColor),
           const SizedBox(height: 12),
-          _buildFilterRow('عمر البناء', 'age', ['0 - 1 سنة', '1 - 5 سنوات', '5 - 10 سنوات', '10 - 19 سنة', '20+ سنة'], brandColor),
+          _buildFilterRow('Ø¹Ù…Ø± Ø§Ù„Ø¨Ù†Ø§Ø¡', 'age', ['0 - 1 Ø³Ù†Ø©', '1 - 5 Ø³Ù†ÙˆØ§Øª', '5 - 10 Ø³Ù†ÙˆØ§Øª', '10 - 19 Ø³Ù†Ø©', '20+ Ø³Ù†Ø©'], brandColor),
         ]
       );
     }
 
-    if (!catName.contains('شقق') && !catName.contains('عقارات') && !catName.contains('فلل') && !catName.contains('استوديوهات') && !catName.contains('سكني')) {
+    if (!catName.contains('Ø´Ù‚Ù‚') && !catName.contains('Ø¹Ù‚Ø§Ø±Ø§Øª') && !catName.contains('ÙÙ„Ù„') && !catName.contains('Ø§Ø³ØªÙˆØ¯ÙŠÙˆÙ‡Ø§Øª') && !catName.contains('Ø³ÙƒÙ†ÙŠ')) {
        return const SizedBox.shrink();
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildFilterRow('عدد الغرف', 'bedrooms', ['ستوديو', '1', '2', '3', '4', '5', '+6'], brandColor),
+        _buildFilterRow('Ø¹Ø¯Ø¯ Ø§Ù„ØºØ±Ù', 'bedrooms', ['Ø³ØªÙˆØ¯ÙŠÙˆ', '1', '2', '3', '4', '5', '+6'], brandColor),
         const SizedBox(height: 12),
-        _buildFilterRow('الفرش', 'furnished', ['مفروشة', 'غير مفروشة', 'مفروش جزئياً'], brandColor),
+        _buildFilterRow('Ø§Ù„ÙØ±Ø´', 'furnished', ['Ù…ÙØ±ÙˆØ´Ø©', 'ØºÙŠØ± Ù…ÙØ±ÙˆØ´Ø©', 'Ù…ÙØ±ÙˆØ´ Ø¬Ø²Ø¦ÙŠØ§Ù‹'], brandColor),
         const SizedBox(height: 12),
-        _buildFilterRow('الطابق', 'floor', ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7', 'طابق أخير', 'روف', 'طابق أخير مع روف'], brandColor),
+        _buildFilterRow('Ø§Ù„Ø·Ø§Ø¨Ù‚', 'floor', ['Ø·Ø§Ø¨Ù‚ Ø§Ù„ØªØ³ÙˆÙŠØ©', 'Ø·Ø§Ø¨Ù‚ Ø´Ø¨Ù‡ Ø£Ø±Ø¶ÙŠ', 'Ø§Ù„Ø·Ø§Ø¨Ù‚ Ø§Ù„Ø£Ø±Ø¶ÙŠ', '1', '2', '3', '4', '5', '6', '7', 'Ø·Ø§Ø¨Ù‚ Ø£Ø®ÙŠØ±', 'Ø±ÙˆÙ', 'Ø·Ø§Ø¨Ù‚ Ø£Ø®ÙŠØ± Ù…Ø¹ Ø±ÙˆÙ'], brandColor),
       ]
     );
   }
@@ -2516,7 +2516,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     final allCats = Provider.of<AppProvider>(context).categories ?? widget.allCategories;
     if (allCats.isEmpty) return const SizedBox.shrink();
 
-    // Only ever surface "ended" (leaf) subcategories here — never a category
+    // Only ever surface "ended" (leaf) subcategories here â€” never a category
     // that itself has subcategories. Parents are flattened to their leaves.
     final subCategories = _collectLeafSubCategories(allCats, widget.category.id)
         .where((c) => _searchQuery.isEmpty || c.name.toLowerCase().contains(_searchQuery.toLowerCase()))
@@ -2740,17 +2740,17 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                            color: brandColor.withOpacity(0.1),
                            borderRadius: BorderRadius.circular(12)
                         ),
-                        child: Text('ميزة تفاعلية', style: TextStyle(color: brandColor, fontSize: 10, fontWeight: FontWeight.bold)),
+                        child: Text('Ù…ÙŠØ²Ø© ØªÙØ§Ø¹Ù„ÙŠØ©', style: TextStyle(color: brandColor, fontSize: 10, fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 8),
-                      const Text('استكشاف الخريطة',
+                      const Text('Ø§Ø³ØªÙƒØ´Ø§Ù Ø§Ù„Ø®Ø±ÙŠØ·Ø©',
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                               color: Colors.black87)),
                       const SizedBox(height: 4),
                       Text(
-                          'اكتشف إعلانات ${widget.category.name} بالقرب منك بسهولة',
+                          'Ø§ÙƒØªØ´Ù Ø¥Ø¹Ù„Ø§Ù†Ø§Øª ${widget.category.name} Ø¨Ø§Ù„Ù‚Ø±Ø¨ Ù…Ù†Ùƒ Ø¨Ø³Ù‡ÙˆÙ„Ø©',
                           style: TextStyle(
                               color: Colors.grey.shade700,
                               fontSize: 11,
@@ -2820,12 +2820,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'تعذر الاتصال بالإنترنت',
+                'ØªØ¹Ø°Ø± Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               const SizedBox(height: 12),
               Text(
-                'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.',
+                'ÙŠØ±Ø¬Ù‰ Ø§Ù„ØªØ­Ù‚Ù‚ Ù…Ù† Ø§ØªØµØ§Ù„Ùƒ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª ÙˆØ§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
               ),
@@ -2836,7 +2836,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: ElevatedButton.icon(
                   onPressed: _fetchAds,
                   icon: const Icon(Icons.refresh_rounded, color: Colors.white),
-                  label: const Text('إعادة المحاولة', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                  label: const Text('Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø©', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _getBrandColor(),
                     elevation: 0,
@@ -2880,9 +2880,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   child: Icon(Icons.search_off_rounded, size: 64, color: Colors.blue.shade300),
                 ),
                 const SizedBox(height: 24),
-                const Text('عذراً، لم نعثر على نتائج مطابقة لبحثك', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87), textAlign: TextAlign.center),
+                const Text('Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù„Ù… Ù†Ø¹Ø«Ø± Ø¹Ù„Ù‰ Ù†ØªØ§Ø¦Ø¬ Ù…Ø·Ø§Ø¨Ù‚Ø© Ù„Ø¨Ø­Ø«Ùƒ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87), textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                const Text('لمساعدتك بشكل أفضل، يرجى اختيار أحد الأقسام التالية وتصفح الأقسام الفرعية:', style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.5), textAlign: TextAlign.center),
+                const Text('Ù„Ù…Ø³Ø§Ø¹Ø¯ØªÙƒ Ø¨Ø´ÙƒÙ„ Ø£ÙØ¶Ù„ØŒ ÙŠØ±Ø¬Ù‰ Ø§Ø®ØªÙŠØ§Ø± Ø£Ø­Ø¯ Ø§Ù„Ø£Ù‚Ø³Ø§Ù… Ø§Ù„ØªØ§Ù„ÙŠØ© ÙˆØªØµÙØ­ Ø§Ù„Ø£Ù‚Ø³Ø§Ù… Ø§Ù„ÙØ±Ø¹ÙŠØ©:', style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.5), textAlign: TextAlign.center),
                 const SizedBox(height: 32),
                 if (rentCat != null)
                   _buildFallbackCategoryCard(rentCat, Icons.key_rounded, const Color(0xFF00BFA5)),
@@ -2911,12 +2911,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'لا توجد إعلانات مطابقة',
+                'Ù„Ø§ ØªÙˆØ¬Ø¯ Ø¥Ø¹Ù„Ø§Ù†Ø§Øª Ù…Ø·Ø§Ø¨Ù‚Ø©',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
               ),
               const SizedBox(height: 12),
               Text(
-                'لم نتمكن من العثور على نتائج تطابق بحثك بدقة. جرب استخدام كلمات عامة أو إزالة بعض الفلاتر.',
+                'Ù„Ù… Ù†ØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ Ù†ØªØ§Ø¦Ø¬ ØªØ·Ø§Ø¨Ù‚ Ø¨Ø­Ø«Ùƒ Ø¨Ø¯Ù‚Ø©. Ø¬Ø±Ø¨ Ø§Ø³ØªØ®Ø¯Ø§Ù… ÙƒÙ„Ù…Ø§Øª Ø¹Ø§Ù…Ø© Ø£Ùˆ Ø¥Ø²Ø§Ù„Ø© Ø¨Ø¹Ø¶ Ø§Ù„ÙÙ„Ø§ØªØ±.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade600, height: 1.5),
               ),
@@ -2944,7 +2944,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('مسح الفلاتر', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: const Text('Ù…Ø³Ø­ Ø§Ù„ÙÙ„Ø§ØªØ±', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 )
             ],
@@ -3079,7 +3079,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('مستكشف موثوق',
+                            Text('Ù…Ø³ØªÙƒØ´Ù Ù…ÙˆØ«ÙˆÙ‚',
                                 style: TextStyle(
                                     color: Color(0xFF0075FF),
                                     fontSize: 11,
@@ -3100,7 +3100,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             children: [
                               Icon(Icons.local_fire_department, color: Colors.redAccent, size: 14),
                               SizedBox(width: 4),
-                              Text('مطلوب بكثرة', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11))
+                              Text('Ù…Ø·Ù„ÙˆØ¨ Ø¨ÙƒØ«Ø±Ø©', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 11))
                             ],
                           ),
                         )
@@ -3129,7 +3129,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      '${ad.price.toStringAsFixed(0)} دينار',
+                      '${ad.price.toStringAsFixed(0)} Ø¯ÙŠÙ†Ø§Ø±',
                       style: const TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.bold,
@@ -3152,7 +3152,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                 final region = ad.attributes?['region']?.toString();
                                 String locationText;
                                 if (city != null && city.isNotEmpty && region != null && region.isNotEmpty) {
-                                  locationText = '$city، $region';
+                                  locationText = '$cityØŒ $region';
                                 } else if (region != null && region.isNotEmpty) {
                                   locationText = region;
                                 } else {
@@ -3182,7 +3182,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   builder: (context) {
                     final paymentMethod = ad.attributes?['payment_method']?.toString() ?? '';
                     final double downPayment = (ad.attributes?['down_payment'] as num?)?.toDouble() ?? 0;
-                    if (paymentMethod == 'أقساط' || paymentMethod == 'كاش أو أقساط') {
+                    if (paymentMethod == 'Ø£Ù‚Ø³Ø§Ø·' || paymentMethod == 'ÙƒØ§Ø´ Ø£Ùˆ Ø£Ù‚Ø³Ø§Ø·') {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8),
                         child: Wrap(
@@ -3206,7 +3206,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(color: Colors.purple.withOpacity(0.15)),
                                 ),
-                                child: Text('دفعة أولى: ${downPayment.toStringAsFixed(0)} دينار', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF8A2387))),
+                                child: Text('Ø¯ÙØ¹Ø© Ø£ÙˆÙ„Ù‰: ${downPayment.toStringAsFixed(0)} Ø¯ÙŠÙ†Ø§Ø±', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF8A2387))),
                               ),
                           ],
                         ),
@@ -3223,7 +3223,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     Text(
                       ad.createdAt != null 
                           ? _formatTimeAgo(ad.createdAt!) 
-                          : 'حديثاً',
+                          : 'Ø­Ø¯ÙŠØ«Ø§Ù‹',
                       style: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 12,
@@ -3248,28 +3248,28 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     if (ad.sharedRoomDetails != null) {
                       final details = ad.sharedRoomDetails!;
                       if (details.rooms != null && details.rooms! > 0) {
-                        propertyDetails.add('${details.rooms} غرفة');
+                        propertyDetails.add('${details.rooms} ØºØ±ÙØ©');
                       }
                       if (details.bathrooms != null && details.bathrooms! > 0) {
-                        propertyDetails.add('${details.bathrooms} حمام');
+                        propertyDetails.add('${details.bathrooms} Ø­Ù…Ø§Ù…');
                       }
                       if (details.furnished != null && details.furnished!.isNotEmpty) {
-                        if (details.furnished == 'مفروش' || details.furnished!.contains('Yes') || details.furnished == 'نعم') {
-                          propertyDetails.add('مفروش');
-                        } else if (details.furnished == 'غير مفروش' || details.furnished!.contains('No') || details.furnished == 'لا') {
-                          propertyDetails.add('غير مفروش');
+                        if (details.furnished == 'Ù…ÙØ±ÙˆØ´' || details.furnished!.contains('Yes') || details.furnished == 'Ù†Ø¹Ù…') {
+                          propertyDetails.add('Ù…ÙØ±ÙˆØ´');
+                        } else if (details.furnished == 'ØºÙŠØ± Ù…ÙØ±ÙˆØ´' || details.furnished!.contains('No') || details.furnished == 'Ù„Ø§') {
+                          propertyDetails.add('ØºÙŠØ± Ù…ÙØ±ÙˆØ´');
                         } else {
                           propertyDetails.add(details.furnished!);
                         }
                       }
                       if (details.rentIncludes.isNotEmpty) {
                         for(var bill in details.rentIncludes) {
-                          if (bill.contains('كهرباء') || bill.contains('Electricity')) {
-                             propertyDetails.add('شامل كهرباء');
-                          } else if (bill.contains('ماء') || bill.contains('Water')) {
-                             propertyDetails.add('شامل ماء');
-                          } else if (bill.contains('انترنت') || bill.contains('Internet')) {
-                             propertyDetails.add('شامل انترنت');
+                          if (bill.contains('ÙƒÙ‡Ø±Ø¨Ø§Ø¡') || bill.contains('Electricity')) {
+                             propertyDetails.add('Ø´Ø§Ù…Ù„ ÙƒÙ‡Ø±Ø¨Ø§Ø¡');
+                          } else if (bill.contains('Ù…Ø§Ø¡') || bill.contains('Water')) {
+                             propertyDetails.add('Ø´Ø§Ù…Ù„ Ù…Ø§Ø¡');
+                          } else if (bill.contains('Ø§Ù†ØªØ±Ù†Øª') || bill.contains('Internet')) {
+                             propertyDetails.add('Ø´Ø§Ù…Ù„ Ø§Ù†ØªØ±Ù†Øª');
                           } else {
                              // Limit to 10 chars max for unknown bills to keep bubbles small
                              propertyDetails.add(bill.length > 15 ? bill.substring(0, 15) : bill);
@@ -3339,15 +3339,15 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                            final currentUserId = authProvider.userData?['sub']?.toString();
                            if (currentUserId == null || !authProvider.isAuthenticated) {
                              PremiumLoginBottomSheet.show(context,
-                                 title: 'يرجى تسجيل الدخول أولاً',
-                                 subtitle: 'يجب أن تسجل دخولك لتتمكن من التواصل مع المعلن',
+                                 title: 'ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹',
+                                 subtitle: 'ÙŠØ¬Ø¨ Ø£Ù† ØªØ³Ø¬Ù„ Ø¯Ø®ÙˆÙ„Ùƒ Ù„ØªØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø§Ù„Ù…Ø¹Ù„Ù†',
                                  onLoginSuccess: () {
                                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PremiumInboxScreen()));
                                  });
                              return;
                            }
                            if (currentUserId == ad.userId.toString()) {
-                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
+                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ù„Ø§ ÙŠÙ…ÙƒÙ†Ùƒ Ø¨Ø¯Ø¡ Ù…Ø­Ø§Ø¯Ø«Ø© Ù…Ø¹ Ù†ÙØ³Ùƒ')));
                              return;
                            }
                            Navigator.push(context, MaterialPageRoute(
@@ -3358,7 +3358,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                adImageUrl: ad.images.isNotEmpty ? ad.images.first : '',
                                isSeller: false,
                                currentUserId: currentUserId,
-                               currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'مستخدم',
+                               currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'Ù…Ø³ØªØ®Ø¯Ù…',
                                otherUserId: ad.userId.toString(),
                                otherUserName: ad.ownerName,
                                otherUserPhone: ad.phoneNumber,
@@ -3377,7 +3377,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             children: [
                               Icon(Icons.chat_bubble_outline, color: Colors.white, size: 18),
                               SizedBox(width: 8),
-                              Text('تواصل', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                              Text('ØªÙˆØ§ØµÙ„', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
                             ],
                           ),
                         ),
@@ -3391,8 +3391,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             final authProvider = Provider.of<AuthProvider>(context, listen: false);
                             if (!authProvider.isAuthenticated) {
                               PremiumLoginBottomSheet.show(context,
-                                title: 'يرجى تسجيل الدخول أولاً',
-                                subtitle: 'قم بتسجيل الدخول لحفظ الإعلان في المفضلة والرجوع إليه لاحقاً',
+                                title: 'ÙŠØ±Ø¬Ù‰ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ø£ÙˆÙ„Ø§Ù‹',
+                                subtitle: 'Ù‚Ù… Ø¨ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ Ù„Ø­ÙØ¸ Ø§Ù„Ø¥Ø¹Ù„Ø§Ù† ÙÙŠ Ø§Ù„Ù…ÙØ¶Ù„Ø© ÙˆØ§Ù„Ø±Ø¬ÙˆØ¹ Ø¥Ù„ÙŠÙ‡ Ù„Ø§Ø­Ù‚Ø§Ù‹',
                                 onLoginSuccess: () {}
                               );
                               return;
@@ -3407,7 +3407,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                             } catch (e) {
                               setLocalState(() => ad.isSaved = originalState);
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حدث خطأ أثناء حفظ الإعلان')));
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ Ø­ÙØ¸ Ø§Ù„Ø¥Ø¹Ù„Ø§Ù†')));
                               }
                             }
                           },
@@ -3455,11 +3455,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     if (difference.inDays > 0) {
       return '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
     } else if (difference.inHours > 0) {
-      return 'منذ ${difference.inHours} ساعة';
+      return 'Ù…Ù†Ø° ${difference.inHours} Ø³Ø§Ø¹Ø©';
     } else if (difference.inMinutes > 0) {
-      return 'منذ ${difference.inMinutes} دقيقة';
+      return 'Ù…Ù†Ø° ${difference.inMinutes} Ø¯Ù‚ÙŠÙ‚Ø©';
     } else {
-      return 'الآن';
+      return 'Ø§Ù„Ø¢Ù†';
     }
   }
 
@@ -3496,7 +3496,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   }
 
   Widget _buildMultipleImagesHero(Ad ad) {
-    // Static Row layout — NO nested scrollable viewports = zero lag
+    // Static Row layout â€” NO nested scrollable viewports = zero lag
     final images = ad.images.take(3).toList(); // Show max 3 images
     return SizedBox(
       height: 220,
@@ -3504,7 +3504,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         padding: const EdgeInsets.all(4),
         child: Row(
           children: [
-            // First (main) image — takes more space
+            // First (main) image â€” takes more space
             Expanded(
               flex: 3,
               child: Padding(
@@ -3595,7 +3595,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Text('موثوق', style: TextStyle(color: Color(0xFF0075FF), fontSize: 10, fontWeight: FontWeight.bold)),
+                Text('Ù…ÙˆØ«ÙˆÙ‚', style: TextStyle(color: Color(0xFF0075FF), fontSize: 10, fontWeight: FontWeight.bold)),
                 SizedBox(width: 4),
                 Icon(Icons.verified, color: Color(0xFF0075FF), size: 12),
               ],
@@ -3628,7 +3628,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     children: [
                       Icon(Icons.local_fire_department, color: Colors.white, size: 12),
                       SizedBox(width: 4),
-                      Text('مطلوب', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
+                      Text('Ù…Ø·Ù„ÙˆØ¨', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
                     ],
                   ),
                 ),
@@ -3641,7 +3641,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     children: [
                       Icon(Icons.star, color: Colors.white, size: 12),
                       SizedBox(width: 4),
-                      Text('مميز', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
+                      Text('Ù…Ù…ÙŠØ²', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
                     ],
                   ),
                 ),
@@ -3654,9 +3654,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     borderRadius: BorderRadius.circular(10)
                   ),
                   child: Text(
-                    ad.marketPriceStatus == 'BELOW_MARKET' ? 'سعر أقل من السوق' 
-                    : ad.marketPriceStatus == 'ABOVE_MARKET' ? 'أعلى من المتوسط' 
-                    : 'سعر عادل',
+                    ad.marketPriceStatus == 'BELOW_MARKET' ? 'Ø³Ø¹Ø± Ø£Ù‚Ù„ Ù…Ù† Ø§Ù„Ø³ÙˆÙ‚' 
+                    : ad.marketPriceStatus == 'ABOVE_MARKET' ? 'Ø£Ø¹Ù„Ù‰ Ù…Ù† Ø§Ù„Ù…ØªÙˆØ³Ø·' 
+                    : 'Ø³Ø¹Ø± Ø¹Ø§Ø¯Ù„',
                     style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)
                   ),
                 ),
@@ -3669,7 +3669,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     children: [
                       Icon(Icons.campaign, color: Colors.white, size: 12),
                       SizedBox(width: 4),
-                      Text('ممول', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
+                      Text('Ù…Ù…ÙˆÙ„', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
                     ],
                   ),
                 )
@@ -3732,7 +3732,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'تصفح الأقسام الفرعية',
+                    'ØªØµÙØ­ Ø§Ù„Ø£Ù‚Ø³Ø§Ù… Ø§Ù„ÙØ±Ø¹ÙŠØ©',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
