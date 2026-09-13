@@ -114,8 +114,8 @@ class ApiService {
     return 'https://api-search.sooq-com.com';
   }
   static String get baseUrl {
-    return 'https://api.sooq-com.com/api';
-    // return 'https://staging.sooq-com.com/api';
+    return 'https://staging.sooq-com.com/api';
+    // return 'https://api.sooq-com.com/api';
   }
 
   /// Check if an icon_name represents an image (URL, path, or data URI).
@@ -162,6 +162,26 @@ class ApiService {
       width: width,
       height: height,
       fit: fit,
+      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+        if (loadingProgress == null) return child;
+        return SizedBox(
+          width: width,
+          height: height,
+          child: Center(
+            child: SizedBox(
+              width: width * 0.5,
+              height: height * 0.5,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: const Color(0xFF0075FF).withOpacity(0.5),
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            ),
+          ),
+        );
+      },
       errorBuilder: (_, __, ___) => fallback ?? const SizedBox(),
     );
   }
@@ -503,6 +523,60 @@ class ApiService {
       return Ad.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load ad details');
+    }
+  }
+
+  
+  Future<List<Map<String, dynamic>>> fetchAdsAggregation({
+    required String groupBy,
+    int? categoryId,
+    String? section,
+    double? minPrice,
+    double? maxPrice,
+    List<String>? tags,
+    List<String>? locations,
+  }) async {
+    try {
+      final queryParams = {
+        'group_by': groupBy,
+      };
+
+      if (categoryId != null) queryParams['category_id'] = categoryId.toString();
+      if (section != null) queryParams['section'] = section;
+      if (minPrice != null) queryParams['min_price'] = minPrice.toString();
+      if (maxPrice != null) queryParams['max_price'] = maxPrice.toString();
+      
+      var uri = Uri.parse('$baseUrl/ads/aggregate').replace(queryParameters: queryParams);
+      
+      String queryString = uri.query;
+      if (tags != null && tags.isNotEmpty) {
+        for (var tag in tags) {
+          if (!queryString.contains('tags=')) {
+            queryString += queryString.isEmpty ? 'tags=$tag' : '&tags=$tag';
+          } else {
+            queryString += '&tags=$tag';
+          }
+        }
+      }
+      if (locations != null && locations.isNotEmpty) {
+        for (var loc in locations) {
+          queryString += queryString.isEmpty ? 'location=$loc' : '&location=$loc';
+        }
+      }
+      
+      uri = Uri.parse('$baseUrl/ads/aggregate?$queryString');
+
+      final headers = await _getHeaders();
+      final response = await _client.get(uri, headers: headers);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.cast<Map<String, dynamic>>();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
   }
 
