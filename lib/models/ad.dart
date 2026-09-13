@@ -27,6 +27,7 @@ class Ad {
   final DateTime? lastRepublishedAt;
   final double cpcBid;
   final bool isFeatured;
+  final String? marketPriceStatus;
 
   Ad({
     required this.id,
@@ -54,6 +55,7 @@ class Ad {
     this.lastRepublishedAt,
     this.cpcBid = 0.0,
     this.isFeatured = false,
+    this.marketPriceStatus,
   });
 
   factory Ad.fromJson(Map<String, dynamic> json) {
@@ -188,6 +190,7 @@ class Ad {
       lastRepublishedAt: json['last_republished_at'] != null ? DateTime.tryParse(json['last_republished_at'].toString()) : null,
       cpcBid: json['cpc_bid'] != null ? (double.tryParse(json['cpc_bid'].toString()) ?? 0.0) : 0.0,
       isFeatured: json['is_featured'] == true || json['is_featured'] == 'true' || json['is_featured'] == 1,
+      marketPriceStatus: json['market_price_status'] as String?,
     );
   }
   String get displayLocation {

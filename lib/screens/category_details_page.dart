@@ -81,6 +81,17 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   final ValueNotifier<bool> _isBottomNavVisible = ValueNotifier<bool>(true);
   static const _navAccent = Color(0xFF1A73E8);
 
+  
+  Category _getRootCategory(Category current) {
+    Category cat = current;
+    while (cat.parentId != null) {
+      final parent = widget.allCategories.firstWhere((c) => c.id == cat.parentId, orElse: () => cat);
+      if (parent.id == cat.id) break; 
+      cat = parent;
+    }
+    return cat;
+  }
+
   void _onScroll() {
     if (_scrollController.position.userScrollDirection == ScrollDirection.reverse) {
       if (_isBottomNavVisible.value) _isBottomNavVisible.value = false;
@@ -769,12 +780,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Breadcrumbs (Mocked)
           Row(
             children: [
               Icon(Icons.home_outlined, size: 10, color: Colors.grey.shade500),
               const SizedBox(width: 4),
-              Text('العقارات', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+              Text(_getRootCategory(widget.category).name, style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
               Icon(Icons.chevron_right, size: 10, color: Colors.grey.shade500),
               Flexible(
                 child: Text(
@@ -1028,6 +1038,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       backgroundColor: Colors.transparent,
       builder: (ctx) {
         return PremiumFilterBottomSheet(
+          rootCategory: _getRootCategory(widget.category),
           category: widget.category,
           subCategories: subCategories,
           brandColor: brandColor,
@@ -1969,14 +1980,22 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     List<String> priorityTags = [];
     final catName = widget.category.name;
-    if (catName.contains('أراضي') || catName.contains('أرض ') || catName.endsWith(' أرض') || catName == 'أرض' || catName.contains('مزرعة')) {
-      priorityTags = ['واصل خدمات', 'قوشان مستقل', 'على شارعين', 'أرض للاسثمار', 'من المالك مباشرة', 'أرض سكنية', 'أرض تجارية', 'جاهزة للبناء', 'داخل التنظيم', 'مفروزة', 'على شارع رئيسي', 'مطلة', 'أقساط'];
-    } else if (catName.contains('تجاري')) {
-      priorityTags = ['موقع حيوي', 'غرفة استقبال', 'بدون خلو', 'غرفتين مكتبيتين', 'مطبخ وحمام'];
-    } else if (catName.contains('العقبة')) {
-      priorityTags = ['اطلالة بحرية', 'كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
-    } else {
-      priorityTags = ['كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
+    final rootCat = _getRootCategory(widget.category);
+    final isCar = rootCat.id == 1 || rootCat.name.contains('سيارات');
+    final isRealEstate = rootCat.id == 3 || rootCat.name.contains('عقارات');
+
+    if (isCar) {
+      priorityTags = ['أوتوماتيك', 'فحص كامل', 'فتحة سقف', 'جلد', 'ترخيص جديد', 'بدون حوادث', 'دهان الوكالة', 'بانوراما', 'بصمة', 'مثبت سرعة', 'كاميرا خلفية', 'تدفئة مقاعد', 'شاشة لمس'];
+    } else if (isRealEstate) {
+      if (catName.contains('أراضي') || catName.contains('أرض ') || catName.endsWith(' أرض') || catName == 'أرض' || catName.contains('مزرعة')) {
+        priorityTags = ['واصل خدمات', 'قوشان مستقل', 'على شارعين', 'أرض للاستثمار', 'من المالك مباشرة', 'أرض سكنية', 'أرض تجارية', 'جاهزة للبناء', 'داخل التنظيم', 'مفروزة', 'على شارع رئيسي', 'مطلة', 'أقساط'];
+      } else if (catName.contains('تجاري')) {
+        priorityTags = ['موقع حيوي', 'غرفة استقبال', 'بدون خلو', 'غرفتين مكتبيتين', 'مطبخ وحمام'];
+      } else if (catName.contains('العقبة')) {
+        priorityTags = ['اطلالة بحرية', 'كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
+      } else {
+        priorityTags = ['كراج خاص', 'مصعد', 'من المالك مباشرة', 'يوجد حارس', if (catName.contains('ايجار') || catName.contains('إيجار')) 'شامل التأمين', 'مشجر', 'مسور', 'مطبخ راكب', 'غرفة غسيل', 'سوبر ديلوكس', 'كاميرات مراقبة', 'مسبح', 'مستودع', 'حديقة', 'بلكونة', 'غرفة خادمة', 'ترس', 'دبل جلاس', 'عرسان', 'مدخل مستقل', 'أباجورات'];
+      }
     }
 
     final Set<String> finalTagsSet = {};
@@ -2572,7 +2591,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                                   subImageUrl,
                                   width: 22,
                                   height: 22,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.contain,
                                   fallback: EmojiCategoryIcon(
                                     iconName: sub.iconName,
                                     size: 18,
@@ -3624,6 +3643,21 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       SizedBox(width: 4),
                       Text('مميز', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10))
                     ],
+                  ),
+                ),
+              if (ad.marketPriceStatus != null && ad.marketPriceStatus != 'NO_DATA')
+                Container(
+                  margin: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ad.marketPriceStatus == 'BELOW_MARKET' ? Colors.green : ad.marketPriceStatus == 'ABOVE_MARKET' ? Colors.red : Colors.blue,
+                    borderRadius: BorderRadius.circular(10)
+                  ),
+                  child: Text(
+                    ad.marketPriceStatus == 'BELOW_MARKET' ? 'سعر أقل من السوق' 
+                    : ad.marketPriceStatus == 'ABOVE_MARKET' ? 'أعلى من المتوسط' 
+                    : 'سعر عادل',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)
                   ),
                 ),
               if (ad.cpcBid > 0)

@@ -1686,6 +1686,29 @@ class _AdCard extends StatelessWidget {
                     ),
                   ),
                 ),
+              if (ad.marketPriceStatus != null && ad.marketPriceStatus != 'NO_DATA')
+                Positioned(
+                  top: ad.isHot ? 38 : 10, right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: ad.marketPriceStatus == 'BELOW_MARKET' 
+                          ? Colors.green.withOpacity(0.9) 
+                          : ad.marketPriceStatus == 'ABOVE_MARKET' 
+                              ? Colors.red.withOpacity(0.9) 
+                              : Colors.blue.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: Colors.white.withOpacity(0.2), width: 0.5),
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                    ),
+                    child: Text(
+                      ad.marketPriceStatus == 'BELOW_MARKET' ? 'سعر أقل من السوق' 
+                      : ad.marketPriceStatus == 'ABOVE_MARKET' ? 'أعلى من المتوسط' 
+                      : 'سعر عادل',
+                      style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
             ],
           ),
           // Refined Details Section
