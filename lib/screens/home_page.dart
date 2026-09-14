@@ -187,38 +187,125 @@ class _HomePageState extends State<HomePage> {
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const SmartFinderWizard()));
                           },
+                          borderRadius: BorderRadius.circular(24),
                           child: Container(
-                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.7)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF1E3A8A), Color(0xFF1A73E8)],
+                                begin: Alignment.bottomRight,
+                                end: Alignment.topLeft,
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(24),
                               boxShadow: [
-                                BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
-                              ]
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                                  child: const Icon(Icons.manage_search, color: Colors.white, size: 32),
+                                BoxShadow(
+                                  color: const Color(0xFF1A73E8).withValues(alpha: 0.4),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 8),
                                 ),
-                                const SizedBox(width: 16),
-                                const Expanded(
+                              ],
+                            ),
+                            child: Stack(
+                              children: [
+                                Positioned(
+                                  right: -20,
+                                  top: -20,
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(alpha: 0.1),
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  left: -30,
+                                  bottom: -30,
+                                  child: Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(alpha: 0.05),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(20),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('المكتشف الذكي', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                      SizedBox(height: 4),
-                                      Text('دع السوق يجد لك أفضل منطقة حسب ميزانيتك ومواصفاتك', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(10),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.2),
+                                              borderRadius: BorderRadius.circular(12),
+                                            ),
+                                            child: const Icon(Icons.travel_explore, color: Colors.white, size: 28),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          const Expanded(
+                                            child: Text(
+                                              'المكتشف الذكي',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      const Text(
+                                        'دع الذكاء الاصطناعي يحلل آلاف الإعلانات ليجد لك أفضل منطقة تناسب ميزانيتك ومواصفاتك.',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(30),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withValues(alpha: 0.1),
+                                                  blurRadius: 5,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ],
+                                            ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'ابدأ البحث الآن',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF1A73E8),
+                                                    fontSize: 15,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8),
+                                                Icon(Icons.arrow_forward_ios, color: Color(0xFF1A73E8), size: 14),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
-                                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
                               ],
                             ),
                           ),
