@@ -191,142 +191,122 @@ class _HomePageState extends State<HomePage> {
                           child: Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF1B2838), Color(0xFF2C3E50), Color(0xFF34495E)],
-                                begin: Alignment.bottomLeft,
-                                end: Alignment.topRight,
-                              ),
+                              color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF1B2838).withValues(alpha: 0.4),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
+                                  color: const Color(0xFF64748B).withValues(alpha: 0.08),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
                             child: Stack(
                               children: [
                                 Positioned(
-                                  right: -30,
-                                  top: -30,
+                                  right: -40,
+                                  top: -40,
                                   child: Container(
-                                    width: 100,
-                                    height: 100,
+                                    width: 120,
+                                    height: 120,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.04),
+                                      color: const Color(0xFF3B82F6).withValues(alpha: 0.05),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  left: -20,
-                                  bottom: -20,
+                                  left: -25,
+                                  bottom: -25,
                                   child: Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: 80,
+                                    height: 80,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.03),
+                                      color: const Color(0xFF3B82F6).withValues(alpha: 0.04),
                                     ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+                                  child: Row(
                                     children: [
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.all(9),
-                                            decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
-                                              ),
-                                              borderRadius: BorderRadius.circular(12),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: const Color(0xFF3498DB).withValues(alpha: 0.3),
-                                                  blurRadius: 8,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
-                                            ),
-                                            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                                      Container(
+                                        padding: const EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
                                           ),
-                                          const SizedBox(width: 12),
-                                          const Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'المكتشف الذكي',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 17,
-                                                    fontWeight: FontWeight.w800,
-                                                    letterSpacing: 0.3,
-                                                  ),
-                                                ),
-                                                SizedBox(height: 2),
-                                                Text(
-                                                  'حدد مواصفاتك ونجد لك أفضل النتائج',
-                                                  style: TextStyle(
-                                                    color: Color(0xFF94A3B8),
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
+                                          borderRadius: BorderRadius.circular(14),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 3),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
+                                        child: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
                                       ),
-                                      const SizedBox(height: 14),
-                                      Row(
-                                        children: [
-                                          _buildFeatureChip(Icons.payments_outlined, 'السعر'),
-                                          const SizedBox(width: 6),
-                                          _buildFeatureChip(Icons.aspect_ratio, 'المساحة'),
-                                          const SizedBox(width: 6),
-                                          _buildFeatureChip(Icons.king_bed_outlined, 'الغرف'),
-                                          const Spacer(),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              gradient: const LinearGradient(
-                                                colors: [Color(0xFF3498DB), Color(0xFF2980B9)],
-                                                begin: Alignment.topLeft,
-                                                end: Alignment.bottomRight,
+                                      const SizedBox(width: 14),
+                                      const Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'المكتشف الذكي',
+                                              style: TextStyle(
+                                                color: Color(0xFF1E293B),
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w800,
                                               ),
-                                              borderRadius: BorderRadius.circular(20),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: const Color(0xFF3498DB).withValues(alpha: 0.3),
-                                                  blurRadius: 6,
-                                                  offset: const Offset(0, 2),
-                                                ),
-                                              ],
                                             ),
-                                            child: const Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  'ابدأ',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                SizedBox(width: 4),
-                                                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 11),
-                                              ],
+                                            SizedBox(height: 3),
+                                            Text(
+                                              'حدد مواصفاتك ونجد لك أفضل النتائج',
+                                              style: TextStyle(
+                                                color: Color(0xFF94A3B8),
+                                                fontSize: 12,
+                                              ),
                                             ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 9),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
                                           ),
-                                        ],
+                                          borderRadius: BorderRadius.circular(22),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF3B82F6).withValues(alpha: 0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'ابدأ',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.arrow_forward_ios, color: Colors.white, size: 11),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
