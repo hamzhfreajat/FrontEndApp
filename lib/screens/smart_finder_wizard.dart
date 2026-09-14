@@ -27,6 +27,8 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   final TextEditingController _maxPriceCtrl = TextEditingController();
   final TextEditingController _minAreaCtrl = TextEditingController();
   final TextEditingController _maxAreaCtrl = TextEditingController();
+  final TextEditingController _citySearchCtrl = TextEditingController();
+  final TextEditingController _regionSearchCtrl = TextEditingController();
   List<String> _selectedRooms = [];
   String? _selectedBathrooms;
   String? _selectedFurnished;
@@ -40,6 +42,18 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   String? _selectedCity;
   List<Map<String, dynamic>> _aggregatedRegions = [];
   
+  List<Map<String, dynamic>> get _filteredCities {
+    final query = _citySearchCtrl.text.trim().toLowerCase();
+    if (query.isEmpty) return _aggregatedCities;
+    return _aggregatedCities.where((c) => c['city'].toString().toLowerCase().contains(query)).toList();
+  }
+
+  List<Map<String, dynamic>> get _filteredRegions {
+    final query = _regionSearchCtrl.text.trim().toLowerCase();
+    if (query.isEmpty) return _aggregatedRegions;
+    return _aggregatedRegions.where((r) => r['region'].toString().toLowerCase().contains(query)).toList();
+  }
+  
   // Professional color theme for the wizard (Deep Blue)
   final Color _primaryWizardColor = const Color(0xFF1A73E8);
 
@@ -49,6 +63,8 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
     _maxPriceCtrl.dispose();
     _minAreaCtrl.dispose();
     _maxAreaCtrl.dispose();
+    _citySearchCtrl.dispose();
+    _regionSearchCtrl.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -571,15 +587,41 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
           )
         else
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: ListView.separated(
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.only(top: 8),
-                itemCount: _aggregatedCities.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final cityData = _aggregatedCities[index];
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: TextField(
+                    controller: _citySearchCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'ابحث عن مدينة...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _filteredCities.isEmpty 
+                    ? const Center(child: Text('لا توجد نتائج مطابقة لبحثك', style: TextStyle(color: Colors.grey, fontSize: 16)))
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 8, bottom: 24),
+                          itemCount: _filteredCities.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final cityData = _filteredCities[index];
                   final count = cityData['count'];
                   return InkWell(
                     onTap: () => _onCitySelected(cityData['city'], count),
@@ -624,7 +666,10 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
               ),
             ),
           ),
-      ],
+        ],
+      ),
+    ),
+  ],
     );
   }
 
@@ -641,6 +686,25 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Column(
                 children: [
+                  TextField(
+                    controller: _regionSearchCtrl,
+                    decoration: InputDecoration(
+                      hintText: 'ابحث عن منطقة...',
+                      prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.grey.shade200),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   InkWell(
                     onTap: () => _navigateToResults([_selectedCity!]),
                     borderRadius: BorderRadius.circular(16),
@@ -670,12 +734,14 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: ListView.separated(
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _aggregatedRegions.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final regionData = _aggregatedRegions[index];
+                    child: _filteredRegions.isEmpty
+                        ? const Center(child: Text('لا توجد نتائج مطابقة لبحثك', style: TextStyle(color: Colors.grey, fontSize: 16)))
+                        : ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: _filteredRegions.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final regionData = _filteredRegions[index];
                         final count = regionData['count'];
                         return InkWell(
                           onTap: () => _navigateToResults([regionData['region']]),
