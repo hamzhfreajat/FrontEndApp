@@ -18,6 +18,7 @@ import '../models/location.dart';
 import 'story_view_page.dart';
 import 'category_details_page.dart';
 import 'categories_page.dart';
+import 'smart_finder_wizard.dart';
 import 'ad_details_page.dart';
 import '../services/analytics_engine.dart';
 import 'add_ad_images.dart';
@@ -180,6 +181,49 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const SmartFinderWizard()));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Theme.of(context).primaryColor, Theme.of(context).primaryColor.withValues(alpha: 0.7)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(color: Theme.of(context).primaryColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 4))
+                              ]
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                                  child: const Icon(Icons.manage_search, color: Colors.white, size: 32),
+                                ),
+                                const SizedBox(width: 16),
+                                const Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('المكتشف الذكي', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                      SizedBox(height: 4),
+                                      Text('دع السوق يجد لك أفضل منطقة حسب ميزانيتك ومواصفاتك', style: TextStyle(color: Colors.white, fontSize: 13)),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 16),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
                       _QuickActionsGateways(categories: provider.categories),
                       _PromoBannerCarousel(),
                       const _SavedActivityBanner(),
