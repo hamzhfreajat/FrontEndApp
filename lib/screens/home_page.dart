@@ -187,113 +187,133 @@ class _HomePageState extends State<HomePage> {
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const SmartFinderWizard()));
                           },
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(20),
                           child: Container(
+                            clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [Color(0xFF1E3A8A), Color(0xFF1A73E8)],
-                                begin: Alignment.bottomRight,
-                                end: Alignment.topLeft,
+                                colors: [Color(0xFF0D47A1), Color(0xFF1565C0), Color(0xFF1E88E5)],
+                                begin: Alignment.bottomLeft,
+                                end: Alignment.topRight,
                               ),
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF1A73E8).withValues(alpha: 0.4),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 8),
+                                  color: const Color(0xFF1565C0).withValues(alpha: 0.35),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
                                 ),
                               ],
                             ),
                             child: Stack(
                               children: [
                                 Positioned(
-                                  right: -20,
-                                  top: -20,
+                                  right: -25,
+                                  top: -25,
                                   child: Container(
-                                    width: 80,
-                                    height: 80,
+                                    width: 90,
+                                    height: 90,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.1),
+                                      color: Colors.white.withValues(alpha: 0.08),
                                     ),
                                   ),
                                 ),
                                 Positioned(
-                                  left: -30,
-                                  bottom: -30,
+                                  left: -15,
+                                  bottom: -15,
                                   child: Container(
-                                    width: 100,
-                                    height: 100,
+                                    width: 60,
+                                    height: 60,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color: Colors.white.withValues(alpha: 0.05),
+                                      color: Colors.white.withValues(alpha: 0.06),
                                     ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                                  child: Row(
+                                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.2),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(Icons.travel_explore, color: Colors.white, size: 26),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      const Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'المكتشف الذكي',
+                                      Row(
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white.withValues(alpha: 0.15),
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 22),
+                                          ),
+                                          const SizedBox(width: 10),
+                                          const Text(
+                                            'المكتشف الذكي',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFFD600),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: const Text(
+                                              'جديد',
                                               style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 17,
+                                                color: Color(0xFF0D47A1),
+                                                fontSize: 10,
                                                 fontWeight: FontWeight.w900,
                                               ),
                                             ),
-                                            SizedBox(height: 2),
-                                            Text(
-                                              'لنجد لك أفضل منطقة',
-                                              style: TextStyle(
-                                                color: Colors.white70,
-                                                fontSize: 13,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
+                                      const Text(
+                                        'حدد ميزانيتك ومواصفاتك ودع النظام يعرض لك أفضل المناطق والنتائج فوراً',
+                                        style: TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 13,
+                                          height: 1.4,
                                         ),
                                       ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.1),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
+                                      const SizedBox(height: 12),
+                                      Row(
+                                        children: [
+                                          _buildFeatureChip(Icons.price_change_outlined, 'السعر'),
+                                          const SizedBox(width: 6),
+                                          _buildFeatureChip(Icons.square_foot, 'المساحة'),
+                                          const SizedBox(width: 6),
+                                          _buildFeatureChip(Icons.bed_outlined, 'الغرف'),
+                                          const Spacer(),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(20),
                                             ),
-                                          ],
-                                        ),
-                                        child: const Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text(
-                                              'ابدأ',
-                                              style: TextStyle(
-                                                color: Color(0xFF1A73E8),
-                                                fontSize: 13,
-                                                fontWeight: FontWeight.bold,
-                                              ),
+                                            child: const Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  'جرّب الآن',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF0D47A1),
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 4),
+                                                Icon(Icons.arrow_forward_ios, color: Color(0xFF0D47A1), size: 12),
+                                              ],
                                             ),
-                                            SizedBox(width: 4),
-                                            Icon(Icons.arrow_forward_ios, color: Color(0xFF1A73E8), size: 12),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -444,6 +464,32 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildFeatureChip(IconData icon, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white70, size: 14),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
