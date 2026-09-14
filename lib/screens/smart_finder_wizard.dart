@@ -140,10 +140,6 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   }
 
   void _onCitySelected(String city, int totalCount) async {
-    if (totalCount < 100) {
-      _navigateToResults([city]);
-      return;
-    }
 
     setState(() {
       _selectedCity = city;
