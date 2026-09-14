@@ -191,13 +191,17 @@ class _HomePageState extends State<HomePage> {
                           child: Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFFEBF3FF), Color(0xFFDCEAFD), Color(0xFFE8F1FE)],
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                              ),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(color: const Color(0xFFBFD7F9)),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF64748B).withValues(alpha: 0.08),
-                                  blurRadius: 20,
+                                  color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                                  blurRadius: 16,
                                   offset: const Offset(0, 4),
                                 ),
                               ],
