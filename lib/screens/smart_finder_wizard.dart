@@ -1200,39 +1200,45 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(color: _primaryWizardColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                      child: Icon(isRegion ? Icons.map_outlined : Icons.location_city, color: _primaryWizardColor, size: 24),
-                    ),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: _primaryWizardColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                        child: Icon(isRegion ? Icons.map_outlined : Icons.location_city, color: _primaryWizardColor, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(name.split(',').last.trim(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                            if (isBestMatch) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(4)),
-                                child: const Text('الأفضل تطابقاً', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                            Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                Text(name.split(',').last.trim(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                                if (isBestMatch) ...[
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(4)),
+                                    child: const Text('الأفضل تطابقاً', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ),
+                                ]
+                              ],
+                            ),
+                            if (avgPrice > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text('متوسط سعر المتر: ${avgPrice.toStringAsFixed(0)} دينار', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
                               ),
-                            ]
                           ],
                         ),
-                        if (avgPrice > 0)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4.0),
-                            child: Text('متوسط سعر المتر: ${avgPrice.toStringAsFixed(0)} دينار', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
-                          ),
-                      ],
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 if (_isCompareMode && !isRegion)
                   Checkbox(
                     value: isSelectedForCompare,
