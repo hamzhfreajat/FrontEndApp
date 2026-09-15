@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:classifieds_frontend/services/api_service.dart';
 import 'package:classifieds_frontend/models/category.dart';
 import 'package:classifieds_frontend/providers/app_provider.dart';
@@ -43,6 +44,12 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   String? _selectedCity;
   List<Map<String, dynamic>> _aggregatedRegions = [];
   
+  // Advanced Features
+  List<String> _recentCities = [];
+  String _sortMode = 'best_match'; // 'best_match', 'deals'
+  bool _isCompareMode = false;
+  List<Map<String, dynamic>> _selectedCompareCities = [];
+
   int _currentFilterCount = 0;
   bool _isCounting = false;
   Timer? _countDebounce;
@@ -50,6 +57,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   @override
   void initState() {
     super.initState();
+    _loadRecentCities();
     _minPriceCtrl.addListener(_updateCount);
     _maxPriceCtrl.addListener(_updateCount);
     _minAreaCtrl.addListener(_updateCount);
@@ -57,6 +65,23 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   }
 
 
+
+  Future<void> _loadRecentCities() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _recentCities = prefs.getStringList('smart_finder_recent_cities') ?? [];
+    });
+  }
+
+  Future<void> _saveRecentCity(String city) async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> current = prefs.getStringList('smart_finder_recent_cities') ?? [];
+    current.remove(city);
+    current.insert(0, city);
+    if (current.length > 3) current.removeLast();
+    await prefs.setStringList('smart_finder_recent_cities', current);
+    if (mounted) setState(() => _recentCities = current);
+  }
 
   void _updateCount() {
     if (_countDebounce?.isActive ?? false) _countDebounce!.cancel();
@@ -162,20 +187,49 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
         tags: tags.isNotEmpty ? tags : null,
       );
 
-      final Map<String, int> cityCounts = {};
+      final Map<String, Map<String, dynamic>> cityStats = {};
       for (final row in data) {
         final loc = (row['group'] as String? ?? '').trim();
         final count = row['count'] as int? ?? 0;
+        final belowMarket = row['below_market_count'] as int? ?? 0;
+        final avgPrice = (row['avg_price'] as num?)?.toDouble() ?? 0.0;
+        final avgArea = (row['avg_area'] as num?)?.toDouble() ?? 0.0;
+
         if (loc.isEmpty) continue;
         final city = loc.split(',').first.trim();
         if (city.isEmpty) continue;
-        cityCounts[city] = (cityCounts[city] ?? 0) + count;
+
+        if (!cityStats.containsKey(city)) {
+          cityStats[city] = {
+            'count': 0,
+            'below_market': 0,
+            'sum_price': 0.0,
+            'sum_area': 0.0,
+            'region_count': 0
+          };
+        }
+        cityStats[city]!['count'] += count;
+        cityStats[city]!['below_market'] += belowMarket;
+        if (avgPrice > 0) {
+          cityStats[city]!['sum_price'] += avgPrice;
+          cityStats[city]!['sum_area'] += avgArea;
+          cityStats[city]!['region_count'] += 1;
+        }
       }
 
-      final cities = cityCounts.entries
-          .map((e) => {'city': e.key, 'count': e.value})
-          .toList();
-      cities.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+      final cities = cityStats.entries.map((e) {
+        final st = e.value;
+        final rCount = st['region_count'] as int;
+        return {
+          'city': e.key,
+          'count': st['count'],
+          'below_market': st['below_market'],
+          'avg_price': rCount > 0 ? (st['sum_price'] / rCount) : 0.0,
+          'avg_area': rCount > 0 ? (st['sum_area'] / rCount) : 0.0,
+        };
+      }).toList();
+      
+      _sortCities(cities);
 
       setState(() {
         _aggregatedCities = cities;
@@ -186,8 +240,16 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
     }
   }
 
-  void _onCitySelected(String city, int totalCount) async {
+  void _sortCities(List<Map<String, dynamic>> cities) {
+    if (_sortMode == 'deals') {
+      cities.sort((a, b) => (b['below_market'] as int).compareTo(a['below_market'] as int));
+    } else {
+      cities.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+    }
+  }
 
+  void _onCitySelected(String city, int totalCount) async {
+    _saveRecentCity(city);
     setState(() {
       _selectedCity = city;
       _isLoadingAggregation = true;
@@ -213,9 +275,25 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
             final loc = row['group'] as String? ?? '';
             return loc.startsWith(city) && loc.contains(',');
           })
-          .map((row) => {'region': row['group'] as String, 'count': row['count'] as int})
+          .map((row) {
+            final belowMarket = row['below_market_count'] as int? ?? 0;
+            final avgPrice = (row['avg_price'] as num?)?.toDouble() ?? 0.0;
+            final avgArea = (row['avg_area'] as num?)?.toDouble() ?? 0.0;
+            return {
+              'region': row['group'] as String,
+              'count': row['count'] as int,
+              'below_market': belowMarket,
+              'avg_price': avgPrice,
+              'avg_area': avgArea,
+            };
+          })
           .toList();
-      regions.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+      
+      if (_sortMode == 'deals') {
+        regions.sort((a, b) => (b['below_market'] as int).compareTo(a['below_market'] as int));
+      } else {
+        regions.sort((a, b) => (b['count'] as int).compareTo(a['count'] as int));
+      }
 
       setState(() {
         _aggregatedRegions = regions;
