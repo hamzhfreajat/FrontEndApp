@@ -211,8 +211,18 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: Color(0xFF0F172A)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
+        top: false,
         child: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
@@ -242,7 +252,12 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
           bottomRight: Radius.circular(40),
         ),
       ),
-      padding: const EdgeInsets.only(top: 20, bottom: 40, left: 24, right: 24),
+      padding: EdgeInsets.only(
+        top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+        bottom: 40,
+        left: 24,
+        right: 24,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -268,13 +283,6 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                 ]
               ],
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.close, size: 26),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            onPressed: () => Navigator.pop(context),
-            color: const Color(0xFF0F172A),
           ),
         ],
       ),
