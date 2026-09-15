@@ -30,9 +30,9 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   final TextEditingController _citySearchCtrl = TextEditingController();
   final TextEditingController _regionSearchCtrl = TextEditingController();
   List<String> _selectedRooms = [];
-  String? _selectedBathrooms;
-  String? _selectedFurnished;
-  String? _selectedFloor;
+  List<String> _selectedBathrooms = [];
+  List<String> _selectedFurnished = [];
+  List<String> _selectedFloor = [];
   
   // Results
   bool _isLoadingCategories = false;
@@ -79,10 +79,10 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
 
   List<String> _buildTags() {
     List<String> tags = [];
-    if (_selectedRooms.isNotEmpty) tags.add('bedrooms:${_selectedRooms.join(',')}');
-    if (_selectedBathrooms != null) tags.add('bathrooms:$_selectedBathrooms');
-    if (_selectedFurnished != null) tags.add('furnished:$_selectedFurnished');
-    if (_selectedFloor != null) tags.add('floor:$_selectedFloor');
+    for (var r in _selectedRooms) tags.add('bedrooms:$r');
+    for (var b in _selectedBathrooms) tags.add('bathrooms:$b');
+    for (var f in _selectedFurnished) tags.add('furnished:$f');
+    for (var fl in _selectedFloor) tags.add('floor:$fl');
     if (_minAreaCtrl.text.isNotEmpty) tags.add('min_area:${_minAreaCtrl.text}');
     if (_maxAreaCtrl.text.isNotEmpty) tags.add('max_area:${_maxAreaCtrl.text}');
     return tags;
@@ -494,25 +494,25 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                   onChanged: (vals) => setState(() => _selectedRooms = vals),
                   icon: Icons.bed_outlined,
                 ),
-                _buildRadioChips(
+                _buildMultiSelectChips(
                   label: 'الحمامات',
-                  value: _selectedBathrooms,
+                  values: _selectedBathrooms,
                   options: ['1', '2', '3', '4', '5', '+6'],
-                  onChanged: (val) => setState(() => _selectedBathrooms = val),
+                  onChanged: (vals) => setState(() => _selectedBathrooms = vals),
                   icon: Icons.bathtub_outlined,
                 ),
-                _buildRadioChips(
+                _buildMultiSelectChips(
                   label: 'الفرش',
-                  value: _selectedFurnished,
+                  values: _selectedFurnished,
                   options: ['مفروشة', 'غير مفروشة', 'مفروش جزئياً'],
-                  onChanged: (val) => setState(() => _selectedFurnished = val),
+                  onChanged: (vals) => setState(() => _selectedFurnished = vals),
                   icon: Icons.chair_outlined,
                 ),
-                _buildRadioChips(
+                _buildMultiSelectChips(
                   label: 'الطابق',
-                  value: _selectedFloor,
+                  values: _selectedFloor,
                   options: ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7', 'طابق أخير', 'روف', 'طابق أخير مع روف'],
-                  onChanged: (val) => setState(() => _selectedFloor = val),
+                  onChanged: (vals) => setState(() => _selectedFloor = vals),
                   icon: Icons.layers_outlined,
                 ),
               ],
@@ -901,13 +901,22 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                         ? [BoxShadow(color: _primaryWizardColor.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))]
                         : [],
                   ),
-                  child: Text(
-                    opt,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                      fontSize: 14,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected) ...[
+                        const Icon(Icons.check, color: Colors.white, size: 16),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(
+                        opt,
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                          fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -918,66 +927,5 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
     );
   }
 
-  Widget _buildRadioChips({
-    required String label,
-    required String? value,
-    required List<String> options,
-    required Function(String?) onChanged,
-    required IconData icon,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18, color: Colors.grey.shade600),
-              const SizedBox(width: 8),
-              Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87)),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: options.map((opt) {
-              final isSelected = opt == value;
-              return GestureDetector(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  onChanged(isSelected ? null : opt);
-                },
-                child: AnimatedContainer(
-                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 64),
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: isSelected ? _primaryWizardColor : Colors.white,
-                    borderRadius: BorderRadius.circular(100),
-                    border: Border.all(
-                      color: isSelected ? _primaryWizardColor : Colors.grey.shade300,
-                      width: 1.5,
-                    ),
-                    boxShadow: isSelected
-                        ? [BoxShadow(color: _primaryWizardColor.withValues(alpha: 0.25), blurRadius: 10, offset: const Offset(0, 4))]
-                        : [],
-                  ),
-                  child: Text(
-                    opt,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black87,
-                      fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
