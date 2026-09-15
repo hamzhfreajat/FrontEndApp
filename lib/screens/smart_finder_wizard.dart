@@ -691,7 +691,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20)]),
+                      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20)]),
                       child: const Icon(Icons.search_off, size: 60, color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
@@ -719,6 +719,8 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
           Expanded(
             child: Column(
               children: [
+                _buildCompareControls(),
+                _buildSortOptions(),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
                   child: TextField(
@@ -745,78 +747,70 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                     ? const Center(child: Text('لا توجد نتائج مطابقة لبحثك', style: TextStyle(color: Colors.grey, fontSize: 16)))
                     : Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: ListView.separated(
+                        child: CustomScrollView(
                           physics: const BouncingScrollPhysics(),
-                          padding: const EdgeInsets.only(top: 8, bottom: 24),
-                          itemCount: _filteredCities.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final cityData = _filteredCities[index];
-                  final count = cityData['count'];
-                  return InkWell(
-                    onTap: () => _onCitySelected(cityData['city'], count),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(color: _primaryWizardColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                                child: Icon(Icons.location_city, color: _primaryWizardColor, size: 24),
+                          slivers: [
+                            if (_recentCities.isNotEmpty && _citySearchCtrl.text.isEmpty && !_isCompareMode)
+                              SliverToBoxAdapter(child: _buildRecentCities()),
+                            SliverPadding(
+                              padding: const EdgeInsets.only(top: 8, bottom: 24),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final cityData = _filteredCities[index];
+                                    final isBestMatch = _sortMode == 'best_match' && index == 0 && _citySearchCtrl.text.isEmpty;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 12.0),
+                                      child: _buildCityTile(cityData, isBestMatch),
+                                    );
+                                  },
+                                  childCount: _filteredCities.length,
+                                ),
                               ),
-                              const SizedBox(width: 16),
-                              Text(cityData['city'], style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
-                                child: Text('$count إعلان', style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-    ),
-  ],
+      ],
     );
   }
 
-  // ─── Step 3: Region Selection ─────────────────────────────────────────
   Widget _buildRegionSelection() {
     return Column(
       children: [
-        _buildGradientHeader('مناطق في ${_selectedCity ?? ""}', null, showBack: true),
+        _buildGradientHeader('اختر المنطقة', _selectedCity, showBack: true),
         if (_isLoadingAggregation)
           const Expanded(child: Center(child: CircularProgressIndicator()))
+        else if (_aggregatedRegions.isEmpty)
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.map_outlined, size: 60, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  const Text('لا توجد مناطق متاحة في هذه المدينة', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => _navigateToResults([_selectedCity!]),
+                    child: const Text('عرض نتائج المدينة بالكامل'),
+                  ),
+                ],
+              ),
+            ),
+          )
         else
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  TextField(
+            child: Column(
+              children: [
+                _buildSortOptions(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+                  child: TextField(
                     controller: _regionSearchCtrl,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن منطقة...',
@@ -834,86 +828,32 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  InkWell(
-                    onTap: () => _navigateToResults([_selectedCity!]),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: _primaryWizardColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: _primaryWizardColor.withValues(alpha: 0.3)),
+                ),
+                Expanded(
+                  child: _filteredRegions.isEmpty 
+                    ? const Center(child: Text('لا توجد نتائج مطابقة لبحثك', style: TextStyle(color: Colors.grey, fontSize: 16)))
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: ListView.separated(
+                          physics: const BouncingScrollPhysics(),
+                          padding: const EdgeInsets.only(top: 8, bottom: 24),
+                          itemCount: _filteredRegions.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final regionData = _filteredRegions[index];
+                            final isBestMatch = _sortMode == 'best_match' && index == 0 && _regionSearchCtrl.text.isEmpty;
+                            return _buildCityTile(regionData, isBestMatch, isRegion: true);
+                          },
+                        ),
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Icon(Icons.maps_home_work, color: _primaryWizardColor, size: 24),
-                                const SizedBox(width: 16),
-                                Flexible(child: Text('عرض جميع إعلانات $_selectedCity', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: _primaryWizardColor))),
-                              ],
-                            ),
-                          ),
-                          Icon(Icons.arrow_forward_ios, size: 16, color: _primaryWizardColor),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: _filteredRegions.isEmpty
-                        ? const Center(child: Text('لا توجد نتائج مطابقة لبحثك', style: TextStyle(color: Colors.grey, fontSize: 16)))
-                        : ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: _filteredRegions.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 12),
-                            itemBuilder: (context, index) {
-                              final regionData = _filteredRegions[index];
-                        final count = regionData['count'];
-                        return InkWell(
-                          onTap: () => _navigateToResults([regionData['region']]),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(regionData['region'].split(',').last.trim(), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
-                                      child: Text('$count إعلان', style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],
     );
   }
+
 
   // ─── Shared UI Components ─────────────────────────────────────────────
 
@@ -1058,4 +998,288 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   }
 
 
+
+  Widget _buildSortOptions() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          const Icon(Icons.sort, size: 16, color: Colors.grey),
+          const SizedBox(width: 8),
+          DropdownButton<String>(
+            value: _sortMode,
+            underline: const SizedBox.shrink(),
+            icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
+            items: const [
+              DropdownMenuItem(value: 'best_match', child: Text('الأفضل تطابقاً')),
+              DropdownMenuItem(value: 'deals', child: Text('الأكثر توفيراً (فرص)')),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                setState(() {
+                  _sortMode = val;
+                  _sortCities(_aggregatedCities);
+                  _sortCities(_aggregatedRegions);
+                });
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompareControls() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Switch(
+                value: _isCompareMode,
+                activeColor: _primaryWizardColor,
+                onChanged: (val) {
+                  setState(() {
+                    _isCompareMode = val;
+                    if (!val) _selectedCompareCities.clear();
+                  });
+                },
+              ),
+              const Text('مقارنة مدينتين', style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          if (_isCompareMode && _selectedCompareCities.length == 2)
+            ElevatedButton(
+              onPressed: _showCompareBottomSheet,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _primaryWizardColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text('قارن الآن', style: TextStyle(color: Colors.white)),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showCompareBottomSheet() {
+    final city1 = _selectedCompareCities[0];
+    final city2 = _selectedCompareCities[1];
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('مقارنة سريعة', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildCompareCol(city1),
+                  Container(width: 1, height: 120, color: Colors.grey.shade300),
+                  _buildCompareCol(city2),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey.shade200,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('إغلاق', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold)),
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCompareCol(Map<String, dynamic> cityData) {
+    return Column(
+      children: [
+        Text(cityData['city'] ?? cityData['region'], style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: _primaryWizardColor)),
+        const SizedBox(height: 12),
+        Text('${cityData['count']} إعلان', style: const TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        Text('${cityData['below_market']} فرص أقل من السوق', style: const TextStyle(color: Colors.green, fontSize: 13, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        if (cityData['avg_price'] > 0)
+          Text('السعر م: ${cityData['avg_price'].toStringAsFixed(0)}', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+      ],
+    );
+  }
+
+  Widget _buildRecentCities() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('آخر المدن التي بحثت فيها', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: _recentCities.map((city) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: ActionChip(
+                    backgroundColor: Colors.grey.shade100,
+                    label: Text(city, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      final cityData = _aggregatedCities.firstWhere((c) => c['city'] == city, orElse: () => {'count': 0});
+                      if (cityData['count'] > 0) {
+                        _onCitySelected(city, cityData['count']);
+                      }
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCityTile(Map<String, dynamic> data, bool isBestMatch, {bool isRegion = false}) {
+    final name = isRegion ? data['region'] : data['city'];
+    final count = data['count'];
+    final belowMarket = data['below_market'] ?? 0;
+    final avgPrice = data['avg_price'] ?? 0.0;
+    
+    final isSelectedForCompare = _selectedCompareCities.contains(data);
+
+    return InkWell(
+      onTap: () {
+        if (_isCompareMode && !isRegion) {
+          setState(() {
+            if (isSelectedForCompare) {
+              _selectedCompareCities.remove(data);
+            } else if (_selectedCompareCities.length < 2) {
+              _selectedCompareCities.add(data);
+            }
+          });
+        } else {
+          if (isRegion) {
+            _navigateToResults([name]);
+          } else {
+            _onCitySelected(name, count);
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelectedForCompare ? _primaryWizardColor.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelectedForCompare ? _primaryWizardColor : (isBestMatch ? Colors.amber.shade400 : Colors.grey.shade200),
+            width: isBestMatch || isSelectedForCompare ? 2 : 1,
+          ),
+          boxShadow: isBestMatch ? [BoxShadow(color: Colors.amber.withOpacity(0.2), blurRadius: 10)] : [],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(color: _primaryWizardColor.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                      child: Icon(isRegion ? Icons.map_outlined : Icons.location_city, color: _primaryWizardColor, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(name.split(',').last.trim(), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                            if (isBestMatch) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(4)),
+                                child: const Text('الأفضل تطابقاً', style: TextStyle(color: Colors.amber, fontSize: 10, fontWeight: FontWeight.bold)),
+                              ),
+                            ]
+                          ],
+                        ),
+                        if (avgPrice > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text('متوسط سعر المتر: ${avgPrice.toStringAsFixed(0)} دينار', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+                if (_isCompareMode && !isRegion)
+                  Checkbox(
+                    value: isSelectedForCompare,
+                    activeColor: _primaryWizardColor,
+                    onChanged: (val) {
+                      setState(() {
+                        if (val == true && _selectedCompareCities.length < 2) {
+                          _selectedCompareCities.add(data);
+                        } else if (val == false) {
+                          _selectedCompareCities.remove(data);
+                        }
+                      });
+                    }
+                  )
+                else
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
+                        child: Text('$count إعلان', style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 13)),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+                    ],
+                  ),
+              ],
+            ),
+            if (belowMarket > 0) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.trending_down, size: 16, color: Colors.green.shade700),
+                    const SizedBox(width: 6),
+                    Text('$belowMarket فرص أقل من السوق', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 12)),
+                  ],
+                ),
+              ),
+            ]
+          ],
+        ),
+      ),
+    );
+  }
+}
 }
