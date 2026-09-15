@@ -1282,4 +1282,3 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
     );
   }
 }
-}
