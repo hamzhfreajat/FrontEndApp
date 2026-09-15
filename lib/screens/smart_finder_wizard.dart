@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:classifieds_frontend/services/api_service.dart';
@@ -41,6 +42,58 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   List<Map<String, dynamic>> _aggregatedCities = [];
   String? _selectedCity;
   List<Map<String, dynamic>> _aggregatedRegions = [];
+  
+  int _currentFilterCount = 0;
+  bool _isCounting = false;
+  Timer? _countDebounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _minPriceCtrl.addListener(_updateCount);
+    _maxPriceCtrl.addListener(_updateCount);
+    _minAreaCtrl.addListener(_updateCount);
+    _maxAreaCtrl.addListener(_updateCount);
+  }
+
+  @override
+  void dispose() {
+    _countDebounce?.cancel();
+    _minPriceCtrl.dispose();
+    _maxPriceCtrl.dispose();
+    _minAreaCtrl.dispose();
+    _maxAreaCtrl.dispose();
+    _citySearchCtrl.dispose();
+    _regionSearchCtrl.dispose();
+    super.dispose();
+  }
+
+  void _updateCount() {
+    if (_countDebounce?.isActive ?? false) _countDebounce!.cancel();
+    _countDebounce = Timer(const Duration(milliseconds: 500), () async {
+      if (!mounted) return;
+      setState(() => _isCounting = true);
+      try {
+        final tags = _buildTags();
+        double? minP = double.tryParse(_minPriceCtrl.text);
+        double? maxP = double.tryParse(_maxPriceCtrl.text);
+        final count = await ApiService().fetchAdsCount(
+          categoryId: _effectiveCategory?.id,
+          minPrice: minP,
+          maxPrice: maxP,
+          tags: tags.isNotEmpty ? tags : null,
+        );
+        if (mounted) {
+          setState(() {
+            _currentFilterCount = count;
+            _isCounting = false;
+          });
+        }
+      } catch (e) {
+        if (mounted) setState(() => _isCounting = false);
+      }
+    });
+  }
   
   List<Map<String, dynamic>> get _filteredCities {
     final query = _citySearchCtrl.text.trim().toLowerCase();
@@ -91,6 +144,9 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   void _goToPage(int page) {
     _pageController.animateToPage(page, duration: const Duration(milliseconds: 400), curve: Curves.easeOutCubic);
     setState(() => _currentStep = page);
+    if (page == 1) {
+      _updateCount();
+    }
   }
 
   void _prevStep() {
@@ -211,18 +267,9 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Color(0xFF0F172A)),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        top: false,
         child: PageView(
           controller: _pageController,
           physics: const NeverScrollableScrollPhysics(),
@@ -252,8 +299,8 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
           bottomRight: Radius.circular(40),
         ),
       ),
-      padding: EdgeInsets.only(
-        top: MediaQuery.of(context).padding.top + kToolbarHeight + 10,
+      padding: const EdgeInsets.only(
+        top: 24,
         bottom: 40,
         left: 24,
         right: 24,
@@ -491,28 +538,40 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                   label: 'عدد الغرف',
                   values: _selectedRooms,
                   options: ['ستوديو', '1', '2', '3', '4', '5', '+6'],
-                  onChanged: (vals) => setState(() => _selectedRooms = vals),
+                  onChanged: (vals) {
+                    setState(() => _selectedRooms = vals);
+                    _updateCount();
+                  },
                   icon: Icons.bed_outlined,
                 ),
                 _buildMultiSelectChips(
                   label: 'الحمامات',
                   values: _selectedBathrooms,
                   options: ['1', '2', '3', '4', '5', '+6'],
-                  onChanged: (vals) => setState(() => _selectedBathrooms = vals),
+                  onChanged: (vals) {
+                    setState(() => _selectedBathrooms = vals);
+                    _updateCount();
+                  },
                   icon: Icons.bathtub_outlined,
                 ),
                 _buildMultiSelectChips(
                   label: 'الفرش',
                   values: _selectedFurnished,
                   options: ['مفروشة', 'غير مفروشة', 'مفروش جزئياً'],
-                  onChanged: (vals) => setState(() => _selectedFurnished = vals),
+                  onChanged: (vals) {
+                    setState(() => _selectedFurnished = vals);
+                    _updateCount();
+                  },
                   icon: Icons.chair_outlined,
                 ),
                 _buildMultiSelectChips(
                   label: 'الطابق',
                   values: _selectedFloor,
                   options: ['طابق التسوية', 'طابق شبه أرضي', 'الطابق الأرضي', '1', '2', '3', '4', '5', '6', '7', 'طابق أخير', 'روف', 'طابق أخير مع روف'],
-                  onChanged: (vals) => setState(() => _selectedFloor = vals),
+                  onChanged: (vals) {
+                    setState(() => _selectedFloor = vals);
+                    _updateCount();
+                  },
                   icon: Icons.layers_outlined,
                 ),
               ],
@@ -535,7 +594,9 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                   _fetchAggregatedCities();
                   _goToPage(2);
                 },
-                child: const Text('البحث عن مناطق', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: _isCounting
+                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                    : Text('عرض $_currentFilterCount إعلان', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
               ),
             ),
           ),
