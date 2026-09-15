@@ -1159,13 +1159,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   Widget _buildCityTile(Map<String, dynamic> data, bool isBestMatch, {bool isRegion = false}) {
     final name = isRegion ? data['region'] : data['city'];
     final count = data['count'];
-    
-    // TODO: Remove this mock value once the database has real BELOW_MARKET data
-    int belowMarket = data['below_market'] ?? 0;
-    if (belowMarket == 0 && isBestMatch) {
-      belowMarket = 12; // MOCK VALUE FOR UI TESTING
-    }
-    
+    final belowMarket = data['below_market'] ?? 0;
     final avgPrice = data['avg_price'] ?? 0.0;
     
     final isSelectedForCompare = _selectedCompareCities.contains(data);
