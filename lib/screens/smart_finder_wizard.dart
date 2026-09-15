@@ -56,17 +56,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
     _maxAreaCtrl.addListener(_updateCount);
   }
 
-  @override
-  void dispose() {
-    _countDebounce?.cancel();
-    _minPriceCtrl.dispose();
-    _maxPriceCtrl.dispose();
-    _minAreaCtrl.dispose();
-    _maxAreaCtrl.dispose();
-    _citySearchCtrl.dispose();
-    _regionSearchCtrl.dispose();
-    super.dispose();
-  }
+
 
   void _updateCount() {
     if (_countDebounce?.isActive ?? false) _countDebounce!.cancel();
@@ -112,6 +102,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
 
   @override
   void dispose() {
+    _countDebounce?.cancel();
     _minPriceCtrl.dispose();
     _maxPriceCtrl.dispose();
     _minAreaCtrl.dispose();
