@@ -211,17 +211,6 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text('المكتشف الذكي', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white.withValues(alpha: 0.9),
-        elevation: 0,
-        foregroundColor: Colors.black,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: PageView(
@@ -279,6 +268,13 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                 ]
               ],
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.close, size: 26),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onPressed: () => Navigator.pop(context),
+            color: const Color(0xFF0F172A),
           ),
         ],
       ),
