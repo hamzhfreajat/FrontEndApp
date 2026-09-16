@@ -758,7 +758,7 @@ class _SmartFinderWizardState extends State<SmartFinderWizard> {
                                 delegate: SliverChildBuilderDelegate(
                                   (context, index) {
                                     final cityData = _filteredCities[index];
-                                    final isBestMatch = _sortMode == 'best_match' && index == 0 && _citySearchCtrl.text.isEmpty;
+                                    final isBestMatch = false; // Disabled Best Match badge on Cities
                                     return Padding(
                                       padding: const EdgeInsets.only(bottom: 12.0),
                                       child: _buildCityTile(cityData, isBestMatch),
