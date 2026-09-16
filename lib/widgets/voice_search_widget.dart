@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
 import '../models/category.dart';
-import 'category_details_page.dart';
-import 'add_ad_images.dart';
-import 'ads_list_page.dart';
+import '../screens/category_details_page.dart';
+import '../screens/add_ad_images.dart';
+import '../screens/ads_list_page.dart';
 
 class VoiceSearchWidget extends StatefulWidget {
   final List<Category> allCategories;
@@ -136,7 +136,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       if (intent == 'post_ad') {
         setState(() => _isSearching = false);
         Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const AddAdImagesPage()));
+            context, MaterialPageRoute(builder: (_) => AddAdImagesPage()));
         return;
       }
 
@@ -145,7 +145,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (_) => const AdsListPage()));
+                builder: (_) => AdsListPage()));
         return;
       }
 
@@ -226,11 +226,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   Category? _findCategory(int id) {
     for (var cat in widget.allCategories) {
       if (cat.id == id) return cat;
-      if (cat.children != null) {
-        for (var child in cat.children!) {
-          if (child.id == id) return child;
-        }
-      }
     }
     return null;
   }
