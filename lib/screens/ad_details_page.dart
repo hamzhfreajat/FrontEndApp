@@ -872,7 +872,43 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               ),
            ]
         ),
-      ]),
+      
+          if (ad.marketPriceStatus == 'BELOW_MARKET') ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFDCFCE7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.local_offer_rounded, color: Color(0xFF166534), size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('فرصة ممتازة!', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 15, color: Color(0xFF166534))),
+                        SizedBox(height: 4),
+                        Text('هذا العقار معروض بسعر أقل بكثير من متوسط أسعار السوق الحالية في هذه المنطقة.', style: TextStyle(fontSize: 13, color: Color(0xFF15803D), height: 1.4, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+]),
     );
   }
 

@@ -482,7 +482,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    Row(crossAxisAlignment: CrossAxisAlignment.center, children: [ Text(
                       '${widget.ad.price.toStringAsFixed(0)} JOD',
                       style: const TextStyle(
                         fontFamily: 'Roboto', // For clean numbers
@@ -492,6 +492,33 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard> with Sing
                         color: Color(0xFF0075FF), // Brand Blue
                       ),
                     ),
+                          if (widget.ad.marketPriceStatus == 'BELOW_MARKET') ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(color: const Color(0xFF81C784)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.local_offer, size: 12, color: Color(0xFF2E7D32)),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'أقل من السوق',
+                                    style: TextStyle(
+                                      color: Color(0xFF2E7D32),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],)
                     if (_negotiable || _mortgage) const SizedBox(height: 6),
                     // Badges under the price
                     SingleChildScrollView(

@@ -28,6 +28,8 @@ class Ad {
   final double cpcBid;
   final bool isFeatured;
   final String? marketPriceStatus;
+  final double? marketAveragePrice;
+  final double? deviationPct;
 
   Ad({
     required this.id,
@@ -56,6 +58,8 @@ class Ad {
     this.cpcBid = 0.0,
     this.isFeatured = false,
     this.marketPriceStatus,
+    this.marketAveragePrice,
+    this.deviationPct,
   });
 
   factory Ad.fromJson(Map<String, dynamic> json) {
@@ -191,6 +195,8 @@ class Ad {
       cpcBid: json['cpc_bid'] != null ? (double.tryParse(json['cpc_bid'].toString()) ?? 0.0) : 0.0,
       isFeatured: json['is_featured'] == true || json['is_featured'] == 'true' || json['is_featured'] == 1,
       marketPriceStatus: json['market_price_status'] as String?,
+      marketAveragePrice: json['market_average_price'] != null ? double.tryParse(json['market_average_price'].toString()) : null,
+      deviationPct: json['deviation_pct'] != null ? double.tryParse(json['deviation_pct'].toString()) : null,
     );
   }
   String get displayLocation {
