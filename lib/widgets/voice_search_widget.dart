@@ -186,14 +186,20 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
   void _navigateToResults(Map<String, dynamic> filters, int count) {
     final categoryId = filters['category_id'] as int?;
+    final categoryName = filters['category_name'] as String?;
 
     Category? targetCategory;
-    if (categoryId != null) {
-      targetCategory = _findCategory(categoryId);
+    if (categoryId != null && categoryName != null) {
+      targetCategory = _findCategory(categoryId) ?? 
+          Category(id: categoryId, name: categoryName, adsCount: 0);
+    } else if (categoryId != null) {
+      targetCategory = _findCategory(categoryId) ?? 
+          Category(id: categoryId, name: 'عقارات', adsCount: 0);
     }
-    // Fallback to parent "عقارات للبيع" (id: 2)
-    targetCategory ??= _findCategory(2);
-    if (targetCategory == null) return;
+    
+    // Final fallback to parent "عقارات للبيع" (id: 2) only if completely null
+    targetCategory ??= _findCategory(2) ?? Category(id: 2, name: 'عقارات للبيع', adsCount: 0);
+
 
     final tags = <String>[];
     if (filters['tags'] != null) {
