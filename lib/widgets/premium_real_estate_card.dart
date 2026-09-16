@@ -541,8 +541,9 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 8,
                       children: [
                         Text(
                           '${widget.ad.price.toStringAsFixed(0)} JOD',
