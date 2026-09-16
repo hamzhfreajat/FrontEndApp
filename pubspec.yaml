@@ -63,6 +63,7 @@ dependencies:
   gma_mediation_meta: ^1.6.0
   gma_mediation_unity: ^1.9.0
   gma_mediation_inmobi: ^2.3.0
+  speech_to_text: ^7.4.0
 
 dev_dependencies:
   flutter_test:

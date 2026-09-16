@@ -1510,5 +1510,26 @@ class ApiService {
       debugPrint('Error tracking ad click: $e');
     }
   }
+
+  // ---------------------------------------------------------
+  // Smart Voice Search (AI-Powered)
+  // ---------------------------------------------------------
+  Future<Map<String, dynamic>> smartVoiceSearch(String text) async {
+    try {
+      final response = await _client.post(
+        Uri.parse('$baseUrl/smart-voice-search'),
+        headers: await _getHeaders(),
+        body: jsonEncode({'text': text}),
+      ).timeout(const Duration(seconds: 25));
+      if (response.statusCode == 200) {
+        return json.decode(utf8.decode(response.bodyBytes));
+      } else {
+        return {'intent': 'error', 'suggestion': 'حدث خطأ في البحث، يرجى المحاولة مرة أخرى.'};
+      }
+    } catch (e) {
+      debugPrint('Error in smart voice search: $e');
+      return {'intent': 'error', 'suggestion': 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.'};
+    }
+  }
 }
 

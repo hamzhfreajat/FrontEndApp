@@ -20,6 +20,7 @@ import 'category_details_page.dart';
 import 'categories_page.dart';
 import 'smart_finder_wizard.dart';
 import 'ad_details_page.dart';
+import '../widgets/voice_search_widget.dart';
 import '../services/analytics_engine.dart';
 import 'add_ad_images.dart';
 import 'global_search_page.dart';
@@ -181,6 +182,7 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      VoiceSearchWidget(allCategories: provider.categories ?? []),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
                         child: InkWell(
