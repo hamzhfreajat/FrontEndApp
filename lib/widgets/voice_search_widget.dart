@@ -200,7 +200,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     // Final fallback to parent "عقارات للبيع" (id: 2) only if completely null
     targetCategory ??= _findCategory(2) ?? Category(id: 2, name: 'عقارات للبيع', adsCount: 0);
 
-
+    // Build tags from backend response (includes bedrooms:N, furnished:value)
     final tags = <String>[];
     if (filters['tags'] != null) {
       for (var t in (filters['tags'] as List)) {
@@ -208,10 +208,15 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       }
     }
 
-    final locationFilter = filters['location_filter'] as String?;
+    // Build locations from backend response (city + region names)
     final locations = <String>[];
-    if (locationFilter != null && locationFilter.isNotEmpty) {
-      locations.add(locationFilter);
+    if (filters['location_names'] != null) {
+      for (var loc in (filters['location_names'] as List)) {
+        final locStr = loc.toString();
+        if (locStr.isNotEmpty) {
+          locations.add(locStr);
+        }
+      }
     }
 
     Navigator.push(
