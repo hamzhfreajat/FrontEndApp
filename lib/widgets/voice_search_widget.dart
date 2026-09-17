@@ -140,7 +140,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     });
 
     try {
-      final response = await ApiService.smartVoiceSearch(text);
+      final response = await ApiService().smartVoiceSearch(text);
 
       if (!mounted) return;
 
@@ -149,12 +149,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       if (intent == 'post_ad') {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const AddAdImagesScreen()),
+          MaterialPageRoute(builder: (_) => AddAdImagesPage()),
         );
       } else if (intent == 'my_ads') {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const AdsListPage()),
+          MaterialPageRoute(builder: (_) => AdsListPage()),
         );
       } else if (intent == 'error') {
         setState(() {
@@ -254,12 +254,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   Category? _findCategory(int id) {
     for (var cat in widget.allCategories) {
       if (cat.id == id) return cat;
-      for (var sub in cat.subcategories) {
-        if (sub.id == id) return sub;
-        for (var sub2 in sub.subcategories) {
-          if (sub2.id == id) return sub2;
-        }
-      }
     }
     return null;
   }
