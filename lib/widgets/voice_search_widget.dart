@@ -302,7 +302,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                     decoration: InputDecoration(
                       hintText: _isListening
                           ? 'جاري الاستماع...'
-                          : 'مثال: \',
+                          : 'مثال: ' + _smartPrompts[_currentPromptIndex],
                       hintStyle: TextStyle(
                         color: _isListening
                             ? const Color(0xFF6366F1)
@@ -518,6 +518,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
