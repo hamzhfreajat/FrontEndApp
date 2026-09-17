@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
@@ -29,13 +29,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
   // Smart prompts for real estate
   final List<String> _smartPrompts = [
-    'شقة للبيع في خلدا 3 غرف',
-    'أرض للبيع في عبدون',
-    'شقة للإيجار الشهري في الرابية',
-    'فيلا مع حديقة في دابوق',
-    'شقة غرفتين بسعر أقل من 50 ألف',
-    'بدي أنزل إعلان شقة',
-    'ستوديو مفروش للإيجار في عمان',
+    'Ø´Ù‚Ø© Ù„Ù„Ø¨ÙŠØ¹ ÙÙŠ Ø®Ù„Ø¯Ø§ 3 ØºØ±Ù',
+    'Ø£Ø±Ø¶ Ù„Ù„Ø¨ÙŠØ¹ ÙÙŠ Ø¹Ø¨Ø¯ÙˆÙ†',
+    'Ø´Ù‚Ø© Ù„Ù„Ø¥ÙŠØ¬Ø§Ø± Ø§Ù„Ø´Ù‡Ø±ÙŠ ÙÙŠ Ø§Ù„Ø±Ø§Ø¨ÙŠØ©',
+    'ÙÙŠÙ„Ø§ Ù…Ø¹ Ø­Ø¯ÙŠÙ‚Ø© ÙÙŠ Ø¯Ø§Ø¨ÙˆÙ‚',
+    'Ø´Ù‚Ø© ØºØ±ÙØªÙŠÙ† Ø¨Ø³Ø¹Ø± Ø£Ù‚Ù„ Ù…Ù† 50 Ø£Ù„Ù',
+    'Ø¨Ø¯ÙŠ Ø£Ù†Ø²Ù„ Ø¥Ø¹Ù„Ø§Ù† Ø´Ù‚Ø©',
+    'Ø³ØªÙˆØ¯ÙŠÙˆ Ù…ÙØ±ÙˆØ´ Ù„Ù„Ø¥ÙŠØ¬Ø§Ø± ÙÙŠ Ø¹Ù…Ø§Ù†',
   ];
   int _currentPromptIndex = 0;
   Timer? _promptTimer;
@@ -85,7 +85,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         setState(() {
           _isListening = false;
           _pulseController.stop();
-          _suggestion = 'عذراً، لم أتمكن من التقاط الصوت بشكل واضح. يرجى المحاولة مرة أخرى.';
+          _suggestion = 'Ø¹Ø°Ø±Ø§Ù‹ØŒ Ù„Ù… Ø£ØªÙ…ÙƒÙ† Ù…Ù† Ø§Ù„ØªÙ‚Ø§Ø· Ø§Ù„ØµÙˆØª Ø¨Ø´ÙƒÙ„ ÙˆØ§Ø¶Ø­. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.';
         });
       },
     );
@@ -158,7 +158,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         );
       } else if (intent == 'error') {
         setState(() {
-          _suggestion = response['suggestion'] ?? 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+          _suggestion = response['suggestion'] ?? 'Ø­Ø¯Ø« Ø®Ø·Ø£. ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.';
         });
       } else if (intent == 'search' && response['filters'] != null) {
         final filters = response['filters'];
@@ -167,7 +167,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         
         if (actionRequired == 'ask_transaction') {
            setState(() {
-             _suggestion = suggestion ?? 'هل تبحث عن عقار للبيع أم للإيجار؟';
+             _suggestion = suggestion ?? 'Ù‡Ù„ ØªØ¨Ø­Ø« Ø¹Ù† Ø¹Ù‚Ø§Ø± Ù„Ù„Ø¨ÙŠØ¹ Ø£Ù… Ù„Ù„Ø¥ÙŠØ¬Ø§Ø±ØŸ';
            });
            return;
         }
@@ -185,13 +185,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         }
       } else {
         setState(() {
-          _suggestion = 'لم أفهم طلبك جيداً. جرب "شقة للإيجار في عمان".';
+          _suggestion = 'Ù„Ù… Ø£ÙÙ‡Ù… Ø·Ù„Ø¨Ùƒ Ø¬ÙŠØ¯Ø§Ù‹. Ø¬Ø±Ø¨ "Ø´Ù‚Ø© Ù„Ù„Ø¥ÙŠØ¬Ø§Ø± ÙÙŠ Ø¹Ù…Ø§Ù†".';
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _suggestion = 'حدث خطأ في الاتصال بالسيرفر.';
+          _suggestion = 'Ø­Ø¯Ø« Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø³ÙŠØ±ÙØ±.';
         });
       }
     } finally {
@@ -213,7 +213,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     
     if (targetCategory == null) {
        targetCategory = widget.allCategories.firstWhere(
-           (c) => c.name.contains('عقارات'), 
+           (c) => c.name.contains('Ø¹Ù‚Ø§Ø±Ø§Øª'), 
            orElse: () => widget.allCategories.first);
     }
 
@@ -319,8 +319,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                     ),
                     decoration: InputDecoration(
                       hintText: _isListening
-                          ? 'جاري الاستماع...'
-                          : 'مثال: ' + _smartPrompts[_currentPromptIndex],
+                          ? 'Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø§Ø³ØªÙ…Ø§Ø¹...'
+                          : 'Ù…Ø«Ø§Ù„: ' + _smartPrompts[_currentPromptIndex],
                       hintStyle: TextStyle(
                         color: _isListening
                             ? const Color(0xFF6366F1)
@@ -427,7 +427,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                     children: [
                       Icon(Icons.auto_awesome, size: 18),
                       SizedBox(width: 8),
-                      Text('ابحث الآن',
+                      Text('Ø§Ø¨Ø­Ø« Ø§Ù„Ø¢Ù†',
                           style: TextStyle(
                               fontWeight: FontWeight.w800, fontSize: 15)),
                     ],
@@ -477,7 +477,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
             ),
             
           // Alternative Search Actions (like 'ask_transaction')
-          if (_suggestion != null && !_isSearching && _suggestion!.contains("هل تبحث عن عقار للبيع أم للإيجار؟"))
+          if (_suggestion != null && !_isSearching && _suggestion!.contains("Ù‡Ù„ ØªØ¨Ø­Ø« Ø¹Ù† Ø¹Ù‚Ø§Ø± Ù„Ù„Ø¨ÙŠØ¹ Ø£Ù… Ù„Ù„Ø¥ÙŠØ¬Ø§Ø±ØŸ"))
             Padding(
               padding: const EdgeInsets.only(top: 12.0),
               child: Row(
@@ -485,7 +485,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        _textController.text = _textController.text + " للبيع";
+                        _textController.text = _textController.text + " Ù„Ù„Ø¨ÙŠØ¹";
                         _performSearch();
                       },
                       style: ElevatedButton.styleFrom(
@@ -495,14 +495,14 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('للبيع'),
+                      child: const Text('Ù„Ù„Ø¨ÙŠØ¹'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        _textController.text = _textController.text + " للإيجار";
+                        _textController.text = _textController.text + " Ù„Ù„Ø¥ÙŠØ¬Ø§Ø±";
                         _performSearch();
                       },
                       style: ElevatedButton.styleFrom(
@@ -512,7 +512,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('للإيجار'),
+                      child: const Text('Ù„Ù„Ø¥ÙŠØ¬Ø§Ø±'),
                     ),
                   ),
                 ],
@@ -523,3 +523,4 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
