@@ -291,20 +291,18 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    textDirection: TextDirection.rtl, 
+                    textDirection: TextDirection.rtl,
                     minLines: 1,
                     maxLines: 5,
-                    strutStyle: const StrutStyle(
-                      forceStrutHeight: true,
-                      height: 1.8,
-                    ),
-                    textAlignVertical: TextAlignVertical.center,
+                    keyboardType: TextInputType.multiline,
+                    textInputAction: TextInputAction.search,
                     style: const TextStyle(
                       fontSize: 15,
-                      
+                      height: 1.8,
                       color: Color(0xFF1E293B),
                     ),
                     decoration: InputDecoration(
+                      isDense: true,
                       hintText: _isListening
                           ? 'جاري الاستماع...'
                           : 'مثال: ' + _smartPrompts[_currentPromptIndex],
@@ -313,11 +311,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                             ? const Color(0xFF6366F1)
                             : const Color(0xFF94A3B8),
                         fontSize: 14,
+                        height: 1.8,
                         fontWeight: FontWeight.w500,
                       ),
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 24),
+                      contentPadding: const EdgeInsets.only(
+                          left: 20, right: 20, top: 30, bottom: 30),
                       suffixIcon: _textController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close,
@@ -331,7 +330,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                               },
                             )
                           : null,
-                    ),
+                    )
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => _performSearch(),
                   ),
@@ -523,6 +522,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
