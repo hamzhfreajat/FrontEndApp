@@ -312,7 +312,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, top: 24, bottom: 24),
+                          horizontal: 20, vertical: 24),
                       suffixIcon: _textController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close,
@@ -518,6 +518,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
