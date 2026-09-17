@@ -330,7 +330,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                               },
                             )
                           : null,
-                    )
+                    ),
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => _performSearch(),
                   ),
@@ -522,6 +522,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
