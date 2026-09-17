@@ -294,6 +294,11 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                     textDirection: TextDirection.rtl, 
                     minLines: 1,
                     maxLines: 5,
+                    strutStyle: const StrutStyle(
+                      forceStrutHeight: true,
+                      height: 1.8,
+                    ),
+                    textAlignVertical: TextAlignVertical.center,
                     style: const TextStyle(
                       fontSize: 15,
                       
@@ -518,6 +523,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
