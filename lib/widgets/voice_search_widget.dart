@@ -291,12 +291,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    textDirection: TextDirection.rtl, textAlignVertical: TextAlignVertical.center,
+                    textDirection: TextDirection.rtl, 
                     minLines: 1,
                     maxLines: 5,
                     style: const TextStyle(
                       fontSize: 15,
-                      height: 1.5,
+                      
                       color: Color(0xFF1E293B),
                     ),
                     decoration: InputDecoration(
@@ -463,7 +463,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       style: const TextStyle(
                         color: Color(0xFF92400E),
                         fontSize: 14,
-                        height: 1.5,
+                        
                       ),
                     ),
                   ),
@@ -518,6 +518,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
