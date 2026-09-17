@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
@@ -29,13 +29,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
   // Smart prompts for real estate
   final List<String> _smartPrompts = [
-    'Ø´Ù‚Ø© Ù„Ù„Ø¨ÙŠØ¹ ÙÙŠ Ø®Ù„Ø¯Ø§ 3 ØºØ±Ù',
-    'Ø£Ø±Ø¶ Ù„Ù„Ø¨ÙŠØ¹ ÙÙŠ Ø¹Ø¨Ø¯ÙˆÙ†',
-    'Ø´Ù‚Ø© Ù„Ù„Ø¥ÙŠØ¬Ø§Ø± Ø§Ù„Ø´Ù‡Ø±ÙŠ ÙÙŠ Ø§Ù„Ø±Ø§Ø¨ÙŠØ©',
-    'ÙÙŠÙ„Ø§ Ù…Ø¹ Ø­Ø¯ÙŠÙ‚Ø© ÙÙŠ Ø¯Ø§Ø¨ÙˆÙ‚',
-    'Ø´Ù‚Ø© ØºØ±ÙØªÙŠÙ† Ø¨Ø³Ø¹Ø± Ø£Ù‚Ù„ Ù…Ù† 50 Ø£Ù„Ù',
-    'Ø¨Ø¯ÙŠ Ø£Ù†Ø²Ù„ Ø¥Ø¹Ù„Ø§Ù† Ø´Ù‚Ø©',
-    'Ø³ØªÙˆØ¯ÙŠÙˆ Ù…ÙØ±ÙˆØ´ Ù„Ù„Ø¥ÙŠØ¬Ø§Ø± ÙÙŠ Ø¹Ù…Ø§Ù†',
+    'شقة للبيع في خلدا 3 غرف',
+    'أرض للبيع في عبدون',
+    'شقة للإيجار الشهري في الرابية',
+    'فيلا مع حديقة في دابوق',
+    'شقة غرفتين بسعر أقل من 50 ألف',
+    'بدي أنزل إعلان شقة',
+    'ستوديو مفروش للإيجار في عمان',
   ];
   int _currentPromptIndex = 0;
   Timer? _promptTimer;
@@ -53,7 +53,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     );
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.6).animate(
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
   }
@@ -105,8 +105,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       localeId: 'ar_JO',
       listenMode: stt.ListenMode.dictation,
       cancelOnError: true,
-      listenFor: const Duration(minutes: 5),
-      pauseFor: const Duration(seconds: 120),
+      listenFor: const Duration(seconds: 30),
+      pauseFor: const Duration(seconds: 3),
     );
   }
 
@@ -152,7 +152,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       if (intent == 'help') {
         setState(() {
           _isSearching = false;
-          _suggestion = 'ÙŠÙ…ÙƒÙ†Ùƒ Ø§Ù„Ø¨Ø­Ø« Ø¨ØµÙˆØªÙƒ Ø¹Ù† Ø£ÙŠ Ø¹Ù‚Ø§Ø±! Ù…Ø«Ø§Ù„: "Ø´Ù‚Ø© 3 ØºØ±Ù ÙÙŠ Ø®Ù„Ø¯Ø§"';
+          _suggestion = 'يمكنك البحث بصوتك عن أي عقار! مثال: "شقة 3 غرف في خلدا"';
         });
         return;
       }
@@ -178,7 +178,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       if (mounted) {
         setState(() {
           _isSearching = false;
-          _suggestion = 'Ø­Ø¯Ø« Ø®Ø·Ø£ØŒ ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.';
+          _suggestion = 'حدث خطأ، يرجى المحاولة مرة أخرى.';
         });
       }
     }
@@ -194,11 +194,11 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
           Category(id: categoryId, name: categoryName, adsCount: 0);
     } else if (categoryId != null) {
       targetCategory = _findCategory(categoryId) ?? 
-          Category(id: categoryId, name: 'Ø¹Ù‚Ø§Ø±Ø§Øª', adsCount: 0);
+          Category(id: categoryId, name: 'عقارات', adsCount: 0);
     }
     
-    // Final fallback to parent "Ø¹Ù‚Ø§Ø±Ø§Øª Ù„Ù„Ø¨ÙŠØ¹" (id: 2) only if completely null
-    targetCategory ??= _findCategory(2) ?? Category(id: 2, name: 'Ø¹Ù‚Ø§Ø±Ø§Øª Ù„Ù„Ø¨ÙŠØ¹', adsCount: 0);
+    // Final fallback to parent "عقارات للبيع" (id: 2) only if completely null
+    targetCategory ??= _findCategory(2) ?? Category(id: 2, name: 'عقارات للبيع', adsCount: 0);
 
     // Build tags from backend response (includes bedrooms:N, furnished:value)
     final tags = <String>[];
@@ -253,271 +253,311 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Unified Search Bar Container
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(
-                color: _isListening
-                    ? const Color(0xFF6366F1)
-                    : const Color(0xFFE2E8F0),
-                width: _isListening ? 2.5 : 1.5,
-              ),
-              boxShadow: [
-                if (_isListening)
-                  BoxShadow(
-                    color: const Color(0xFF6366F1).withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                if (!_isListening)
-                  BoxShadow(
-                    color: const Color(0xFF94A3B8).withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Text field
-                Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    textDirection: TextDirection.rtl,
-                    minLines: 1,
-                    maxLines: 5,
-                    keyboardType: TextInputType.multiline,
-                    textInputAction: TextInputAction.search,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF1E293B),
-                    ),
-                    decoration: InputDecoration(
-                      hintText: _isListening
-                          ? 'جاري الاستماع...'
-                          : 'مثال: ' + _smartPrompts[_currentPromptIndex],
-                      hintStyle: TextStyle(
-                        color: _isListening
-                            ? const Color(0xFF6366F1)
-                            : const Color(0xFF94A3B8),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
-                    ),
-                    onChanged: (_) => setState(() {}),
-                    onSubmitted: (_) => _performSearch(),
-                  ),
-                ),
-
-                // Premium Mic button with Ripple Animation (Inside the box)
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Ripple Effect
-                      if (_isListening)
-                        AnimatedBuilder(
-                          animation: _pulseAnimation,
-                          builder: (context, child) {
-                            return Container(
-                              width: 44 * _pulseAnimation.value,
-                              height: 44 * _pulseAnimation.value,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFFEF4444).withValues(
-                                  alpha: (1.6 - _pulseAnimation.value).clamp(0.0, 1.0) * 0.4,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      
-                      // Actual Button
-                      GestureDetector(
-                        onTap: _isListening ? _stopListening : _startListening,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: _isListening
-                                  ? [const Color(0xFFEF4444), const Color(0xFFB91C1C)]
-                                  : [const Color(0xFF6366F1), const Color(0xFF4338CA)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (_isListening
-                                        ? const Color(0xFFEF4444)
-                                        : const Color(0xFF6366F1))
-                                    .withValues(alpha: 0.4),
-                                blurRadius: _isListening ? 12 : 6,
-                                spreadRadius: _isListening ? 2 : 0,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            _isListening ? Icons.stop_rounded : Icons.mic_rounded,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFF0F7FF), Color(0xFFE8F2FF), Color(0xFFF5F0FF)],
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
           ),
-
-          const SizedBox(height: 12),
-
-          // Search button (visible when text is present)
-          if (_textController.text.trim().isNotEmpty && !_isSearching)
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFD4E4F7), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6366F1).withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: _performSearch,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                       borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.mic_rounded, color: Colors.white, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ابحث بصوتك',
+                          style: TextStyle(
+                            color: Color(0xFF1E293B),
+                            fontSize: 17,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'قل ما تريد وسيجد لك الذكاء الاصطناعي',
+                          style: TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Input area + mic button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  // Text field
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: _isListening
+                              ? const Color(0xFF6366F1)
+                              : const Color(0xFFE2E8F0),
+                          width: _isListening ? 2 : 1,
+                        ),
+                        boxShadow: [
+                          if (_isListening)
+                            BoxShadow(
+                              color: const Color(0xFF6366F1).withValues(alpha: 0.15),
+                              blurRadius: 12,
+                            ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _textController,
+                        textDirection: TextDirection.rtl,
+                        decoration: InputDecoration(
+                          hintText: _isListening
+                              ? 'جاري الاستماع...'
+                              : 'جرب: ${_smartPrompts[_currentPromptIndex]}',
+                          hintStyle: TextStyle(
+                            color: _isListening
+                                ? const Color(0xFF6366F1)
+                                : const Color(0xFFCBD5E1),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          suffixIcon: _textController.text.isNotEmpty
+                              ? IconButton(
+                                  icon: const Icon(Icons.close, size: 18,
+                                      color: Color(0xFF94A3B8)),
+                                  onPressed: () {
+                                    _textController.clear();
+                                    setState(() {
+                                      _suggestion = null;
+                                      _alternativeFilters = null;
+                                    });
+                                  },
+                                )
+                              : null,
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _performSearch(),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 10),
+
+                  // Mic button
+                  ScaleTransition(
+                    scale: _isListening ? _pulseAnimation : const AlwaysStoppedAnimation(1.0),
+                    child: GestureDetector(
+                      onTap: _isListening ? _stopListening : _startListening,
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: _isListening
+                                ? [const Color(0xFFEF4444), const Color(0xFFDC2626)]
+                                : [const Color(0xFF6366F1), const Color(0xFF8B5CF6)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (_isListening
+                                      ? const Color(0xFFEF4444)
+                                      : const Color(0xFF6366F1))
+                                  .withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          _isListening ? Icons.stop_rounded : Icons.mic_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // Search button (visible when text is present)
+            if (_textController.text.trim().isNotEmpty && !_isSearching)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton(
+                    onPressed: _performSearch,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6366F1),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.auto_awesome, size: 18),
+                        SizedBox(width: 8),
+                        Text('ابحث الآن',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w800, fontSize: 15)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+            // Loading state
+            if (_isSearching)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF6366F1),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Text('الذكاء الاصطناعي يبحث لك...',
+                        style: TextStyle(
+                            color: Color(0xFF6366F1),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+
+            // Suggestion banner (when 0 results)
+            if (_suggestion != null) ...[
+              const SizedBox(height: 4),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEF3C7),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: const Color(0xFFFDE68A)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.auto_awesome, size: 18),
-                      SizedBox(width: 8),
-                      Text('ابحث الآن',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 15)),
+                      Row(
+                        children: [
+                          const Icon(Icons.lightbulb_rounded,
+                              color: Color(0xFFD97706), size: 18),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(_suggestion!,
+                                style: const TextStyle(
+                                    color: Color(0xFF92400E),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    height: 1.5)),
+                          ),
+                        ],
+                      ),
+                      if (_alternativeCount != null &&
+                          _alternativeCount! > 0 &&
+                          _alternativeFilters != null) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 38,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _navigateToResults(
+                                  _alternativeFilters!, _alternativeCount!);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFD97706),
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: Text(
+                                'عرض $_alternativeCount نتيجة بديلة',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700, fontSize: 13)),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ),
-            ),
+            ],
 
-          // Loading state
-          if (_isSearching)
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6366F1)),
-                ),
-              ),
-            ),
-
-          // Suggestions / Errors
-          if (_suggestion != null && !_isSearching)
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFDE68A)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lightbulb_outline,
-                      color: Color(0xFFD97706)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _suggestion!,
-                      style: const TextStyle(
-                        color: Color(0xFF92400E),
-                        fontSize: 14,
-                        
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-          // Alternative Search Actions (like 'ask_transaction')
-          if (_suggestion != null && !_isSearching && _suggestion!.contains("هل تبحث عن عقار للبيع أم للإيجار؟"))
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _textController.text = _textController.text + " للبيع";
-                        _performSearch();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('للبيع'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _textController.text = _textController.text + " للإيجار";
-                        _performSearch();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('للإيجار'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
+            SizedBox(height: _suggestion != null ? 16 : 14),
+          ],
+        ),
       ),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
