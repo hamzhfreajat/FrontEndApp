@@ -285,13 +285,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
               ],
             ),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Text field
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    textDirection: TextDirection.rtl,
+                    textDirection: TextDirection.rtl, textAlignVertical: TextAlignVertical.center,
                     minLines: 1,
                     maxLines: 5,
                     style: const TextStyle(
@@ -518,6 +518,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
 
 
 
