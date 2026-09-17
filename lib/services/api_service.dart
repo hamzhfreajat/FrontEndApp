@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/widgets.dart';
@@ -664,7 +664,7 @@ class ApiService {
         if (response.statusCode == 400) {
           failedPaths.add(file.path);
         } else if (response.statusCode != 200) {
-          throw Exception('حدث خطأ أثناء فحص الصورة');
+          throw Exception('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ ÙØ­Øµ Ø§Ù„ØµÙˆØ±Ø©');
         }
         
         processed++;
@@ -1144,7 +1144,7 @@ class ApiService {
         for (var lane in decodedLanes) {
           final adsData = lane['ads'] as List;
           results.add({
-            'title': lane['title'] ?? 'قد يعجبك',
+            'title': lane['title'] ?? 'Ù‚Ø¯ ÙŠØ¹Ø¬Ø¨Ùƒ',
             'category_id': lane['category_id'],
             'filters': lane['filters_json'],
             'ads': adsData.map((a) => Ad.fromJson(a)).toList(),
@@ -1289,7 +1289,7 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('Error calling fetchAdEvaluation: $e');
-      return {'score': 75, 'tips': ['تأكد من مراجعة التفاصيل قبل النشر']};
+      return {'score': 75, 'tips': ['ØªØ£ÙƒØ¯ Ù…Ù† Ù…Ø±Ø§Ø¬Ø¹Ø© Ø§Ù„ØªÙØ§ØµÙŠÙ„ Ù‚Ø¨Ù„ Ø§Ù„Ù†Ø´Ø±']};
     }
   }
 
@@ -1350,7 +1350,7 @@ class ApiService {
       'max_price': search.maxPrice,
       'tags': search.tags,
       'locations': search.locations,
-      'alert_frequency': search.alertType == 'instant' ? 'فوري' : search.alertType,
+      'alert_frequency': search.alertType == 'instant' ? 'ÙÙˆØ±ÙŠ' : search.alertType,
       'is_active': true
     };
 
@@ -1390,9 +1390,9 @@ class ApiService {
     }
   }
 
-  // ══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   // User Recent Searches API
-  // ══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Future<List<String>> fetchRecentSearches() async {
     try {
@@ -1446,9 +1446,9 @@ class ApiService {
       debugPrint('Error deleting recent search: $e');
     }
   }
-  // ══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   // Wallet & Bidding API
-  // ══════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
   Future<void> topupWallet(String productId, String platform, String receiptData) async {
     final response = await _client.post(
@@ -1520,16 +1520,17 @@ class ApiService {
         Uri.parse('$baseUrl/smart-voice-search'),
         headers: await _getHeaders(),
         body: jsonEncode({'text': text}),
-      ).timeout(const Duration(seconds: 25));
+      ).timeout(const Duration(seconds: 60));
       if (response.statusCode == 200) {
         return json.decode(utf8.decode(response.bodyBytes));
       } else {
-        return {'intent': 'error', 'suggestion': 'حدث خطأ في البحث، يرجى المحاولة مرة أخرى.'};
+        return {'intent': 'error', 'suggestion': 'Ø­Ø¯Ø« Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø¨Ø­Ø«ØŒ ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'};
       }
     } catch (e) {
       debugPrint('Error in smart voice search: $e');
-      return {'intent': 'error', 'suggestion': 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.'};
+      return {'intent': 'error', 'suggestion': 'ØªØ£ÙƒØ¯ Ù…Ù† Ø§ØªØµØ§Ù„Ùƒ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª ÙˆØ­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'};
     }
   }
 }
+
 
