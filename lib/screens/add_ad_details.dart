@@ -10,6 +10,7 @@ import '../models/category.dart';
 import '../services/api_service.dart';
 import 'add_ad_basic_info.dart';
 import '../utils/arabic_numbers_formatter.dart';
+import '../utils/arabic_numbers_formatter.dart';
 
 class AddAdDetailsPage extends StatefulWidget {
   final Category selectedLeafCategory;
