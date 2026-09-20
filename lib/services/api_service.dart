@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/widgets.dart';
@@ -664,7 +664,7 @@ class ApiService {
         if (response.statusCode == 400) {
           failedPaths.add(file.path);
         } else if (response.statusCode != 200) {
-          throw Exception('Ø­Ø¯Ø« Ø®Ø·Ø£ Ø£Ø«Ù†Ø§Ø¡ ÙØ­Øµ Ø§Ù„ØµÙˆØ±Ø©');
+          throw Exception('حدث خطأ أثناء فحص الصورة');
         }
         
         processed++;
@@ -1289,7 +1289,7 @@ class ApiService {
       }
     } catch (e) {
       debugPrint('Error calling fetchAdEvaluation: $e');
-      return {'score': 75, 'tips': ['ØªØ£ÙƒØ¯ Ù…Ù† Ù…Ø±Ø§Ø¬Ø¹Ø© Ø§Ù„ØªÙØ§ØµÙŠÙ„ Ù‚Ø¨Ù„ Ø§Ù„Ù†Ø´Ø±']};
+      return {'score': 75, 'tips': ['تأكد من مراجعة التفاصيل قبل النشر']};
     }
   }
 
@@ -1350,7 +1350,7 @@ class ApiService {
       'max_price': search.maxPrice,
       'tags': search.tags,
       'locations': search.locations,
-      'alert_frequency': search.alertType == 'instant' ? 'ÙÙˆØ±ÙŠ' : search.alertType,
+      'alert_frequency': search.alertType == 'instant' ? 'فوري' : search.alertType,
       'is_active': true
     };
 
@@ -1524,13 +1524,11 @@ class ApiService {
       if (response.statusCode == 200) {
         return json.decode(utf8.decode(response.bodyBytes));
       } else {
-        return {'intent': 'error', 'suggestion': 'Ø­Ø¯Ø« Ø®Ø·Ø£ ÙÙŠ Ø§Ù„Ø¨Ø­Ø«ØŒ ÙŠØ±Ø¬Ù‰ Ø§Ù„Ù…Ø­Ø§ÙˆÙ„Ø© Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'};
+        return {'intent': 'error', 'suggestion': 'حدث خطأ في البحث، يرجى المحاولة مرة أخرى.'};
       }
     } catch (e) {
       debugPrint('Error in smart voice search: $e');
-      return {'intent': 'error', 'suggestion': 'ØªØ£ÙƒØ¯ Ù…Ù† Ø§ØªØµØ§Ù„Ùƒ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª ÙˆØ­Ø§ÙˆÙ„ Ù…Ø±Ø© Ø£Ø®Ø±Ù‰.'};
+      return {'intent': 'error', 'suggestion': 'تأكد من اتصالك بالإنترنت وحاول مرة أخرى.'};
     }
   }
 }
-
-
