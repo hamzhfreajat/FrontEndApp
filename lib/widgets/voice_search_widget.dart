@@ -519,8 +519,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       Text('ابحث الآن',
                           style: TextStyle(
                               fontWeight: FontWeight.w800, fontSize: 15)),
-                    ],
                   ),
+                ),
                 ),
               ),
             ),
