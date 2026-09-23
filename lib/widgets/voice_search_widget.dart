@@ -25,7 +25,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   bool _speechAvailable = false;
   bool _userStopped = false;
   String _previousText = "";
-        print("--- isRestart=false, cleared text");
   String? _suggestion;
   Map<String, dynamic>? _alternativeFilters;
   int? _alternativeCount;
@@ -74,7 +73,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   void _initSpeech() async {
     _speechAvailable = await _speech.initialize(
       onStatus: (status) {
-        print("--- onStatus: ");
         if (status == 'done' || status == 'notListening') {
           if (_isListening) {
             if (!_userStopped && _textController.text.length < 300) {
@@ -90,7 +88,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         }
       },
       onError: (errorNotification) {
-        print("--- onError: ");
         if (!_userStopped && _textController.text.length < 300) {
           Future.delayed(const Duration(milliseconds: 100), () {
             if (mounted && !_userStopped) {
@@ -131,7 +128,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
     await _speech.listen(
       onResult: (result) {
-        print("--- onResult: recognizedWords=");
         setState(() {
           _textController.text = _previousText + result.recognizedWords;
         });
