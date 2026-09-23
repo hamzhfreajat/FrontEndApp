@@ -12,6 +12,7 @@ class AddAdBasicInfoPage extends StatefulWidget {
   final Category selectedLeafCategory;
   final String transactionType;
   final List<XFile>? images;
+  final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
   final String selectedCity;
   final String selectedRegion;
@@ -28,6 +29,7 @@ class AddAdBasicInfoPage extends StatefulWidget {
     required this.selectedRegion,
     required this.attributes,
     this.images,
+    this.uploadedImageUrls,
     this.reelVideo,
     this.mapLocation,
     this.selectedLandmarks,
@@ -206,7 +208,9 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
     final finalAdData = {
       if (_adData.containsKey('id'))
         'id': _adData['id'],
-      if (_adData.containsKey('image_urls'))
+      if (widget.uploadedImageUrls != null && widget.uploadedImageUrls!.isNotEmpty)
+        'image_urls': widget.uploadedImageUrls
+      else if (_adData.containsKey('image_urls'))
         'image_urls': _adData['image_urls'],
       'title': _titleController.text.isNotEmpty 
           ? _titleController.text 

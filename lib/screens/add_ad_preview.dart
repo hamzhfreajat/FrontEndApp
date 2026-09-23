@@ -169,16 +169,18 @@ class _AddAdPreviewPageState extends State<AddAdPreviewPage> {
       dataToSend['is_published'] = true;
 
       final Object? incomingId = widget.adData['id'];
+      final imagesToUpload = (dataToSend['image_urls'] != null && (dataToSend['image_urls'] as List).isNotEmpty) ? null : widget.images;
+
       if (incomingId != null) {
         final adIdInt = int.parse(incomingId.toString());
-        newAd = await _apiService.updateAd(adIdInt, dataToSend, widget.images, widget.reelVideo);
+        newAd = await _apiService.updateAd(adIdInt, dataToSend, imagesToUpload, widget.reelVideo);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم تعديل الإعلان بنجاح! 🎉'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating),
           );
         }
       } else {
-        newAd = await _apiService.publishAd(dataToSend, widget.images, widget.reelVideo);
+        newAd = await _apiService.publishAd(dataToSend, imagesToUpload, widget.reelVideo);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('تم رفع الإعلان بنجاح! 🎉'), backgroundColor: Colors.orange, behavior: SnackBarBehavior.floating),

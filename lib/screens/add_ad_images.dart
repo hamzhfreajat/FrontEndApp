@@ -96,15 +96,122 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
     });
   }
 
+  bool _isUploading = false;
+  String _uploadStatus = '';
+  final Map<String, String> _uploadedPathsCache = {};
+
   Future<void> _nextStep() async {
+    if (_images.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('الرجاء اختيار صور للإعلان'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    
+    setState(() {
+      _isUploading = true;
+      _uploadStatus = 'جاري رفع الصور...';
+    });
+    
+    List<String> uploadedUrls = [];
+    List<Map<String, dynamic>> rejectedImages = [];
+    
+    for (int i = 0; i < _images.length; i++) {
+      if (_uploadedPathsCache.containsKey(_images[i].path)) {
+        uploadedUrls.add(_uploadedPathsCache[_images[i].path]!);
+        continue; // Skip uploading already uploaded images
+      }
+      
+      setState(() {
+         _uploadStatus = 'جاري رفع صورة ${i + 1} من ${_images.length}...';
+      });
+      
+      try {
+        final url = await ApiService().uploadSingleMedia(_images[i]);
+        _uploadedPathsCache[_images[i].path] = url; // Cache the successful upload
+        uploadedUrls.add(url);
+      } catch (e) {
+        String msg = e.toString().replaceAll('Exception:', '').trim();
+        rejectedImages.add({
+          'file': _images[i],
+          'index': i,
+          'reason': msg,
+        });
+      }
+    }
+    
+    if (!mounted) return;
+    
+    setState(() {
+      _isUploading = false;
+      _uploadStatus = '';
+    });
+    
+    if (rejectedImages.isNotEmpty) {
+       _showRejectedImagesDialog(rejectedImages);
+       return;
+    }
+    
+    if (uploadedUrls.isEmpty || uploadedUrls.length < 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('لابد من رفع 3 صور صالحة على الأقل.'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_images');
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAdReelsPage(
           images: _images,
+          uploadedImageUrls: uploadedUrls,
           suggestedCategory: _suggestedCategory,
         ),
+      ),
+    );
+  }
+
+  void _showRejectedImagesDialog(List<Map<String, dynamic>> rejectedImages) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('عذراً، تم رفض بعض الصور', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 18)),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: rejectedImages.length,
+            itemBuilder: (context, index) {
+              final img = rejectedImages[index]['file'] as XFile;
+              final reason = rejectedImages[index]['reason'];
+              return ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.file(File(img.path), width: 50, height: 50, fit: BoxFit.cover),
+                ),
+                title: Text('صورة ${rejectedImages[index]['index'] + 1}'),
+                subtitle: Text(reason, style: const TextStyle(color: Colors.red, fontSize: 12)),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                final toRemove = rejectedImages.map((e) => e['file'] as XFile).toSet();
+                _images.removeWhere((element) => toRemove.contains(element));
+              });
+            },
+            child: const Text('حذف الصور المرفوضة'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء', style: TextStyle(color: Colors.grey)),
+          ),
+        ],
       ),
     );
   }
@@ -427,23 +534,36 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
           child: SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _images.length >= 3 ? _nextStep : null,
+              onPressed: (_images.length >= 3 && !_isUploading) ? _nextStep : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 backgroundColor: _images.length >= 3 ? const Color(0xFF0075FF) : Colors.grey.shade300,
               ),
-              child: Text(
-                _images.length < 3
-                    ? 'الرجاء إضافة 3 صور على الأقل' 
-                    : 'متابعة لإضافة فيديو',
-                style: TextStyle(
-                  fontSize: 16, 
-                  fontWeight: FontWeight.w800, 
-                  color: _images.length >= 3 ? Colors.white : Colors.grey.shade600
-                ),
-              ),
+              child: _isUploading 
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(_uploadStatus, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ],
+                    )
+                  : Text(
+                      _images.length < 3
+                          ? 'الرجاء إضافة 3 صور على الأقل' 
+                          : 'متابعة لإضافة فيديو',
+                      style: TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.w800, 
+                        color: _images.length >= 3 ? Colors.white : Colors.grey.shade600
+                      ),
+                    ),
             ),
           ),
         ),

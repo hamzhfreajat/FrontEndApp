@@ -13,6 +13,7 @@ class AddAdMapPage extends StatefulWidget {
   final Category selectedLeafCategory;
   final String transactionType;
   final List<XFile>? images;
+  final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
   final String selectedCity;
   final String selectedRegion;
@@ -25,6 +26,7 @@ class AddAdMapPage extends StatefulWidget {
     required this.selectedCity,
     required this.selectedRegion,
     this.images,
+    this.uploadedImageUrls,
     this.reelVideo,
     this.editingAdData,
   });
@@ -76,6 +78,7 @@ class _AddAdMapPageState extends State<AddAdMapPage> {
           selectedLeafCategory: widget.selectedLeafCategory,
           transactionType: widget.transactionType,
           images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
           reelVideo: widget.reelVideo,
           selectedCity: widget.selectedCity,
           selectedRegion: widget.selectedRegion,

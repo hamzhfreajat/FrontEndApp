@@ -682,31 +682,74 @@ class ApiService {
   Future<List<String>> uploadMedia(List<XFile> files, {bool bypassWatermark = false}) async {
     if (files.isEmpty) return [];
 
-    try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/media/upload${bypassWatermark ? '?bypass_watermark=true' : ''}'),
-      );
-      
-      final headers = await _getHeaders();
-      headers.remove('Content-Type'); 
-      request.headers.addAll(headers);
-      
-      for (var file in files) {
+    List<String> allUrls = [];
+    
+    for (var file in files) {
+      try {
+        var request = http.MultipartRequest(
+          'POST',
+          Uri.parse('$baseUrl/media/upload${bypassWatermark ? '?bypass_watermark=true' : ''}'),
+        );
+        
+        final headers = await _getHeaders();
+        headers.remove('Content-Type'); 
+        request.headers.addAll(headers);
+        
         request.files.add(await http.MultipartFile.fromPath('files', file.path));
-      }
 
-      final response = await _client.send(request).timeout(const Duration(minutes: 5));
-      if (response.statusCode == 200) {
-        final respStr = await response.stream.bytesToString();
-        final data = json.decode(respStr) as Map<String, dynamic>;
-        return (data['urls'] as List).cast<String>();
-      } else {
-        throw Exception('Failed to upload media: ${response.statusCode}');
+        final response = await _client.send(request).timeout(const Duration(minutes: 2));
+        if (response.statusCode == 200) {
+          final respStr = await response.stream.bytesToString();
+          final data = json.decode(respStr) as Map<String, dynamic>;
+          allUrls.addAll((data['urls'] as List).cast<String>());
+        } else {
+          throw Exception('Failed to upload media chunk: ${response.statusCode}');
+        }
+      } catch (e) {
+        debugPrint('Error uploading file ${file.name}: $e');
+        throw Exception('Failed to upload media files.');
       }
-    } catch (e) {
-      debugPrint('Error uploading media: $e');
-      throw Exception('Failed to upload media files.');
+    }
+    return allUrls;
+  }
+
+  Future<String> uploadSingleMedia(XFile file, {bool bypassWatermark = false}) async {
+    var request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseUrl/media/upload${bypassWatermark ? '?bypass_watermark=true' : ''}'),
+    );
+    
+    final headers = await _getHeaders();
+    headers.remove('Content-Type'); 
+    request.headers.addAll(headers);
+    
+    request.files.add(await http.MultipartFile.fromPath('files', file.path));
+
+    final response = await _client.send(request).timeout(const Duration(minutes: 2));
+    final respStr = await response.stream.bytesToString();
+    
+    if (response.statusCode == 200) {
+      final data = json.decode(respStr) as Map<String, dynamic>;
+      final urls = (data['urls'] as List).cast<String>();
+      if (urls.isNotEmpty) return urls.first;
+      throw Exception('لم يتم إرجاع رابط للصورة');
+    } else {
+      String errorMsg = 'تعذر الرفع (خطأ ${response.statusCode})';
+      try {
+        final data = json.decode(respStr);
+        if (data['detail'] != null) {
+          errorMsg = data['detail'].toString();
+        }
+      } catch (_) {}
+      
+      if (errorMsg.toLowerCase().contains('watermark')) {
+        errorMsg = 'الصورة تحتوي على شعار أو علامة مائية';
+      } else if (errorMsg.toLowerCase().contains('too large') || response.statusCode == 413) {
+        errorMsg = 'حجم الصورة كبير جداً';
+      } else if (errorMsg.toLowerCase().contains('extension') || errorMsg.toLowerCase().contains('not allowed')) {
+        errorMsg = 'صيغة الصورة غير مدعومة';
+      }
+      throw Exception(errorMsg);
     }
   }
 
@@ -1144,7 +1187,7 @@ class ApiService {
         for (var lane in decodedLanes) {
           final adsData = lane['ads'] as List;
           results.add({
-            'title': lane['title'] ?? 'Ù‚Ø¯ ÙŠØ¹Ø¬Ø¨Ùƒ',
+            'title': lane['title'] ?? 'قد يعجبك',
             'category_id': lane['category_id'],
             'filters': lane['filters_json'],
             'ads': adsData.map((a) => Ad.fromJson(a)).toList(),

@@ -160,8 +160,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         setState(() {
           _suggestion = response['suggestion'] ?? 'حدث خطأ. يرجى المحاولة مرة أخرى.';
         });
-      } else if (intent == 'search' && response['filters'] != null) {
-        final filters = response['filters'];
+      } else if (intent == 'search' && (response['filters'] != null || response['filters_applied'] != null)) {
+        final filters = response['filters'] ?? response['filters_applied'];
         final actionRequired = response['action_required'];
         final suggestion = response['suggestion'];
         
@@ -172,7 +172,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
            return;
         }
 
-        final int count = response['count'] ?? 0;
+        final int count = response['count'] ?? response['result_count'] ?? 0;
         
         if (count == 0 && response['alternative_filters'] != null) {
           setState(() {
@@ -211,11 +211,14 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       targetCategory = _findCategory(categoryId);
     }
     
-    if (targetCategory == null) {
-       targetCategory = widget.allCategories.firstWhere(
-           (c) => c.name.contains('عقارات'), 
-           orElse: () => widget.allCategories.first);
-    }
+      if (targetCategory == null && categoryId != null) {
+        String catName = filters['category_name']?.toString() ?? "نتائج البحث";
+        targetCategory = Category(id: categoryId, name: catName, adsCount: count);
+      } else if (targetCategory == null) {
+         targetCategory = widget.allCategories.firstWhere(
+             (c) => c.name.contains('عقارات'), 
+             orElse: () => widget.allCategories.first);
+      }
 
     List<String> tags = [];
     if (filters['tags'] != null) {

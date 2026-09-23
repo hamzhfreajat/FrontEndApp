@@ -13,12 +13,14 @@ import 'package:image_picker/image_picker.dart';
 
 class AddAdWizardPage extends StatefulWidget {
   final List<XFile>? images;
+  final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
   final String? suggestedCategoryName;
 
   const AddAdWizardPage({
     super.key,
     this.images,
+    this.uploadedImageUrls,
     this.reelVideo,
     this.suggestedCategoryName,
   });
@@ -285,6 +287,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                      parentCategory: suggestedCat!,
                                      transactionType: suggestedCat!.name,
                                      images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
                                      reelVideo: widget.reelVideo,
                                    ),
                                  ),
@@ -407,6 +410,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                    parentCategory: cat,
                                    transactionType: cat.name,
                                    images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
                                    reelVideo: widget.reelVideo,
                                  ),
                                ),

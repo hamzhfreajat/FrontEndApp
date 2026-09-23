@@ -9,11 +9,13 @@ import 'add_ad_wizard.dart';
 
 class AddAdReelsPage extends StatefulWidget {
   final List<XFile>? images;
+  final List<String>? uploadedImageUrls;
   final String? suggestedCategory;
 
   const AddAdReelsPage({
     super.key,
     this.images,
+    this.uploadedImageUrls,
     this.suggestedCategory,
   });
 
@@ -91,6 +93,7 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
       MaterialPageRoute(
         builder: (context) => AddAdWizardPage(
           images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
           reelVideo: _reelVideo,
           suggestedCategoryName: widget.suggestedCategory,
         ),

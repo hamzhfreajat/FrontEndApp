@@ -16,6 +16,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
   final String transactionType;
   final List<int>? categoryPath;
   final List<XFile>? images;
+  final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
 
   const AddAdSubcategoriesPage({
@@ -25,6 +26,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
     required this.transactionType,
     this.categoryPath,
     this.images,
+    this.uploadedImageUrls,
     this.reelVideo,
   });
 
@@ -90,6 +92,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
             selectedLeafCategory: widget.parentCategory,
             transactionType: widget.transactionType,
             images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
             reelVideo: widget.reelVideo,
           ),
         ),
@@ -456,6 +459,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
                                     transactionType: widget.transactionType,
                                     categoryPath: newPath,
                                     images: widget.images,
+          uploadedImageUrls: widget.uploadedImageUrls,
                                     reelVideo: widget.reelVideo,
                                   ),
                                 ),
