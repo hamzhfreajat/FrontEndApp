@@ -215,14 +215,6 @@ class _RootScreenState extends State<RootScreen> with SingleTickerProviderStateM
                 ),
               ),
               actions: [
-                GestureDetector(
-                  onTap: () {
-                    AnalyticsEngine().logButtonTapped(buttonName: 'top_nav_search', location: 'root_screen');
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const GlobalSearchPage()));
-                  },
-                  child: _headerBtn(Icons.search_rounded),
-                ),
-                const SizedBox(width: 6),
 
                 Consumer<AppProvider>(
                   builder: (context, provider, child) {
