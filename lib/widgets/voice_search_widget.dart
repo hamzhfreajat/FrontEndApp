@@ -88,11 +88,21 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         }
       },
       onError: (errorNotification) {
-        setState(() {
-          _isListening = false;
-          _pulseController.stop();
-          _suggestion = 'عذراً، لم أتمكن من التقاط الصوت بشكل واضح. يرجى المحاولة مرة أخرى.';
-        });
+        if (!_userStopped && _textController.text.length < 300) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (mounted && !_userStopped) {
+              _startListening(isRestart: true);
+            }
+          });
+        } else {
+          setState(() {
+            _isListening = false;
+            _pulseController.stop();
+            if (_textController.text.isEmpty) {
+              _suggestion = 'حدث خطأ في التقاط الصوت. يرجى المحاولة مرة أخرى.';
+            }
+          });
+        }
       },
     );
     setState(() {});
