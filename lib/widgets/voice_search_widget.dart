@@ -375,7 +375,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                   child: TextField(
                     controller: _textController,
                     textDirection: TextDirection.rtl,
-                    minLines: 1,
+                    minLines: 2,
                     maxLines: 5,
                     keyboardType: TextInputType.multiline,
                     textInputAction: TextInputAction.search,
@@ -402,7 +402,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 16),
+                          horizontal: 20, vertical: 20),
                     ),
                     onChanged: (_) => setState(() {}),
                     onSubmitted: (_) => _performSearch(),
