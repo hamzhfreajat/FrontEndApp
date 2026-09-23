@@ -23,6 +23,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   bool _isListening = false;
   bool _isSearching = false;
   bool _speechAvailable = false;
+  bool _userStopped = false;
+  String _previousText = "";
   String? _suggestion;
   Map<String, dynamic>? _alternativeFilters;
   int? _alternativeCount;
@@ -73,10 +75,14 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       onStatus: (status) {
         if (status == 'done' || status == 'notListening') {
           if (_isListening) {
-            setState(() => _isListening = false);
-            _pulseController.stop();
-            if (_textController.text.isNotEmpty) {
-              _performSearch();
+            if (!_userStopped && _textController.text.length < 300) {
+              _startListening(isRestart: true);
+            } else {
+              setState(() => _isListening = false);
+              _pulseController.stop();
+              if (_textController.text.isNotEmpty) {
+                _performSearch();
+              }
             }
           }
         }
@@ -92,23 +98,32 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     setState(() {});
   }
 
-  void _startListening() async {
+  void _startListening({bool isRestart = false}) async {
     if (!_speechAvailable) return;
 
     setState(() {
       _isListening = true;
-      _suggestion = null;
-      _alternativeFilters = null;
+      _userStopped = false;
+      if (!isRestart) {
+        _suggestion = null;
+        _alternativeFilters = null;
+        _textController.clear();
+        _previousText = "";
+      } else {
+        _previousText = _textController.text + ( _textController.text.isNotEmpty ? " " : "");
+      }
     });
 
     _pulseController.repeat(reverse: true);
-    _textController.clear();
 
     await _speech.listen(
       onResult: (result) {
         setState(() {
-          _textController.text = result.recognizedWords;
+          _textController.text = _previousText + result.recognizedWords;
         });
+        if (_textController.text.length >= 300) {
+          _stopListening();
+        }
       },
       localeId: 'ar_JO',
       cancelOnError: false,
@@ -119,6 +134,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   }
 
   void _stopListening() async {
+    _userStopped = true;
     await _speech.stop();
     setState(() {
       _isListening = false;
@@ -366,7 +382,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       
                       // Actual Button
                       GestureDetector(
-                        onTap: _isListening ? _stopListening : _startListening,
+                        onTap: _isListening ? _stopListening : () => _startListening(),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           width: 44,
