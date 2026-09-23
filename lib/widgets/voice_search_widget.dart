@@ -293,7 +293,54 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+
+          // AI Header
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0, right: 8.0, left: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Color(0xFF6366F1), Color(0xFFA855F7), Color(0xFFEC4899)],
+                      ).createShader(bounds),
+                      child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'البحث الذكي بالذكاء الاصطناعي',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1E293B),
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF6366F1).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'AI Powered',
+                    style: TextStyle(
+                      color: Color(0xFF6366F1),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
           // Unified Search Bar Container
+
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             decoration: BoxDecoration(
@@ -337,6 +384,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                       color: Color(0xFF1E293B),
                     ),
                     decoration: InputDecoration(
+                      prefixIcon: _isListening ? null : ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFF6366F1), Color(0xFFA855F7)],
+                        ).createShader(bounds),
+                        child: const Icon(Icons.psychology, color: Colors.white, size: 24),
+                      ),
                       hintText: _isListening
                           ? 'جاري الاستماع...'
                           : 'مثال: ' + _smartPrompts[_currentPromptIndex],
@@ -392,7 +445,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                             gradient: LinearGradient(
                               colors: _isListening
                                   ? [const Color(0xFFEF4444), const Color(0xFFB91C1C)]
-                                  : [const Color(0xFF6366F1), const Color(0xFF4338CA)],
+                                  : [const Color(0xFF6366F1), const Color(0xFFA855F7), const Color(0xFFEC4899)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),
@@ -431,17 +484,34 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
               child: SizedBox(
                 width: double.infinity,
                 height: 46,
-                child: ElevatedButton(
-                  onPressed: _performSearch,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6366F1),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF6366F1), Color(0xFFA855F7), Color(0xFFEC4899)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                     ),
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFFA855F7).withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
-                  child: const Row(
+                  child: ElevatedButton(
+                    onPressed: _performSearch,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(Icons.auto_awesome, size: 18),
