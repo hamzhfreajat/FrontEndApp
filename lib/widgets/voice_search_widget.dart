@@ -24,7 +24,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   bool _isSearching = false;
   bool _speechAvailable = false;
   bool _userStopped = false;
-  String _previousText = "";
+  bool _isRestarting = false;
   String? _suggestion;
   Map<String, dynamic>? _alternativeFilters;
   int? _alternativeCount;
@@ -74,8 +74,8 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     _speechAvailable = await _speech.initialize(
       onStatus: (status) {
         if (status == 'done' || status == 'notListening') {
-          if (_isListening && !_userStopped) {
-            // Speech engine auto-paused. Save current text and restart.
+          // Only act if we're actively listening AND user didn't press stop AND we're not already restarting
+          if (_isListening && !_userStopped && !_isRestarting) {
             final savedText = _textController.text;
             if (savedText.length < 300) {
               _restartListening(savedText);
@@ -86,20 +86,15 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                 _performSearch();
               }
             }
-          } else if (_isListening && _userStopped) {
-            setState(() => _isListening = false);
-            _pulseController.stop();
-            if (_textController.text.isNotEmpty) {
-              _performSearch();
-            }
           }
         }
       },
       onError: (errorNotification) {
-        if (_isListening && !_userStopped && _textController.text.length < 300) {
+        // Only act if we're actively listening AND not already restarting
+        if (_isListening && !_userStopped && !_isRestarting && _textController.text.length < 300) {
           final savedText = _textController.text;
           _restartListening(savedText);
-        } else {
+        } else if (!_isRestarting) {
           setState(() {
             _isListening = false;
             _pulseController.stop();
@@ -115,35 +110,34 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
   /// Restart listening after auto-pause, preserving the given text.
   void _restartListening(String savedText) async {
-    // CRITICAL: Set _isListening to false BEFORE calling _speech.stop()
-    // because stop() triggers onStatus('notListening') which would
-    // call _restartListening again in an infinite loop.
-    _isListening = false;
+    if (_isRestarting) return; // Prevent re-entry
+    _isRestarting = true;
+    _isListening = false; // Prevent onStatus/onError from triggering during stop()
     
-    // Stop current session cleanly
     await _speech.stop();
-    
-    // Wait for the speech engine to fully release
     await Future.delayed(const Duration(milliseconds: 500));
     
-    if (!mounted || _userStopped) return;
+    if (!mounted || _userStopped) {
+      _isRestarting = false;
+      return;
+    }
     
-    // Set _previousText to the saved text BEFORE calling listen()
-    _previousText = savedText.isNotEmpty ? "$savedText " : "";
-    
-    // Ensure the text controller still has the old text
+    // Restore the text
     _textController.text = savedText;
     
-    // Re-enable listening state
+    // Capture as LOCAL variable so the closure below is immune to any future changes
+    final prefix = savedText.isNotEmpty ? "$savedText " : "";
+    
     setState(() {
       _isListening = true;
     });
+    _isRestarting = false;
     
     await _speech.listen(
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
-            _textController.text = _previousText + result.recognizedWords;
+            _textController.text = prefix + result.recognizedWords;
           });
         }
         if (_textController.text.length >= 300) {
@@ -158,15 +152,15 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 
-  void _startListening({bool isRestart = false}) async {
+  void _startListening() async {
     if (!_speechAvailable) return;
 
     setState(() {
       _isListening = true;
       _userStopped = false;
+      _isRestarting = false;
       _suggestion = null;
       _alternativeFilters = null;
-      _previousText = "";
       _textController.clear();
     });
 
@@ -176,7 +170,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
-            _textController.text = _previousText + result.recognizedWords;
+            _textController.text = result.recognizedWords;
           });
         }
         if (_textController.text.length >= 300) {
