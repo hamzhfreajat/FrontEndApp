@@ -115,7 +115,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
 
   /// Restart listening after auto-pause, preserving the given text.
   void _restartListening(String savedText) async {
-    // Stop current session cleanly first
+    // CRITICAL: Set _isListening to false BEFORE calling _speech.stop()
+    // because stop() triggers onStatus('notListening') which would
+    // call _restartListening again in an infinite loop.
+    _isListening = false;
+    
+    // Stop current session cleanly
     await _speech.stop();
     
     // Wait for the speech engine to fully release
@@ -128,6 +133,11 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     
     // Ensure the text controller still has the old text
     _textController.text = savedText;
+    
+    // Re-enable listening state
+    setState(() {
+      _isListening = true;
+    });
     
     await _speech.listen(
       onResult: (result) {
