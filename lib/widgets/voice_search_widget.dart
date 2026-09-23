@@ -112,21 +112,18 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   }
 
   void _startListening({bool isRestart = false}) async {
-    print("--- _startListening called: isRestart=\, currentText=");
     if (!_speechAvailable) return;
 
     setState(() {
       _isListening = true;
       _userStopped = false;
-      if (!isRestart) {
-        _suggestion = null;
-        _alternativeFilters = null;
-        _textController.clear();
-        _previousText = "";
-        print("--- isRestart=false, cleared text");
+      _suggestion = null;
+      _alternativeFilters = null;
+      
+      if (_textController.text.isNotEmpty) {
+        _previousText = _textController.text + " ";
       } else {
-        _previousText = _textController.text + ( _textController.text.isNotEmpty ? " " : "");
-        print("--- isRestart=true, _previousText set to: ");
+        _previousText = "";
       }
     });
 
