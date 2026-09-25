@@ -1632,7 +1632,7 @@ class _AddAdDetailsPageState extends State<AddAdDetailsPage> {
                 'يوجد مصعد',
                 'حديقة',
                 'حارس / أمن وحماية',
-                'كراج تفك',
+                
                 'منطقة شواء',
                 'نظام كهرباء احتياطي للطوارئ',
                 'بركة سباحة',
