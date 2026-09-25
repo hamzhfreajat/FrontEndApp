@@ -16,6 +16,7 @@ class AddAdWizardPage extends StatefulWidget {
   final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
   final String? suggestedCategoryName;
+  final Map<String, dynamic>? editingAdData;
 
   const AddAdWizardPage({
     super.key,
@@ -23,6 +24,7 @@ class AddAdWizardPage extends StatefulWidget {
     this.uploadedImageUrls,
     this.reelVideo,
     this.suggestedCategoryName,
+    this.editingAdData,
   });
 
   @override

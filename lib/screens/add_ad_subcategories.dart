@@ -18,6 +18,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
   final List<XFile>? images;
   final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
+  final Map<String, dynamic>? editingAdData;
 
   const AddAdSubcategoriesPage({
     super.key,
@@ -28,6 +29,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
     this.images,
     this.uploadedImageUrls,
     this.reelVideo,
+    this.editingAdData,
   });
 
   @override

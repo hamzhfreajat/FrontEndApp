@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../services/api_service.dart';
 import '../models/category.dart';
-import 'add_ad_details.dart';
+import 'add_ad_reels.dart';
 
 class EditAdImagesPage extends StatefulWidget {
   final Category selectedLeafCategory;
@@ -146,17 +146,13 @@ class _EditAdImagesPageState extends State<EditAdImagesPage> {
 
     if (mounted) {
       Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AddAdDetailsPage(
-            selectedLeafCategory: widget.selectedLeafCategory,
-            transactionType: widget.transactionType,
-            selectedCity: widget.selectedCity,
-            selectedRegion: widget.selectedRegion,
-            editingAdData: widget.editingAdData,
+          context,
+          MaterialPageRoute(
+            builder: (_) => AddAdReelsPage(
+              editingAdData: widget.editingAdData,
+            ),
           ),
-        ),
-      );
+        );
     }
   }
 

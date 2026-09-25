@@ -8,7 +8,9 @@ import '../services/api_service.dart';
 import 'add_ad_reels.dart';
 
 class AddAdImagesPage extends StatefulWidget {
-  const AddAdImagesPage({super.key});
+  final Map<String, dynamic>? editingAdData;
+
+  const AddAdImagesPage({super.key, this.editingAdData});
 
   @override
   State<AddAdImagesPage> createState() => _AddAdImagesPageState();
@@ -186,6 +188,7 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
       context,
       MaterialPageRoute(
         builder: (context) => AddAdReelsPage(
+            editingAdData: widget.editingAdData,
           images: _images,
           uploadedImageUrls: uploadedUrls,
           suggestedCategory: _suggestedCategory,

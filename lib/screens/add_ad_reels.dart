@@ -8,6 +8,8 @@ import '../models/category.dart';
 import 'add_ad_wizard.dart';
 
 class AddAdReelsPage extends StatefulWidget {
+  final Map<String, dynamic>? editingAdData;
+
   final List<XFile>? images;
   final List<String>? uploadedImageUrls;
   final String? suggestedCategory;
@@ -17,6 +19,7 @@ class AddAdReelsPage extends StatefulWidget {
     this.images,
     this.uploadedImageUrls,
     this.suggestedCategory,
+    this.editingAdData,
   });
 
   @override
@@ -92,6 +95,7 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
       context,
       MaterialPageRoute(
         builder: (context) => AddAdWizardPage(
+            editingAdData: widget.editingAdData,
           images: widget.images,
           uploadedImageUrls: widget.uploadedImageUrls,
           reelVideo: _reelVideo,
