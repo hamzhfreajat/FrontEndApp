@@ -18,7 +18,7 @@ class VoiceSearchWidget extends StatefulWidget {
 }
 
 class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final stt.SpeechToText _speech = stt.SpeechToText();
   final TextEditingController _textController = TextEditingController();
 
@@ -53,6 +53,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initSpeech();
 
     // Pulse animation for mic
@@ -433,12 +434,23 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   }
 
   @override
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive || state == AppLifecycleState.hidden) {
+      if (_isListening) {
+        _stopListening();
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _promptTimer?.cancel();
     _pauseTimer?.cancel();
     _pulseController.dispose();
     _textController.dispose();
     _speech.stop();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
