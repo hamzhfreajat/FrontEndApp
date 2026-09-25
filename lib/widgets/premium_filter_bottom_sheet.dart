@@ -402,7 +402,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                       _selectedTopography.clear();
                       _selectedInstallmentPossible.clear();
                       _selectedAvailableServices.clear();
-                      _selectedMainFeatures.clear();
+                      _selectedPaymentMethod.clear();
+    _selectedMainFeatures.clear();
                       _selectedExtraFeatures.clear();
                       _selectedNearby.clear();
                       _selectedGovernorateId = null;
@@ -492,6 +493,8 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
                   _buildMultiSelectSection('الواجهة', ['شمالية', 'جنوبية', 'شرقية', 'غربية', 'شمالية شرقية', 'شمالية غربية', 'جنوبية شرقية', 'جنوبية غربية'], _selectedFacade, (val) { setState(() { _selectedFacade.contains(val) ? _selectedFacade.remove(val) : _selectedFacade.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedFacade.clear()); _triggerCountUpdate(); }),
                   
                   if (!_isCommercial()) ...[
+                    _buildMultiSelectSection('طريقة الدفع', ['كاش', 'أقساط', 'كاش أو أقساط'], _selectedPaymentMethod, (val) { setState(() { _selectedPaymentMethod.contains(val) ? _selectedPaymentMethod.remove(val) : _selectedPaymentMethod.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedPaymentMethod.clear()); _triggerCountUpdate(); }),
+                    
                     _buildMultiSelectSection('المزايا الرئيسية', ['تكييف مركزي', 'تدفئة', 'شرفة / بلكونة', 'غرفة خادمة', 'غرفة غسيل', 'خزائن حائط', 'مسبح خاص', 'سخان شمسي', 'زجاج شبابيك مزدوج', 'مناسبة لعرسان', 'كراج', 'سوبر ديلوكس'], _selectedMainFeatures, (val) { setState(() { _selectedMainFeatures.contains(val) ? _selectedMainFeatures.remove(val) : _selectedMainFeatures.add(val); }); _triggerCountUpdate(); }, () { setState(() => _selectedMainFeatures.clear()); _triggerCountUpdate(); }),
                   ],
                   
