@@ -6,6 +6,7 @@ import '../widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import 'add_ad_subcategories.dart';
+import 'add_ad_city.dart';
 import '../widgets/emoji_category_icon.dart';
 import '../widgets/support_action_button.dart';
 
@@ -52,6 +53,40 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
   }
   // Removed _getIconData as we use EmojiCategoryIcon
 
+
+  
+  void _skipCategorySelection() {
+    if (widget.editingAdData != null && widget.editingAdData!['category_id'] != null) {
+      final categoryId = widget.editingAdData!['category_id'];
+      
+      final provider = Provider.of<AppProvider>(context, listen: false);
+      final allCats = provider.categories ?? [];
+      Category? leafCat;
+      try {
+        leafCat = allCats.cast<Category>().firstWhere((c) => c.id == categoryId);
+      } catch (e) {
+        leafCat = null;
+      }
+      
+      if (leafCat != null) {
+        String txType = widget.editingAdData!['attributes']?['transaction_type'] ?? '';
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddAdCityPage(
+              selectedLeafCategory: leafCat!,
+              transactionType: txType,
+              images: widget.images,
+              uploadedImageUrls: widget.uploadedImageUrls,
+              reelVideo: widget.reelVideo,
+              editingAdData: widget.editingAdData,
+            ),
+          ),
+        );
+        return;
+      }
+    }
+  }
 
   Color _getColor(String? hexString) {
     if (hexString == null || hexString.isEmpty) return const Color(0xFF0075FF);
@@ -295,16 +330,24 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                  ),
                                );
                             },
-                            child: _buildCompactCategoryItem(
-                              suggestedCat.name,
-                              suggestedCat.iconName,
-                              _getColor(suggestedCat.colorHex),
-                              suggestedCat.description ?? '',
-                              hasChildren: true,
-                              tag: suggestedCat.tag,
-                              imageUrl: ApiService.resolveIconUrl(suggestedCat.iconName),
-                              isSuggested: true,
+
+                            child: Container(
+                              decoration: isSelected ? BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: Colors.green, width: 2),
+                                color: Colors.green.withOpacity(0.05),
+                              ) : null,
+                              child: _buildCompactCategoryItem(
+                                cat.name,
+                                cat.iconName,
+                                _getColor(cat.colorHex),
+                                cat.description ?? '',
+                                hasChildren: true,
+                                tag: cat.tag,
+                                imageUrl: ApiService.resolveIconUrl(cat.iconName),
+                              ),
                             ),
+
                           ),
                         ],
                       ),

@@ -4,6 +4,7 @@ import '../services/analytics_engine.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/category.dart';
 import 'add_ad_region.dart';
+import 'add_ad_details.dart';
 
 class AddAdCityPage extends StatefulWidget {
   final Category selectedLeafCategory;
@@ -57,6 +58,33 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
   List<String> get _filteredCities {
     if (_searchQuery.isEmpty) return _allCities;
     return _allCities.where((city) => city.contains(_searchQuery)).toList();
+  }
+
+  
+  void _skipLocationSelection() {
+    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null) {
+      final city = widget.editingAdData!['attributes']['city'];
+      final region = widget.editingAdData!['attributes']['region'];
+      
+      if (city != null && region != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddAdDetailsPage(
+              selectedLeafCategory: widget.selectedLeafCategory,
+              transactionType: widget.transactionType,
+              images: widget.images,
+              uploadedImageUrls: widget.uploadedImageUrls,
+              reelVideo: widget.reelVideo,
+              selectedCity: city.toString(),
+              selectedRegion: region.toString(),
+              editingAdData: widget.editingAdData,
+            ),
+          ),
+        );
+        return;
+      }
+    }
   }
 
   void _selectCity(String city) async {
