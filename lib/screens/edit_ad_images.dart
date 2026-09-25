@@ -95,9 +95,10 @@ class _EditAdImagesPageState extends State<EditAdImagesPage> {
   }
 
   Future<void> _nextStep() async {
-    if (_existingUrls.isEmpty && _newImages.isEmpty) {
+    int totalImages = _existingUrls.length + _newImages.length;
+    if (totalImages < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('الرجاء اختيار صور للإعلان'), backgroundColor: Colors.red),
+        const SnackBar(content: Text('لابد من اختيار 3 صور على الأقل للإعلان'), backgroundColor: Colors.red),
       );
       return;
     }
