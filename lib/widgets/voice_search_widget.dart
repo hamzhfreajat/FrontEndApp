@@ -546,6 +546,19 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
                         ).createShader(bounds),
                         child: const Icon(Icons.psychology, color: Colors.white, size: 24),
                       ),
+                      suffixIcon: _textController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Color(0xFF94A3B8), size: 20),
+                              onPressed: () {
+                                setState(() {
+                                  _textController.clear();
+                                  _finalizedWords = "";
+                                  _suggestion = null;
+                                  _alternativeFilters = null;
+                                });
+                              },
+                            )
+                          : null,
                       hintText: _isListening
                           ? 'جاري الاستماع...'
                           : 'مثال: ' + _smartPrompts[_currentPromptIndex],
