@@ -142,20 +142,30 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
             final recognized = result.recognizedWords.trim();
+            String newText;
             if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
-              _textController.text = recognized;
+              newText = recognized;
             } else {
-              _textController.text = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+              newText = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
             }
+            if (newText.length > 300) {
+              newText = newText.substring(0, 300);
+            }
+            _textController.text = newText;
           });
         }
         if (result.finalResult) {
           final recognized = result.recognizedWords.trim();
+          String newFinal;
           if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
-            _finalizedWords = recognized;
+            newFinal = recognized;
           } else {
-            _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+            newFinal = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
           }
+          if (newFinal.length > 300) {
+             newFinal = newFinal.substring(0, 300);
+          }
+          _finalizedWords = newFinal;
         } else {
           _pauseTimer = Timer(const Duration(milliseconds: 1200), () {
             if (mounted) {
@@ -163,7 +173,14 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
             }
           });
         }
-        if (_textController.text.length >= 300) {
+        if (_textController.text.length >= 300 && _isListening) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم الوصول للحد الأقصى (300 حرف). جاري البحث...'),
+              duration: Duration(seconds: 3),
+              backgroundColor: Color(0xFF6366F1),
+            ),
+          );
           _stopListening();
         }
       },
@@ -197,20 +214,30 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
             final recognized = result.recognizedWords.trim();
+            String newText;
             if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
-              _textController.text = recognized;
+              newText = recognized;
             } else {
-              _textController.text = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+              newText = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
             }
+            if (newText.length > 300) {
+              newText = newText.substring(0, 300);
+            }
+            _textController.text = newText;
           });
         }
         if (result.finalResult) {
           final recognized = result.recognizedWords.trim();
+          String newFinal;
           if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
-            _finalizedWords = recognized;
+            newFinal = recognized;
           } else {
-            _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+            newFinal = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
           }
+          if (newFinal.length > 300) {
+             newFinal = newFinal.substring(0, 300);
+          }
+          _finalizedWords = newFinal;
         } else {
           _pauseTimer = Timer(const Duration(milliseconds: 1200), () {
             if (mounted) {
@@ -218,7 +245,14 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
             }
           });
         }
-        if (_textController.text.length >= 300) {
+        if (_textController.text.length >= 300 && _isListening) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم الوصول للحد الأقصى (300 حرف). جاري البحث...'),
+              duration: Duration(seconds: 3),
+              backgroundColor: Color(0xFF6366F1),
+            ),
+          );
           _stopListening();
         }
       },
