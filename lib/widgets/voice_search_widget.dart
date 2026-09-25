@@ -312,9 +312,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         final actionRequired = response['action_required'];
         final suggestion = response['suggestion'];
         
-        if (actionRequired == 'ask_transaction') {
+        if (actionRequired != null) {
            setState(() {
-             _suggestion = suggestion ?? 'هل تبحث عن عقار للبيع أم للإيجار؟';
+             if (actionRequired == 'ask_transaction') {
+               _suggestion = suggestion ?? 'هل تبحث عن عقار للبيع أم للإيجار؟';
+             } else {
+               _suggestion = actionRequired;
+             }
            });
            return;
         }
