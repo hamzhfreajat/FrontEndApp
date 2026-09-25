@@ -35,11 +35,33 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
 
   Future<void> _pickImages() async {
     try {
-      final List<XFile> picked = await _picker.pickMultiImage();
+      final List<XFile> picked = await _picker.pickMultiImage(imageQuality: 80);
       if (picked.isNotEmpty) {
+        List<XFile> validImages = [];
+        bool hasLargeImages = false;
+
+        for (var file in picked) {
+          final bytes = await file.length();
+          if (bytes > 5 * 1024 * 1024) { // 5MB
+            hasLargeImages = true;
+          } else {
+            validImages.add(file);
+          }
+        }
+
+        if (hasLargeImages && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('تم استبعاد بعض الصور لأن حجمها يتجاوز 5 ميجابايت.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+
         final wasEmpty = _images.isEmpty;
         setState(() {
-          _images.addAll(picked);
+          _images.addAll(validImages);
           if (_images.length > 20) {
             _images.removeRange(20, _images.length);
           }

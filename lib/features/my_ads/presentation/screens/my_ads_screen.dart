@@ -16,6 +16,7 @@ import '../widgets/my_ads_skeleton.dart';
 import '../../domain/entities/my_ad_entities.dart';
 import '../../../../services/analytics_engine.dart';
 import '../../../../screens/add_ad_details.dart';
+import '../../../../screens/edit_ad_images.dart';
 import '../../../../services/api_service.dart';
 import '../../../../services/iap_service.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
@@ -107,7 +108,7 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           final String city = adToEdit.attributes?['city']?.toString() ?? 'O1U.O U+';
           final String region = adToEdit.attributes?['region']?.toString() ?? '';
           
-          Navigator.push(context, MaterialPageRoute(builder: (_) => AddAdDetailsPage(
+          Navigator.push(context, MaterialPageRoute(builder: (_) => EditAdImagesPage(
              selectedLeafCategory: category,
              transactionType: adToEdit.attributes?['transaction_type']?.toString() ?? '',
              selectedCity: city,
