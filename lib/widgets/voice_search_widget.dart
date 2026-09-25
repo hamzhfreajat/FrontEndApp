@@ -27,6 +27,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   bool _speechAvailable = false;
   bool _userStopped = false;
   bool _isRestarting = false;
+  String _finalizedWords = '';
   String? _suggestion;
   Map<String, dynamic>? _alternativeFilters;
   int? _alternativeCount;
@@ -126,9 +127,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     
     // Restore the text
     _textController.text = savedText;
-    
-    // Capture as LOCAL variable so the closure below is immune to any future changes
-    final prefix = savedText.isNotEmpty ? "$savedText " : "";
+    _finalizedWords = savedText.trim();
     
     setState(() {
       _isListening = true;
@@ -136,11 +135,25 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     _isRestarting = false;
     
     await _speech.listen(
+      listenMode: stt.ListenMode.dictation,
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
-            _textController.text = prefix + result.recognizedWords;
+            final recognized = result.recognizedWords.trim();
+            if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
+              _textController.text = recognized;
+            } else {
+              _textController.text = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+            }
           });
+        }
+        if (result.finalResult) {
+          final recognized = result.recognizedWords.trim();
+          if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
+            _finalizedWords = recognized;
+          } else {
+            _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+          }
         }
         if (_textController.text.length >= 300) {
           _stopListening();
@@ -164,16 +177,31 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       _suggestion = null;
       _alternativeFilters = null;
       _textController.clear();
+      _finalizedWords = '';
     });
 
     _pulseController.repeat(reverse: true);
 
     await _speech.listen(
+      listenMode: stt.ListenMode.dictation,
       onResult: (result) {
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
-            _textController.text = result.recognizedWords;
+            final recognized = result.recognizedWords.trim();
+            if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
+              _textController.text = recognized;
+            } else {
+              _textController.text = _finalizedWords + (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+            }
           });
+        }
+        if (result.finalResult) {
+          final recognized = result.recognizedWords.trim();
+          if (_finalizedWords.isNotEmpty && recognized.startsWith(_finalizedWords)) {
+            _finalizedWords = recognized;
+          } else {
+            _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
+          }
         }
         if (_textController.text.length >= 300) {
           _stopListening();
