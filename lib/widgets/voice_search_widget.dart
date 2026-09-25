@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../services/api_service.dart';
 import '../models/category.dart';
+import '../providers/app_provider.dart';
 import '../screens/category_details_page.dart';
 import '../screens/add_ad_images.dart';
 import '../screens/ads_list_page.dart';
@@ -303,6 +305,19 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         final locStr = loc.toString();
         if (locStr.isNotEmpty) {
           locations.add(locStr);
+        }
+      }
+    }
+
+    if (filters['city_id'] != null) {
+      final int cityId = filters['city_id'];
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      if (appProvider.dbCities != null) {
+        try {
+          final cityObj = appProvider.dbCities!.firstWhere((c) => c.id == cityId);
+          await appProvider.setLocation(cityObj, null, null);
+        } catch (e) {
+          // ignore
         }
       }
     }
@@ -665,3 +680,4 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 }
+
