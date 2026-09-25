@@ -331,22 +331,16 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                );
                             },
 
-                            child: Container(
-                              decoration: isSelected ? BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(color: Colors.green, width: 2),
-                                color: Colors.green.withOpacity(0.05),
-                              ) : null,
-                              child: _buildCompactCategoryItem(
-                                cat.name,
-                                cat.iconName,
-                                _getColor(cat.colorHex),
-                                cat.description ?? '',
+                            child: _buildCompactCategoryItem(
+                                suggestedCat.name,
+                                suggestedCat.iconName,
+                                _getColor(suggestedCat.colorHex),
+                                suggestedCat.description ?? '',
                                 hasChildren: true,
-                                tag: cat.tag,
-                                imageUrl: ApiService.resolveIconUrl(cat.iconName),
+                                tag: suggestedCat.tag,
+                                imageUrl: ApiService.resolveIconUrl(suggestedCat.iconName),
+                                isSuggested: true,
                               ),
-                            ),
 
                           ),
                         ],
