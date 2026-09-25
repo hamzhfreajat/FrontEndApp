@@ -185,26 +185,23 @@ class _HomePageState extends State<HomePage> {
                       VoiceSearchWidget(allCategories: provider.categories ?? []),
                       _QuickActionsGateways(categories: provider.categories),
                       Padding(
-                        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         child: InkWell(
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const SmartFinderWizard()));
                           },
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(20),
                           child: Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF0F172A), Color(0xFF1E3A8A)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
+                              color: Theme.of(context).cardColor,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.15), width: 1.5),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF1E3A8A).withValues(alpha: 0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                                  color: const Color(0xFF3B82F6).withOpacity(0.06),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
                                 ),
                               ],
                             ),
@@ -213,44 +210,48 @@ class _HomePageState extends State<HomePage> {
                                 Positioned(
                                   right: -20,
                                   top: -20,
-                                  child: Icon(Icons.travel_explore, size: 100, color: Colors.white.withValues(alpha: 0.05)),
+                                  child: Icon(Icons.travel_explore, size: 100, color: const Color(0xFF3B82F6).withOpacity(0.03)),
                                 ),
                                 Positioned(
                                   left: -30,
                                   bottom: -10,
-                                  child: Icon(Icons.map, size: 80, color: Colors.white.withValues(alpha: 0.03)),
+                                  child: Icon(Icons.map, size: 80, color: const Color(0xFF3B82F6).withOpacity(0.02)),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                                   child: Row(
                                     children: [
                                       Container(
-                                        padding: const EdgeInsets.all(12),
+                                        padding: const EdgeInsets.all(14),
                                         decoration: BoxDecoration(
-                                          color: Colors.white.withValues(alpha: 0.15),
-                                          borderRadius: BorderRadius.circular(12),
+                                          gradient: const LinearGradient(
+                                            colors: [Color(0xFF3B82F6), Color(0xFF1E3A8A)],
+                                            begin: Alignment.topLeft,
+                                            end: Alignment.bottomRight,
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
                                         ),
                                         child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
                                       ),
                                       const SizedBox(width: 16),
-                                      const Expanded(
+                                      Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
                                               'دع سوق كوم يجد المنطقة\nالتي تناسب احتياجك',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black87,
                                                 fontSize: 15,
                                                 fontWeight: FontWeight.bold,
                                                 height: 1.3,
                                               ),
                                             ),
-                                            SizedBox(height: 6),
-                                            Text(
+                                            const SizedBox(height: 6),
+                                            const Text(
                                               'ابدأ رحلة البحث الذكية الآن',
                                               style: TextStyle(
-                                                color: Color(0xFF94A3B8),
+                                                color: Color(0xFF64748B),
                                                 fontSize: 12,
                                               ),
                                             ),
@@ -259,11 +260,11 @@ class _HomePageState extends State<HomePage> {
                                       ),
                                       Container(
                                         padding: const EdgeInsets.all(10),
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFF3B82F6),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF3B82F6).withOpacity(0.1),
                                           shape: BoxShape.circle,
                                         ),
-                                        child: const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                                        child: const Icon(Icons.arrow_forward_ios, color: const Color(0xFF3B82F6), size: 14),
                                       ),
                                     ],
                                   ),
@@ -1141,7 +1142,7 @@ class _QuickActionsGateways extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Row(
         children: [
           Expanded(

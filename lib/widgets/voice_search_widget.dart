@@ -656,12 +656,10 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
             ),
           ),
 
-          const SizedBox(height: 12),
-
           // Search button (visible when text is present)
           if (_textController.text.trim().isNotEmpty && !_isSearching)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.only(top: 12.0, left: 4.0, right: 4.0),
               child: SizedBox(
                 width: double.infinity,
                 height: 46,
