@@ -114,7 +114,7 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
   Set<String> _selectedInstallmentPossible = {};
   Set<String> _selectedAvailableServices = {};
   Set<String> _selectedMainFeatures = {};
-  List<String> _selectedPaymentMethod = [];
+  Set<String> _selectedPaymentMethod = {};
   Set<String> _selectedExtraFeatures = {};
   Set<String> _selectedNearby = {};
 
