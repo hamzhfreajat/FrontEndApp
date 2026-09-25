@@ -29,6 +29,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   bool _isRestarting = false;
   String _finalizedWords = '';
   String? _suggestion;
+  String _suggestionType = 'tip';
   Map<String, dynamic>? _alternativeFilters;
   int? _alternativeCount;
 
@@ -103,7 +104,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
             _isListening = false;
             _pulseController.stop();
             if (_textController.text.isEmpty) {
-              _suggestion = 'حدث خطأ في التقاط الصوت. يرجى المحاولة مرة أخرى.';
+                _showMessage('حدث خطأ في التقاط الصوت. يرجى المحاولة مرة أخرى.', 'error');
             }
           });
         }
@@ -192,6 +193,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     );
   }
 
+  void _showMessage(String text, String type) {
+    setState(() {
+      _suggestion = text;
+      _suggestionType = type;
+    });
+  }
+  
   void _startListening() async {
     if (!_speechAvailable) return;
 
@@ -305,7 +313,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         );
       } else if (intent == 'error') {
         setState(() {
-          _suggestion = response['suggestion'] ?? 'حدث خطأ. يرجى المحاولة مرة أخرى.';
+            _showMessage(response['suggestion'] ?? 'حدث خطأ. يرجى المحاولة مرة أخرى.', 'error');
         });
       } else if (intent == 'search' && (response['filters'] != null || response['filters_applied'] != null)) {
         final filters = response['filters'] ?? response['filters_applied'];
@@ -315,9 +323,9 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         if (actionRequired != null) {
            setState(() {
              if (actionRequired == 'ask_transaction') {
-               _suggestion = suggestion ?? 'هل تبحث عن عقار للبيع أم للإيجار؟';
+                 _showMessage(suggestion ?? 'هل تبحث عن عقار للبيع أم للإيجار؟', 'warning');
              } else {
-               _suggestion = actionRequired;
+                 _showMessage(actionRequired, 'warning');
              }
            });
            return;
@@ -327,7 +335,6 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         
         if (count == 0 && response['alternative_filters'] != null) {
           setState(() {
-            _suggestion = suggestion;
             _alternativeFilters = response['alternative_filters'];
             _alternativeCount = response['alternative_count'] ?? 0;
           });
@@ -336,13 +343,13 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
         }
       } else {
         setState(() {
-          _suggestion = 'لم أفهم طلبك جيداً. جرب "شقة للإيجار في عمان".';
+            _showMessage('لم أفهم طلبك جيداً. جرب شقة للإيجار في عمان.', 'error');
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _suggestion = 'حدث خطأ في الاتصال بالسيرفر.';
+            _showMessage('حدث خطأ في الاتصال بالسيرفر.', 'error');
         });
       }
     } finally {
@@ -686,35 +693,59 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
               ),
             ),
 
-          // Suggestions / Errors
-          if (_suggestion != null && !_isSearching)
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFFBEB),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFFDE68A)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.lightbulb_outline,
-                      color: Color(0xFFD97706)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _suggestion!,
-                      style: const TextStyle(
-                        color: Color(0xFF92400E),
-                        fontSize: 14,
-                        height: 1.5,
+            // Suggestions / Errors
+            if (_suggestion != null && !_isSearching)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: _suggestionType == 'error' 
+                      ? const Color(0xFFFEF2F2) 
+                      : _suggestionType == 'warning' 
+                          ? const Color(0xFFFFFBEB) 
+                          : const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _suggestionType == 'error' 
+                        ? const Color(0xFFFECACA) 
+                        : _suggestionType == 'warning' 
+                            ? const Color(0xFFFDE68A) 
+                            : const Color(0xFFC7D2FE),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _suggestionType == 'error' 
+                          ? Icons.error_outline 
+                          : _suggestionType == 'warning' 
+                              ? Icons.warning_amber_rounded 
+                              : Icons.lightbulb_outline,
+                      color: _suggestionType == 'error' 
+                          ? const Color(0xFFDC2626) 
+                          : _suggestionType == 'warning' 
+                              ? const Color(0xFFD97706) 
+                              : const Color(0xFF4F46E5),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _suggestion!,
+                        style: TextStyle(
+                          color: _suggestionType == 'error' 
+                              ? const Color(0xFF991B1B) 
+                              : _suggestionType == 'warning' 
+                                  ? const Color(0xFF92400E) 
+                                  : const Color(0xFF3730A3),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          height: 1.5,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            
           // Alternative Search Actions (like 'ask_transaction')
           if (_suggestion != null && !_isSearching && _suggestion!.contains("هل تبحث عن عقار للبيع أم للإيجار؟"))
             Padding(
