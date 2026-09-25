@@ -489,7 +489,12 @@ class _AddAdBasicInfoPageState extends State<AddAdBasicInfoPage> {
                         TextFormField(
                           controller: _titleController,
                           focusNode: _titleFocus,
-                          validator: (val) => val == null || val.trim().length < 10 ? 'أدخل عنواناً لا يقل عن 10 أحرف' : null,
+                          maxLength: 70,
+                          validator: (val) {
+                            if (val == null || val.trim().length < 10) return 'أدخل عنواناً لا يقل عن 10 أحرف';
+                            if (val.trim().length > 70) return 'العنوان طويل جداً (الحد الأقصى 70 حرف)';
+                            return null;
+                          },
                           minLines: 1,
                           maxLines: null,
                           scrollPhysics: const NeverScrollableScrollPhysics(),
