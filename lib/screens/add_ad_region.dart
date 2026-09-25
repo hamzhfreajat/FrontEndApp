@@ -156,7 +156,14 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
     });
   }
 
+  final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   List<String> get _filteredRegions {
     if (_searchQuery.isEmpty) return _allRegions;
@@ -323,15 +330,35 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
                     ],
                   ),
                   child: TextField(
-                    onChanged: (value) => setState(() => _searchQuery = value),
-                    decoration: InputDecoration(
-                      hintText: 'ابحث عن الحي أو المنطقة...',
-                      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
-                      prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF10B981)),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                      controller: _searchController,
+                      onChanged: (value) => setState(() => _searchQuery = value),
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                      decoration: InputDecoration(
+                        hintText: 'ابحث عن الحي أو المنطقة...',
+                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15, fontWeight: FontWeight.normal),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFF10B981), Color(0xFF047857)],
+                            ).createShader(bounds),
+                            child: const Icon(Icons.search_rounded, color: Colors.white, size: 26),
+                          ),
+                        ),
+                        prefixIconConstraints: const BoxConstraints(minWidth: 50, minHeight: 50),
+                        suffixIcon: _searchQuery.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.cancel_rounded, color: Color(0xFF94A3B8), size: 22),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _searchQuery = '');
+                                },
+                              )
+                            : null,
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                      ),
                     ),
-                  ),
                 ),
               ],
             ),
