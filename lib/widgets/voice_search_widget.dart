@@ -44,6 +44,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   ];
   int _currentPromptIndex = 0;
   Timer? _promptTimer;
+  Timer? _pauseTimer;
 
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
@@ -137,6 +138,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     await _speech.listen(
       listenMode: stt.ListenMode.dictation,
       onResult: (result) {
+        _pauseTimer?.cancel();
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
             final recognized = result.recognizedWords.trim();
@@ -154,6 +156,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
           } else {
             _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
           }
+        } else {
+          _pauseTimer = Timer(const Duration(milliseconds: 1200), () {
+            if (mounted) {
+              _finalizedWords = _textController.text.trim();
+            }
+          });
         }
         if (_textController.text.length >= 300) {
           _stopListening();
@@ -185,6 +193,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
     await _speech.listen(
       listenMode: stt.ListenMode.dictation,
       onResult: (result) {
+        _pauseTimer?.cancel();
         if (result.recognizedWords.isNotEmpty) {
           setState(() {
             final recognized = result.recognizedWords.trim();
@@ -202,6 +211,12 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
           } else {
             _finalizedWords += (_finalizedWords.isEmpty ? '' : ' ') + recognized;
           }
+        } else {
+          _pauseTimer = Timer(const Duration(milliseconds: 1200), () {
+            if (mounted) {
+              _finalizedWords = _textController.text.trim();
+            }
+          });
         }
         if (_textController.text.length >= 300) {
           _stopListening();
@@ -375,6 +390,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
   @override
   void dispose() {
     _promptTimer?.cancel();
+    _pauseTimer?.cancel();
     _pulseController.dispose();
     _textController.dispose();
     _speech.stop();
