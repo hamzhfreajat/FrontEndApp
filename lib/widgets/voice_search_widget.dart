@@ -343,7 +343,7 @@ class _VoiceSearchWidgetState extends State<VoiceSearchWidget>
       if (appProvider.dbCities != null) {
         try {
           final cityObj = appProvider.dbCities!.firstWhere((c) => c.id == cityId);
-          await appProvider.setLocation(cityObj, null, null);
+          appProvider.setLocation(cityObj, null, null);
         } catch (e) {
           // ignore
         }
