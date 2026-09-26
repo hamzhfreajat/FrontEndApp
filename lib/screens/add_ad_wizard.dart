@@ -370,23 +370,6 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                     ),
 
                   
-                    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null && widget.editingAdData!['attributes']['transaction_type'] != null)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 24),
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: _skipCategorySelection,
-                          icon: const Icon(Icons.fast_forward),
-                          label: const Text('الاحتفاظ بالقسم الحالي والمتابعة'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                        ),
-                      ),
                     const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 16),
                   
