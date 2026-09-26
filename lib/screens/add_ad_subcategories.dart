@@ -471,14 +471,33 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
                           },
                           child: Stack(
                             children: [
-                              _buildCompactCategoryItem(
-                                cat.name,
-                                cat.iconName,
-                                catColor,
-                                cat.description ?? '',
-                                hasChildren: true,
-                                imageUrl: ApiService.resolveIconUrl(cat.iconName),
-                              ),
+                              Builder(
+                                  builder: (context) {
+                                    bool _checkIsSelected() {
+                                      if (widget.editingAdData == null) return false;
+                                      if (widget.editingAdData!['category_id'] == cat.id) return true;
+                                      if (widget.resolvedCategoryPath.contains(cat.id)) return true;
+                                      
+                                      final attrs = widget.editingAdData!['attributes'] as Map<String, dynamic>? ?? {};
+                                      if (attrs['leaf_category_name']?.toString().trim() == cat.name.trim()) return true;
+                                      if (attrs['transaction_type']?.toString().trim() == cat.name.trim()) return true;
+                                      
+                                      for (final value in attrs.values) {
+                                        if (value?.toString().trim() == cat.name.trim()) return true;
+                                      }
+                                      return false;
+                                    }
+                                    return _buildCompactCategoryItem(
+                                      cat.name,
+                                      cat.iconName,
+                                      catColor,
+                                      cat.description ?? '',
+                                      hasChildren: true,
+                                      isSelected: _checkIsSelected(),
+                                      imageUrl: ApiService.resolveIconUrl(cat.iconName),
+                                    );
+                                  }
+                                ),
                             ],
                           ),
                         );
