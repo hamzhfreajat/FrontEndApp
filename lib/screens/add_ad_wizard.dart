@@ -371,16 +371,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                   
 
                     const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
-                    if (widget.editingAdData != null)
-                      Container(
-                        color: Colors.red.shade100,
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          ['DEBUG INFO:', 'CategoryID: ' + (widget.editingAdData!['category_id']?.toString() ?? 'null'), 'TxType: ' + (widget.editingAdData!['attributes']?['transaction_type']?.toString() ?? 'null'), 'Path: ' + _resolvedCategoryPath.toString()].join('\n'),
-                          style: const TextStyle(fontSize: 12, color: Colors.black),
-                        ),
-                      ),
+
                   const SizedBox(height: 16),
 
                   
