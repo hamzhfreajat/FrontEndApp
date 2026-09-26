@@ -19,6 +19,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
   final List<String>? uploadedImageUrls;
   final XFile? reelVideo;
   final Map<String, dynamic>? editingAdData;
+  final List<int> resolvedCategoryPath;
 
   const AddAdSubcategoriesPage({
     super.key,
@@ -30,6 +31,7 @@ class AddAdSubcategoriesPage extends StatefulWidget {
     this.uploadedImageUrls,
     this.reelVideo,
     this.editingAdData,
+    this.resolvedCategoryPath = const [],
   });
 
   @override

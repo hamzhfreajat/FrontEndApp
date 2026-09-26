@@ -43,7 +43,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     super.dispose();
   }
 
-  int? _resolvedRootCategoryId;
+  List<int> _resolvedCategoryPath = [];
 
   @override
   void initState() {
@@ -52,29 +52,33 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _isPageTransitioning = false);
     });
-    _resolveRootCategory();
+    _resolveCategoryPath();
   }
 
-  Future<void> _resolveRootCategory() async {
+  Future<void> _resolveCategoryPath() async {
     if (widget.editingAdData == null || widget.editingAdData!['category_id'] == null) return;
     
     int leafId = int.tryParse(widget.editingAdData!['category_id'].toString()) ?? 0;
     if (leafId == 0) return;
     
     try {
+      List<int> path = [leafId];
       Category current = await ApiService().fetchCategoryById(leafId);
       while (current.parentId != null) {
+        path.add(current.parentId!);
         current = await ApiService().fetchCategoryById(current.parentId!);
       }
       if (mounted) {
         setState(() {
-          _resolvedRootCategoryId = current.id;
+          _resolvedCategoryPath = path;
         });
       }
     } catch (e) {
-      debugPrint('Error resolving root category: ');
+      debugPrint('Error resolving category path: ');
     }
   }
+
+
   // Removed _getIconData as we use EmojiCategoryIcon
 
 
@@ -320,6 +324,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
           uploadedImageUrls: widget.uploadedImageUrls,
                                      reelVideo: widget.reelVideo,
                                      editingAdData: widget.editingAdData,
+                                     resolvedCategoryPath: _resolvedCategoryPath,
                                    ),
                                  ),
                                );
@@ -448,6 +453,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
           uploadedImageUrls: widget.uploadedImageUrls,
                                    reelVideo: widget.reelVideo,
                                      editingAdData: widget.editingAdData,
+                                     resolvedCategoryPath: _resolvedCategoryPath,
                                    ),
                                ),
                              );
@@ -460,7 +466,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                             hasChildren: true,
                             tag: cat.tag,
                             imageUrl: ApiService.resolveIconUrl(cat.iconName),
-                            isSelected: (widget.editingAdData != null && widget.editingAdData!['attributes']?['transaction_type']?.toString().trim() == cat.name.trim()) || (_resolvedRootCategoryId == cat.id),
+                            isSelected: (widget.editingAdData != null && widget.editingAdData!['attributes']?['transaction_type']?.toString().trim() == cat.name.trim()) || (_resolvedCategoryPath.contains(cat.id)),
                           ),
                         );
                       },
