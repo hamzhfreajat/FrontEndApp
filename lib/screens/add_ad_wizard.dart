@@ -377,7 +377,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                         padding: const EdgeInsets.all(12),
                         margin: const EdgeInsets.symmetric(vertical: 12),
                         child: Text(
-                          ['DEBUG INFO:', 'CategoryID: ', 'TxType: ', 'Path: '].join('\n'),
+                          ['DEBUG INFO:', 'CategoryID: ' + (widget.editingAdData!['category_id']?.toString() ?? 'null'), 'TxType: ' + (widget.editingAdData!['attributes']?['transaction_type']?.toString() ?? 'null'), 'Path: ' + _resolvedCategoryPath.toString()].join('\n'),
                           style: const TextStyle(fontSize: 12, color: Colors.black),
                         ),
                       ),
