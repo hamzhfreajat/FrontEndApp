@@ -52,12 +52,42 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
 
   bool _hasError = false;
 
+  List<int> _localResolvedPath = [];
+
   @override
   void initState() {
     super.initState();
     AnalyticsEngine().logScreenViewed(screenName: 'add_ad_subcategories');
     _currentCategoryPath = widget.categoryPath ?? [];
+    _localResolvedPath = widget.resolvedCategoryPath;
     _loadData();
+    if (_localResolvedPath.isEmpty && widget.editingAdData != null) {
+      _resolvePathLocally();
+    }
+  }
+
+  Future<void> _resolvePathLocally() async {
+    final categoryId = widget.editingAdData?['category_id'];
+    if (categoryId == null) return;
+    int leafId = int.tryParse(categoryId.toString()) ?? 0;
+    if (leafId == 0) return;
+    try {
+      final allCats = await ApiService().fetchCategories();
+      final catMap = {for (var c in allCats) c.id: c};
+      List<int> path = [];
+      int? currentId = leafId;
+      while (currentId != null && catMap.containsKey(currentId)) {
+        path.add(currentId);
+        currentId = catMap[currentId]!.parentId;
+      }
+      if (mounted) {
+        setState(() {
+          _localResolvedPath = path;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error resolving path locally: $e');
+    }
   }
 
   Future<void> _loadData() async {
@@ -466,7 +496,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
           uploadedImageUrls: widget.uploadedImageUrls,
                                     reelVideo: widget.reelVideo,
                                     editingAdData: widget.editingAdData,
-                                    resolvedCategoryPath: widget.resolvedCategoryPath,
+                                    resolvedCategoryPath: _localResolvedPath.isNotEmpty ? _localResolvedPath : widget.resolvedCategoryPath,
                                   ),
                                 ),
                               );
@@ -478,7 +508,7 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
                                     bool _checkIsSelected() {
                                       if (widget.editingAdData == null) return false;
                                       if (widget.editingAdData!['category_id'] == cat.id) return true;
-                                      if (widget.resolvedCategoryPath.contains(cat.id)) return true;
+                                      if (widget.resolvedCategoryPath.contains(cat.id) || _localResolvedPath.contains(cat.id)) return true;
                                       
                                       final attrs = widget.editingAdData!['attributes'] as Map<String, dynamic>? ?? {};
                                       if (attrs['leaf_category_name']?.toString().trim() == cat.name.trim()) return true;
