@@ -369,8 +369,20 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                     ),
 
                   
+
                     const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+                    if (widget.editingAdData != null)
+                      Container(
+                        color: Colors.red.shade100,
+                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          ['DEBUG INFO:', 'CategoryID: ', 'TxType: ', 'Path: '].join('\n'),
+                          style: const TextStyle(fontSize: 12, color: Colors.black),
+                        ),
+                      ),
                   const SizedBox(height: 16),
+
                   
                   
                     // Modern Search Bar
