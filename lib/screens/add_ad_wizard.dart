@@ -59,32 +59,32 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     if (widget.editingAdData != null && widget.editingAdData!['category_id'] != null) {
       final categoryId = widget.editingAdData!['category_id'];
       
-      final provider = Provider.of<AppProvider>(context, listen: false);
-      final allCats = provider.categories ?? [];
-      Category? leafCat;
-      try {
-        leafCat = allCats.cast<Category>().firstWhere((c) => c.id == categoryId);
-      } catch (e) {
-        leafCat = null;
-      }
+      // We don't have the leaf category object loaded, but we have its ID and name.
+      // We can just construct a dummy leaf category object since AddAdCityPage only needs its id and name.
+      String txType = widget.editingAdData!['attributes']?['transaction_type'] ?? '';
+      String leafCatName = widget.editingAdData!['attributes']?['leaf_category_name'] ?? '';
       
-      if (leafCat != null) {
-        String txType = widget.editingAdData!['attributes']?['transaction_type'] ?? '';
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddAdCityPage(
-              selectedLeafCategory: leafCat!,
-              transactionType: txType,
-              images: widget.images,
-              uploadedImageUrls: widget.uploadedImageUrls,
-              reelVideo: widget.reelVideo,
-              editingAdData: widget.editingAdData,
-            ),
+      Category dummyLeaf = Category(
+        id: categoryId,
+        name: leafCatName,
+        iconName: '',
+        colorHex: '',
+      );
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddAdCityPage(
+            selectedLeafCategory: dummyLeaf,
+            transactionType: txType,
+            images: widget.images,
+            uploadedImageUrls: widget.uploadedImageUrls,
+            reelVideo: widget.reelVideo,
+            editingAdData: widget.editingAdData,
           ),
-        );
-        return;
-      }
+        ),
+      );
+      return;
     }
   }
 
@@ -372,7 +372,26 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                   const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 16),
                   
-                  // Modern Search Bar
+                  
+                  if (widget.editingAdData != null && widget.editingAdData!['category_id'] != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 24),
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _skipCategorySelection,
+                        icon: const Icon(Icons.fast_forward),
+                        label: const Text('Ø§Ù„Ø§Ø­ØªÙ Ø§Ø¸ Ø¨Ø§Ù„Ù‚Ø³Ù… Ø§Ù„Ø­Ø§Ù„ÙŠ ÙˆØ§Ù„Ù…ØªØ§Ø¨Ø¹Ø©'),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                    ),
+
+                    // Modern Search Bar
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
