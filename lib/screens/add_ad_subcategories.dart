@@ -465,6 +465,8 @@ class _AddAdSubcategoriesPageState extends State<AddAdSubcategoriesPage> {
                                     images: widget.images,
           uploadedImageUrls: widget.uploadedImageUrls,
                                     reelVideo: widget.reelVideo,
+                                    editingAdData: widget.editingAdData,
+                                    resolvedCategoryPath: widget.resolvedCategoryPath,
                                   ),
                                 ),
                               );

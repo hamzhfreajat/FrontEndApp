@@ -62,19 +62,25 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     if (leafId == 0) return;
     
     try {
-      List<int> path = [leafId];
-      Category current = await ApiService().fetchCategoryById(leafId);
-      while (current.parentId != null) {
-        path.add(current.parentId!);
-        current = await ApiService().fetchCategoryById(current.parentId!);
+      // Fetch ALL categories (the /categories endpoint without parent_id filter returns everything)
+      final allCats = await ApiService().fetchCategories();
+      final catMap = {for (var c in allCats) c.id: c};
+      
+      List<int> path = [];
+      int? currentId = leafId;
+      while (currentId != null && catMap.containsKey(currentId)) {
+        path.add(currentId);
+        currentId = catMap[currentId]!.parentId;
       }
+      
+      debugPrint('Resolved category path: $path');
       if (mounted) {
         setState(() {
           _resolvedCategoryPath = path;
         });
       }
     } catch (e) {
-      debugPrint('Error resolving category path: ');
+      debugPrint('Error resolving category path: $e');
     }
   }
 
