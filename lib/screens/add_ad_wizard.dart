@@ -56,7 +56,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
 
   
   void _skipCategorySelection() {
-    if (widget.editingAdData != null && widget.editingAdData!['category_id'] != null) {
+    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null && widget.editingAdData!['attributes']['transaction_type'] != null) {
       final categoryId = widget.editingAdData!['category_id'];
       
       // We don't have the leaf category object loaded, but we have its ID and name.
@@ -369,28 +369,28 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                       ),
                     ),
 
-                  const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
+                  
+                    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null && widget.editingAdData!['attributes']['transaction_type'] != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 24),
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _skipCategorySelection,
+                          icon: const Icon(Icons.fast_forward),
+                          label: const Text('الاحتفاظ بالقسم الحالي والمتابعة'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                        ),
+                      ),
+                    const Text('الأقسام الرئيسية', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87)),
                   const SizedBox(height: 16),
                   
                   
-                  if (widget.editingAdData != null && widget.editingAdData!['category_id'] != null)
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 24),
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _skipCategorySelection,
-                        icon: const Icon(Icons.fast_forward),
-                        label: const Text('Ø§Ù„Ø§Ø­ØªÙ Ø§Ø¸ Ø¨Ø§Ù„Ù‚Ø³Ù… Ø§Ù„Ø­Ø§Ù„ÙŠ ÙˆØ§Ù„Ù…ØªØ§Ø¨Ø¹Ø©'),
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: Colors.green,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        ),
-                      ),
-                    ),
-
                     // Modern Search Bar
                   Container(
                     decoration: BoxDecoration(
