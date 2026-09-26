@@ -418,18 +418,6 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
                             ],
                           ),
                         ),
-                        if (_images.length < 20)
-                          TextButton.icon(
-                            onPressed: _pickImages,
-                            icon: const Icon(Icons.add_photo_alternate_rounded, size: 18),
-                            label: const Text('المزيد', style: TextStyle(fontWeight: FontWeight.bold)),
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF0075FF),
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              backgroundColor: const Color(0xFF0075FF).withValues(alpha: 0.05),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            ),
-                          ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -530,6 +518,25 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
                         ),
                       ),
                     ], // Closes if (_images.length < 3) ...[
+                    
+                    if (_images.length >= 3 && _images.length < 20) ...[
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _pickImages,
+                          icon: const Icon(Icons.add_photo_alternate_rounded, size: 20),
+                          label: const Text('إضافة صور جديدة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF0075FF),
+                            side: const BorderSide(color: Color(0xFF0075FF), width: 1.5),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            backgroundColor: const Color(0xFF0075FF).withOpacity(0.05),
+                          ),
+                        ),
+                      ),
+                    ],
                     ], // Closes if (_images.isNotEmpty) ...[
                   ], // Closes else ...[
                 ], // Closes children of Column
