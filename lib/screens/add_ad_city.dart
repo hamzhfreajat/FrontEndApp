@@ -61,32 +61,6 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
   }
 
   
-  void _skipLocationSelection() {
-    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null) {
-      final city = widget.editingAdData!['attributes']['city'];
-      final region = widget.editingAdData!['attributes']['region'];
-      
-      if (city != null && region != null) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddAdDetailsPage(
-              selectedLeafCategory: widget.selectedLeafCategory,
-              transactionType: widget.transactionType,
-              images: widget.images,
-              uploadedImageUrls: widget.uploadedImageUrls,
-              reelVideo: widget.reelVideo,
-              selectedCity: city.toString(),
-              selectedRegion: region.toString(),
-              editingAdData: widget.editingAdData,
-            ),
-          ),
-        );
-        return;
-      }
-    }
-  }
-
   void _selectCity(String city) async {
     AnalyticsEngine().logButtonTapped(buttonName: 'next_step', location: 'add_ad_city');
     await Navigator.push(

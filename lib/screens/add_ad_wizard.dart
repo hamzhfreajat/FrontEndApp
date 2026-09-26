@@ -43,6 +43,8 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     super.dispose();
   }
 
+  int? _resolvedRootCategoryId;
+
   @override
   void initState() {
     super.initState();
@@ -50,43 +52,34 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) setState(() => _isPageTransitioning = false);
     });
+    _resolveRootCategory();
+  }
+
+  Future<void> _resolveRootCategory() async {
+    if (widget.editingAdData == null || widget.editingAdData!['category_id'] == null) return;
+    
+    int leafId = int.tryParse(widget.editingAdData!['category_id'].toString()) ?? 0;
+    if (leafId == 0) return;
+    
+    try {
+      Category current = await ApiService().fetchCategoryById(leafId);
+      while (current.parentId != null) {
+        current = await ApiService().fetchCategoryById(current.parentId!);
+      }
+      if (mounted) {
+        setState(() {
+          _resolvedRootCategoryId = current.id;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error resolving root category: ');
+    }
   }
   // Removed _getIconData as we use EmojiCategoryIcon
 
 
   
-  void _skipCategorySelection() {
-    if (widget.editingAdData != null && widget.editingAdData!['attributes'] != null && widget.editingAdData!['attributes']['transaction_type'] != null) {
-      final categoryId = widget.editingAdData!['category_id'];
-      
-      // We don't have the leaf category object loaded, but we have its ID and name.
-      // We can just construct a dummy leaf category object since AddAdCityPage only needs its id and name.
-      String txType = widget.editingAdData!['attributes']?['transaction_type'] ?? '';
-      String leafCatName = widget.editingAdData!['attributes']?['leaf_category_name'] ?? '';
-      
-      Category dummyLeaf = Category(
-        id: categoryId,
-        name: leafCatName,
-        iconName: '',
-        colorHex: '',
-      );
-      
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AddAdCityPage(
-            selectedLeafCategory: dummyLeaf,
-            transactionType: txType,
-            images: widget.images,
-            uploadedImageUrls: widget.uploadedImageUrls,
-            reelVideo: widget.reelVideo,
-            editingAdData: widget.editingAdData,
-          ),
-        ),
-      );
-      return;
-    }
-  }
+
 
   Color _getColor(String? hexString) {
     if (hexString == null || hexString.isEmpty) return const Color(0xFF0075FF);
@@ -326,6 +319,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                      images: widget.images,
           uploadedImageUrls: widget.uploadedImageUrls,
                                      reelVideo: widget.reelVideo,
+                                     editingAdData: widget.editingAdData,
                                    ),
                                  ),
                                );
@@ -453,7 +447,8 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                                    images: widget.images,
           uploadedImageUrls: widget.uploadedImageUrls,
                                    reelVideo: widget.reelVideo,
-                                 ),
+                                     editingAdData: widget.editingAdData,
+                                   ),
                                ),
                              );
                           },
@@ -465,6 +460,7 @@ class _AddAdWizardPageState extends State<AddAdWizardPage> {
                             hasChildren: true,
                             tag: cat.tag,
                             imageUrl: ApiService.resolveIconUrl(cat.iconName),
+                            isSelected: (widget.editingAdData != null && widget.editingAdData!['attributes']?['transaction_type']?.toString().trim() == cat.name.trim()) || (_resolvedRootCategoryId == cat.id),
                           ),
                         );
                       },
