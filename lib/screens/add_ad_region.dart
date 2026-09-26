@@ -387,7 +387,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
                           spacing: 12,
                           runSpacing: 12,
                           children: _popularRegions.map((region) {
-                            final bool isSelected = _adData['attributes']?['region'] == region;
+                            final bool isSelected = _adData['attributes']?['region']?.toString().trim() == region.trim();
 
                             return InkWell(
                               onTap: () => _selectRegion(region),
@@ -448,7 +448,7 @@ class _AddAdRegionPageState extends State<AddAdRegionPage> {
                           spacing: 8,
                           runSpacing: 8,
                           children: _filteredRegions.map((region) {
-                            final bool isSelected = _adData['attributes']?['region'] == region;
+                            final bool isSelected = _adData['attributes']?['region']?.toString().trim() == region.trim();
 
                             return InkWell(
                               onTap: () => _selectRegion(region),

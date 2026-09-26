@@ -103,7 +103,8 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
              'attributes': adToEdit.attributes ?? {},
              'image_urls': adToEdit.images,
              'phone_number': adToEdit.phoneNumber,
-          };
+               'category_id': adToEdit.categoryId,
+            };
           
           final String city = adToEdit.attributes?['city']?.toString() ?? 'O1U.O U+';
           final String region = adToEdit.attributes?['region']?.toString() ?? '';

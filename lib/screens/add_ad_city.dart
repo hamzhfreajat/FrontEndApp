@@ -247,7 +247,7 @@ class _AddAdCityPageState extends State<AddAdCityPage> {
     }
 
     final String? savedCity = _adData['attributes']?['city'] ?? _adData['location'];
-    final bool isSelected = savedCity == city;
+    final bool isSelected = savedCity?.trim() == city.trim();
 
     return InkWell(
       onTap: () => _selectCity(city),
