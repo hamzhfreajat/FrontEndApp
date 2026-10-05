@@ -56,6 +56,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Icons.visibility_off_rounded;
       case 'phone_revealed':
         return Icons.phone_callback_rounded;
+      case 'ad_review':
+        return Icons.star_rounded;
       case 'chat_started':
         return Icons.chat_bubble_outline_rounded;
       case 'category_milestone':
@@ -80,6 +82,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
         return Colors.red.shade600;
       case 'phone_revealed':
         return Colors.deepPurple.shade600;
+      case 'ad_review':
+        return Colors.amber.shade700;
       case 'chat_started':
         return Colors.teal.shade600;
       case 'category_milestone':

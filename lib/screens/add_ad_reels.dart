@@ -176,7 +176,7 @@ class _AddAdReelsPageState extends State<AddAdReelsPage> {
                     ),
                     child: Column(
                       children: [
-                        _buildPolishedCheckItem('يمكنك إضافة فيديو لمدة لا تتجاوز 60 ثانية'),
+                        _buildPolishedCheckItem('يمكنك إضافة فيديو لمدة لا تتجاوز 30 ثانية'),
                         const SizedBox(height: 12),
                         _buildPolishedCheckItem('اشرح مميزات المنتج بشكل سريع وواضح وصوتي إن أمكن'),
                         const SizedBox(height: 12),

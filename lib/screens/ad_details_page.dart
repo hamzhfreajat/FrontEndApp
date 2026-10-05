@@ -9,7 +9,6 @@ import 'package:video_player/video_player.dart';
 import '../models/ad.dart';
 import '../services/api_service.dart';
 import '../widgets/shimmer_loading.dart';
-import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../utils/share_helper.dart';
@@ -18,6 +17,9 @@ import '../providers/app_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/premium_video_player.dart';
 import '../widgets/full_screen_media_gallery.dart';
+import '../widgets/ad_reviews_section.dart';
+import '../widgets/ad_review_sheet.dart';
+import '../utils/ad_contact.dart';
 import '../services/analytics_engine.dart';
 
 import '../features/profile/presentation/screens/public_profile_screen.dart';
@@ -37,6 +39,7 @@ class AdDetailsPage extends StatefulWidget {
 class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateMixin {
   final ApiService _apiService = ApiService();
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<AdReviewsSectionState> _reviewsKey = GlobalKey<AdReviewsSectionState>();
   List<Ad> _relatedAds = [];
   bool _isLoadingAds = true;
   bool _isLoadingMore = false;
@@ -495,6 +498,8 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                         // const SizedBox(height: 10),
                         _buildAdInfoCard(),
                         const SizedBox(height: 10),
+                        if (!widget.isPreview) AdReviewsSection(key: _reviewsKey, ad: ad),
+                        if (!widget.isPreview) const SizedBox(height: 10),
                         _buildSafetyTips(),
                         const SizedBox(height: 20),
                         if (!widget.isPreview) _buildRelatedAds(),
@@ -572,6 +577,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                           child: ApiService.networkImage(
                             ad.images[hasVideo ? i - 1 : i], 
                             fit: BoxFit.cover,
+                            memCacheWidth: 1280,
                             errorWidget: _placeholder()
                           ),
                         ),
@@ -579,7 +585,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
               },
             )
           else if (ad.imageUrl != null)
-            ApiService.networkImage(ad.imageUrl!, fit: BoxFit.cover, errorWidget: _placeholder())
+            ApiService.networkImage(ad.imageUrl!, fit: BoxFit.cover, memCacheWidth: 1280, errorWidget: _placeholder())
           else _placeholder(),
 
           // Right Navigation Arrow (Main Slider) - Points Right, goes to Previous (in RTL)
@@ -1581,7 +1587,7 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                             fit: StackFit.expand,
                             children: [
                               r.images.isNotEmpty
-                                ? ApiService.networkImage(r.images.first, fit: BoxFit.cover, errorWidget: Container(color: Colors.grey.shade100, child: const Icon(Icons.image, color: Colors.grey)))
+                                ? ApiService.networkImage(r.images.first, fit: BoxFit.cover, card: true, errorWidget: Container(color: Colors.grey.shade100, child: const Icon(Icons.image, color: Colors.grey)))
                                 : Container(color: Colors.grey.shade100, child: Center(child: Icon(Icons.image, color: Colors.grey.shade400))),
                               // Gradient Overlay for text
                               Positioned.fill(
@@ -1712,6 +1718,9 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                 } else if (waPhone.startsWith('+')) {
                   waPhone = waPhone.substring(1);
                 }
+                if (mounted && !widget.isPreview) {
+                  AdReviewSheet.promptAfterCall(context, ad, onChanged: () => _reviewsKey.currentState?.reload());
+                }
                 final uri = Uri.parse('whatsapp://send?phone=$waPhone');
                 final fallbackUri = Uri.parse('https://wa.me/$waPhone');
                 try {
@@ -1737,53 +1746,18 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
             // Chat
             Expanded(
               child: GestureDetector(
-                onTap: () {
-                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                  if (!authProvider.isAuthenticated) {
-                    PremiumLoginBottomSheet.show(
-                      context,
-                      title: 'دردشة',
-                      subtitle: 'سجل الدخول للدردشة مع البائع داخل التطبيق بأمان',
-                      onLoginSuccess: () {}, // Handled by user clicking again
+                onTap: () => openAdChat(
+                  context,
+                  ad,
+                  onOpen: () {
+                    ApiService().recordAdInteractionChat(ad.id);
+                    AnalyticsEngine().logContactAgentInitiated(
+                      propertyId: ad.id.toString(),
+                      contactMethod: 'chat',
                     );
-                    return;
-                  }
-                  
-                  final currentUserId = authProvider.userData?['sub']?.toString();
-                  if (currentUserId == null) {
-                    _snack('حدث خطأ في معلومات الحساب');
-                    return;
-                  }
-                  
-                  if (currentUserId == ad.userId.toString()) {
-                    _snack('لا يمكنك بدء محادثة مع نفسك');
-                    return;
-                  }
-
-                  // Record interaction
-                  ApiService().recordAdInteractionChat(ad.id);
-                  ApiService().trackAdClick(ad.id, 'chat');
-                  AnalyticsEngine().logContactAgentInitiated(
-                    propertyId: ad.id.toString(),
-                    contactMethod: 'chat',
-                  );
-
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => PremiumChatScreen(
-                      adId: ad.id.toString(),
-                      adTitle: ad.title,
-                      adPrice: ad.price.toStringAsFixed(0),
-                      adImageUrl: ad.images.isNotEmpty ? ad.images.first : '',
-                      isSeller: false,
-                      currentUserId: currentUserId,
-                      currentUserName: authProvider.userData?['full_name'] ?? authProvider.userData?['username'] ?? 'مستخدم',
-                      currentUserPhone: authProvider.userData?['phone']?.toString(),
-                      otherUserId: ad.userId.toString(),
-                      otherUserName: ad.ownerName,
-                      otherUserPhone: ad.phoneNumber,
-                    )
-                  ));
-                },
+                  },
+                  onReviewChanged: () => _reviewsKey.currentState?.reload(),
+                ),
                 child: Container(height: 52,
                   decoration: BoxDecoration(border: Border.all(color: _accent, width: 2), borderRadius: BorderRadius.circular(14)),
                   child: const Center(child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -1807,6 +1781,14 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                   
                   if (!_showPhone) {
                     setState(() => _showPhone = true);
+                    if (!widget.isPreview) {
+                      AdReviewSheet.promptAfterCall(
+                        context,
+                        ad,
+                        onChanged: () => _reviewsKey.currentState?.reload(),
+                        leaveWindow: const Duration(minutes: 3),
+                      );
+                    }
                     // Record interaction when they reveal the number
                     ApiService().recordAdInteractionPhone(ad.id);
                     ApiService().trackAdClick(ad.id, 'call');
@@ -1828,6 +1810,9 @@ class _AdDetailsPageState extends State<AdDetailsPage> with TickerProviderStateM
                   final Uri telUri = Uri.parse('tel:$phone');
                   try {
                     if (await canLaunchUrl(telUri)) {
+                      if (mounted && !widget.isPreview) {
+                        AdReviewSheet.promptAfterCall(context, ad, onChanged: () => _reviewsKey.currentState?.reload());
+                      }
                       await launchUrl(telUri);
                     } else {
                       _snack('تعذر فتح تطبيق الاتصال');

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../models/ad.dart';
 import '../models/saved_search.dart';
 import '../models/category.dart';
@@ -192,13 +193,41 @@ class ApiService {
     'Bypass-Tunnel-Reminder': 'true',
   };
 
+  /// The backend stores every ad image in two sizes (see backend/image_processing.py):
+  /// "img/<id>.jpg" (full) and "img/<id>_m.jpg" (card, ~10x smaller). Returns the card
+  /// URL for such images and the URL unchanged for anything else (older uploads).
+  static String cardImageUrl(String url) {
+    if (url.contains('/img/') && url.endsWith('.jpg') && !url.endsWith('_m.jpg')) {
+      return '${url.substring(0, url.length - 4)}_m.jpg';
+    }
+    return url;
+  }
+
+  /// Downloads the cover images of [ads] to the disk cache ahead of time, so cards
+  /// already have their picture when they scroll into view.
+  static void prefetchCardImages(Iterable<Ad> ads, {int max = 8}) {
+    for (final ad in ads.take(max)) {
+      if (ad.images.isEmpty) continue;
+      final url = cardImageUrl(ad.images.first);
+      // Only the small card rendition is worth fetching ahead; older images have no
+      // small version and pulling several multi-megabyte originals at once is costly.
+      if (!url.startsWith('http') || url == ad.images.first) continue;
+      DefaultCacheManager().getSingleFile(url).then((_) {}, onError: (_) {});
+    }
+  }
+
   /// Universal image widget that automatically adds tunnel headers.
   /// Use this EVERYWHERE instead of Image.network() directly.
+  ///
+  /// Pass [card] for images shown in lists and cards, so the small rendition is
+  /// loaded instead of the full-size photo.
   static Widget networkImage(String url, {
     BoxFit fit = BoxFit.cover,
     double? width,
     double? height,
     Widget? errorWidget,
+    bool card = false,
+    int memCacheWidth = 600,
   }) {
     if (url.startsWith('file://')) {
       return Image.file(
@@ -223,20 +252,42 @@ class ApiService {
     // Only apply Ngrok bypass headers if the URL is actually an Ngrok URL
     final bool isNgrokUrl = finalUrl.contains('ngrok');
     
+    final Map<String, String>? headers = isNgrokUrl ? _tunnelHeaders : null;
+    final String cardUrl = cardImageUrl(finalUrl);
+    final bool hasCardVersion = cardUrl != finalUrl;
+    const Widget blank = ColoredBox(color: Color(0xFFF3F4F9));
+
     return CachedNetworkImage(
-      imageUrl: finalUrl,
-      httpHeaders: isNgrokUrl ? _tunnelHeaders : null,
+      imageUrl: card ? cardUrl : finalUrl,
+      httpHeaders: headers,
       fit: fit,
       width: width,
       height: height,
-      placeholder: (context, url) => Container(
-        color: const Color(0xFFF3F4F9),
-        child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-      ),
-      errorWidget: (context, url, error) => errorWidget ?? Container(
-        color: const Color(0xFFF5F5F5),
-        child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
-      ),
+      memCacheWidth: card ? 720 : memCacheWidth,
+      fadeInDuration: const Duration(milliseconds: 180),
+      fadeOutDuration: const Duration(milliseconds: 80),
+      placeholder: (context, _) => (!card && hasCardVersion)
+          // The card rendition is usually on disk already from the list, so a
+          // picture shows immediately while the sharp one loads.
+          ? CachedNetworkImage(
+              imageUrl: cardUrl,
+              httpHeaders: headers,
+              fit: fit,
+              width: width,
+              height: height,
+              memCacheWidth: 720,
+              fadeInDuration: Duration.zero,
+              placeholder: (_, __) => blank,
+              errorWidget: (_, __, ___) => blank,
+            )
+          : blank,
+      errorWidget: (context, _, error) => (card && hasCardVersion)
+          // Card rendition missing: fall back to the full image
+          ? networkImage(url, fit: fit, width: width, height: height, errorWidget: errorWidget)
+          : errorWidget ?? Container(
+              color: const Color(0xFFF5F5F5),
+              child: const Icon(Icons.image_not_supported_outlined, color: Colors.grey),
+            ),
     );
   }
 
@@ -269,10 +320,10 @@ class ApiService {
       body: jsonEncode({'id_token': idToken}),
     ).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       return data;
     } else {
-      throw Exception(json.decode(response.body)['detail'] ?? 'Google Login failed');
+      throw Exception(json.decode(utf8.decode(response.bodyBytes))['detail'] ?? 'Google Login failed');
     }
   }
 
@@ -283,10 +334,10 @@ class ApiService {
       body: jsonEncode({'access_token': accessToken}),
     ).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       return data;
     } else {
-      throw Exception(json.decode(response.body)['detail'] ?? 'Facebook Login failed');
+      throw Exception(json.decode(utf8.decode(response.bodyBytes))['detail'] ?? 'Facebook Login failed');
     }
   }
 
@@ -302,10 +353,10 @@ class ApiService {
       }),
     ).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      final data = json.decode(utf8.decode(response.bodyBytes));
       return data;
     } else {
-      throw Exception(json.decode(response.body)['detail'] ?? 'Apple Login failed');
+      throw Exception(json.decode(utf8.decode(response.bodyBytes))['detail'] ?? 'Apple Login failed');
     }
   }
 
@@ -328,7 +379,7 @@ class ApiService {
     ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(utf8.decode(response.bodyBytes));
     } else {
       throw Exception('Failed to load user profile');
     }
@@ -340,7 +391,7 @@ class ApiService {
   Future<UserMetrics> fetchDashboardMetrics() async {
     final response = await _client.get(Uri.parse('$baseUrl/dashboard/metrics'), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      return UserMetrics.fromJson(json.decode(response.body));
+      return UserMetrics.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to load metrics');
     }
@@ -414,7 +465,7 @@ class ApiService {
   Future<List<LiveTicker>> fetchTicker() async {
     final response = await _client.get(Uri.parse('$baseUrl/ticker'), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       return jsonResponse.map((tick) => LiveTicker.fromJson(tick)).toList();
     } else {
       throw Exception('Failed to load ticker');
@@ -508,7 +559,7 @@ class ApiService {
     final response = await _client.get(Uri.parse(url), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       var ads = jsonResponse.map((ad) => Ad.fromJson(ad)).toList();
       ads.removeWhere((ad) => _deletedAdIds.contains(ad.id));
       return ads;
@@ -520,7 +571,7 @@ class ApiService {
   Future<Ad> fetchAdById(int id) async {
     final response = await _client.get(Uri.parse('$baseUrl/ads/$id'), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      return Ad.fromJson(json.decode(response.body));
+      return Ad.fromJson(json.decode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to load ad details');
     }
@@ -570,7 +621,7 @@ class ApiService {
       final response = await _client.get(uri, headers: headers);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
         return data.cast<Map<String, dynamic>>();
       } else {
         return [];
@@ -621,7 +672,7 @@ class ApiService {
     final response = await _client.get(Uri.parse(url), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
-      return json.decode(response.body)['total_count'] as int;
+      return json.decode(utf8.decode(response.bodyBytes))['total_count'] as int;
     } else {
       return 0; // Fallback
     }
@@ -630,7 +681,7 @@ class ApiService {
   Future<List<Story>> fetchStories() async {
     final response = await _client.get(Uri.parse('$baseUrl/stories'), headers: await _getHeaders()).timeout(const Duration(seconds: 15));
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       return jsonResponse.map((story) => Story.fromJson(story)).toList();
     } else {
       throw Exception('Failed to load stories');
@@ -805,7 +856,7 @@ class ApiService {
       ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
-        return Ad.fromJson(json.decode(response.body));
+        return Ad.fromJson(json.decode(utf8.decode(response.bodyBytes)));
       } else {
         throw Exception('Failed to publish ad: ${response.statusCode} - ${response.body}');
       }
@@ -844,7 +895,7 @@ class ApiService {
       ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
-        return Ad.fromJson(json.decode(response.body));
+        return Ad.fromJson(json.decode(utf8.decode(response.bodyBytes)));
       } else {
         throw Exception('Failed to update ad: ${response.statusCode} - ${response.body}');
       }
@@ -907,7 +958,7 @@ class ApiService {
     } else {
       String errorMessage = 'Failed to republish ad';
       try {
-        final error = json.decode(response.body);
+        final error = json.decode(utf8.decode(response.bodyBytes));
         if (error['detail'] != null) {
           errorMessage = error['detail'];
         }
@@ -1069,7 +1120,7 @@ class ApiService {
       headers: await _getHeaders(),
     );
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       return jsonResponse.cast<Map<String, dynamic>>();
     } else {
       throw Exception('Failed to load notifications');
@@ -1082,7 +1133,7 @@ class ApiService {
       headers: await _getHeaders(),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body)['unread_count'] as int;
+      return json.decode(utf8.decode(response.bodyBytes))['unread_count'] as int;
     }
     return 0;
   }
@@ -1110,7 +1161,7 @@ class ApiService {
       headers: await _getHeaders(),
     );
     if (response.statusCode == 200) {
-      return json.decode(response.body)['is_saved'] as bool;
+      return json.decode(utf8.decode(response.bodyBytes))['is_saved'] as bool;
     } else if (response.statusCode == 401) {
       throw Exception('Unauthorized');
     } else {
@@ -1124,7 +1175,7 @@ class ApiService {
       headers: await _getHeaders(),
     );
     if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
+      List jsonResponse = json.decode(utf8.decode(response.bodyBytes));
       return jsonResponse.map((data) => Ad.fromJson(data)).toList();
     } else {
       throw Exception('Failed to load saved ads');
@@ -1153,6 +1204,55 @@ class ApiService {
     if (response.statusCode != 200) {
       throw Exception('Failed to report ad: ${response.statusCode}');
     }
+  }
+
+  //---------------------------------------------------------
+  // Ad Reviews
+  //---------------------------------------------------------
+  Future<Map<String, dynamic>> getAdReviews(int adId, {int skip = 0, int limit = 20}) async {
+    final response = await _client.get(
+      // The timestamp keeps any cache in between from serving reviews from before a submit
+      Uri.parse('$baseUrl/ads/$adId/reviews?skip=$skip&limit=$limit&_=${DateTime.now().millisecondsSinceEpoch}'),
+      headers: await _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load reviews: ${response.statusCode}');
+    }
+    return json.decode(utf8.decode(response.bodyBytes));
+  }
+
+  /// Returns the saved review plus the ad's new `ad_rating_avg` / `ad_reviews_count`.
+  Future<Map<String, dynamic>> submitAdReview(int adId, {required int rating, List<String> tags = const [], String? comment}) async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/ads/$adId/reviews'),
+      headers: await _getHeaders(),
+      body: json.encode({
+        'rating': rating,
+        'tags': tags,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      }),
+    );
+    if (response.statusCode != 200) {
+      String? detail;
+      try {
+        final body = json.decode(utf8.decode(response.bodyBytes));
+        if (body is Map && body['detail'] is String) detail = body['detail'];
+      } catch (_) {}
+      throw Exception(detail ?? 'Failed to submit review: ${response.statusCode}');
+    }
+    return json.decode(utf8.decode(response.bodyBytes));
+  }
+
+  /// Returns the ad's new `ad_rating_avg` / `ad_reviews_count`.
+  Future<Map<String, dynamic>> deleteMyAdReview(int adId) async {
+    final response = await _client.delete(
+      Uri.parse('$baseUrl/ads/$adId/reviews/mine'),
+      headers: await _getHeaders(),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete review: ${response.statusCode}');
+    }
+    return json.decode(utf8.decode(response.bodyBytes));
   }
 
   //---------------------------------------------------------
@@ -1375,7 +1475,7 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body);
+      final List<dynamic> data = jsonDecode(utf8.decode(response.bodyBytes));
       return data.map((json) => SavedSearch.fromMap(json)).toList();
     } else if (response.statusCode == 401) {
       return [];
@@ -1404,7 +1504,7 @@ class ApiService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return SavedSearch.fromMap(jsonDecode(response.body));
+      return SavedSearch.fromMap(jsonDecode(utf8.decode(response.bodyBytes)));
     } else {
       throw Exception('Failed to create saved search: ${response.statusCode}');
     }
@@ -1532,7 +1632,7 @@ class ApiService {
       throw InsufficientBalanceException();
     }
     if (response.statusCode != 200) {
-      final body = jsonDecode(response.body);
+      final body = jsonDecode(utf8.decode(response.bodyBytes));
       throw Exception(body['detail'] ?? 'Failed to set bid');
     }
   }

@@ -242,7 +242,7 @@ class ClipRuttaImage extends StatelessWidget {
         height: 80,
         color: Colors.grey[100],
         child: url != null && url!.isNotEmpty
-            ? ApiService.networkImage(url!)
+            ? ApiService.networkImage(url!, card: true)
             : const Icon(Icons.image, color: Colors.grey),
       ),
     );
