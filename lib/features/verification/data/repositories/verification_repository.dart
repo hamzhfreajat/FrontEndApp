@@ -13,7 +13,7 @@ class VerificationRepository {
     );
     
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
       // We will encode both URL and KEY in a pipe format string 
       // so it travels easily through the Bloc's simple String states,
       // or we can just fetch the key later from the url. Let's return JSON as string!
@@ -62,7 +62,7 @@ class VerificationRepository {
     );
     
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
       return {
         'fullName': data['full_name'],
         'nationalId': data['national_id'],
@@ -82,7 +82,7 @@ class VerificationRepository {
       body: jsonEncode({"liveness_session_id": livenessSessionId}),
     );
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = jsonDecode(utf8.decode(response.bodyBytes));
       return data['liveness_passed'] == true;
     }
     return false;

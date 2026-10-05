@@ -129,7 +129,12 @@ class _PrivateProfileScreenState extends State<PrivateProfileScreen> {
 
   Future<void> _pickAndUploadImage(BuildContext context, String fieldUpdate) async {
     final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? image = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+      maxWidth: 800,
+      maxHeight: 800,
+    );
     if (image == null) return;
     
     setState(() {

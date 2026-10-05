@@ -37,7 +37,11 @@ class _AddAdImagesPageState extends State<AddAdImagesPage> {
 
   Future<void> _pickImages() async {
     try {
-      final List<XFile> picked = await _picker.pickMultiImage(imageQuality: 80);
+      final List<XFile> picked = await _picker.pickMultiImage(
+        imageQuality: 80,
+        maxWidth: 1280,
+        maxHeight: 1280,
+      );
       if (picked.isNotEmpty) {
         List<XFile> validImages = [];
         bool hasLargeImages = false;

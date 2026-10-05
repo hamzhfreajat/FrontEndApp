@@ -404,6 +404,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
       final count = results[0] as int;
       final fetchedAds = results[1] as List<Ad>;
+      ApiService.prefetchCardImages(fetchedAds);
       
       setState(() {
         _ads = fetchedAds;
@@ -520,6 +521,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         userLng: _sortBy == 'nearest' ? _userLng : null,
       );
       if (!mounted) return;
+      ApiService.prefetchCardImages(fetchedAds);
       setState(() {
         _ads.addAll(fetchedAds);
         _skip += _limit;
@@ -3682,12 +3684,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   Widget _buildFallbackCategoryCard(Category cat, IconData icon, Color brandColor) {
     return GestureDetector(
       onTap: () {
+        // Resolved now: this page is disposed once it is replaced, but the builder can run again
+        final allCategories = Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => CategoryDetailsPage(
               category: cat,
-              allCategories: Provider.of<AppProvider>(context, listen: false).categories ?? widget.allCategories,
+              allCategories: allCategories,
             ),
           ),
         );

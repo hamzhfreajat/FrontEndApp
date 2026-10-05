@@ -377,12 +377,14 @@ class _HomePageState extends State<HomePage> {
                 Category(id: 2, name: context.tr('real_estate_sale'), iconName: '🏢', adsCount: 0),
                 Category(id: 3, name: context.tr('real_estate_rent'), iconName: '🔑', adsCount: 0),
               ] : provider.categories!;
+              // Resolved now: the route's builder can run again after this widget is gone
+              final allOffersTitle = context.tr('all_offers');
               
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => CategoryDetailsPage(
-                    category: Category(id: 0, name: context.tr('all_offers'), iconName: '🌐', adsCount: 0),
+                    category: Category(id: 0, name: allOffersTitle, iconName: '🌐', adsCount: 0),
                     allCategories: safeCategories,
                     initialSort: filter['sort'] as String?,
                     initialIsHot: filter['isHot'] as bool?,
@@ -1153,12 +1155,14 @@ class _QuickActionsGateways extends StatelessWidget {
               gradientColors: const [Color(0xFF0075FF), Color(0xFF0052B4)],
               onTap: () {
                 AnalyticsEngine().logButtonTapped(buttonName: 'quick_action_buy', location: 'home');
+                // Resolved now: the route's builder can run again after this widget is gone
+                final title = context.tr('buy');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CategoriesPage(
                       parentId: 2,
-                      title: context.tr('buy'),
+                      title: title,
                       allCategories: categories,
                     ),
                   ),
@@ -1175,12 +1179,14 @@ class _QuickActionsGateways extends StatelessWidget {
               gradientColors: const [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
               onTap: () {
                 AnalyticsEngine().logButtonTapped(buttonName: 'quick_action_rent', location: 'home');
+                // Resolved now: the route's builder can run again after this widget is gone
+                final title = context.tr('rent');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => CategoriesPage(
                       parentId: 3,
-                      title: context.tr('rent'),
+                      title: title,
                       allCategories: categories,
                     ),
                   ),
@@ -1700,7 +1706,7 @@ class _AdCard extends StatelessWidget {
                   height: 155,
                   width: double.infinity,
                   child: ad.imageUrl != null
-                      ? ApiService.networkImage(ad.imageUrl!, fit: BoxFit.cover)
+                      ? ApiService.networkImage(ad.imageUrl!, fit: BoxFit.cover, card: true)
                       : Container(color: Colors.grey.shade100, child: Icon(Icons.image_not_supported_outlined, color: Colors.grey.shade300, size: 30)),
                 ),
               ),

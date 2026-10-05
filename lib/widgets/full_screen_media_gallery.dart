@@ -6,10 +6,11 @@ import '../services/api_service.dart';
 import '../providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'premium_video_player.dart';
 import 'premium_share_bottom_sheet.dart';
 import 'premium_login_bottom_sheet.dart';
+import 'ad_review_sheet.dart';
+import '../utils/ad_contact.dart';
 
 class FullScreenMediaGallery extends StatefulWidget {
   final Ad ad;
@@ -208,6 +209,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
                           child: ApiService.networkImage(
                             _mediaItems[index],
                             fit: BoxFit.contain,
+                            memCacheWidth: 1280,
                             errorWidget: const Icon(Icons.broken_image, color: Colors.white54, size: 60),
                           ),
                         ),
@@ -561,6 +563,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
             String waPhone = phone;
             if (waPhone.startsWith('0')) waPhone = '962' + waPhone.substring(1);
             else if (waPhone.startsWith('+')) waPhone = waPhone.substring(1);
+            if (mounted) AdReviewSheet.promptAfterCall(context, widget.ad);
             final uri = Uri.parse('whatsapp://send?phone=$waPhone');
             final fallbackUri = Uri.parse('https://wa.me/$waPhone');
             try {
@@ -583,31 +586,7 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
         // Chat
         Expanded(
           child: GestureDetector(
-            onTap: () {
-              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-              final currentUserId = authProvider.userData?['sub']?.toString();
-              if (currentUserId == null) return;
-              if (currentUserId == widget.ad.userId.toString()) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('لا يمكنك بدء محادثة مع نفسك')));
-                return;
-              }
-              ApiService().trackAdClick(widget.ad.id, 'chat');
-              Navigator.push(context, MaterialPageRoute(
-                builder: (_) => PremiumChatScreen(
-                  adId: widget.ad.id.toString(),
-                  adTitle: widget.ad.title,
-                  adPrice: widget.ad.price.toStringAsFixed(0),
-                  adImageUrl: widget.ad.images.isNotEmpty ? widget.ad.images.first : '',
-                  isSeller: false,
-                  currentUserId: currentUserId,
-                  currentUserName: authProvider.userData?['full_name']?.toString() ?? authProvider.userData?['username']?.toString() ?? 'مستخدم',
-                  currentUserPhone: authProvider.userData?['phone']?.toString(),
-                  otherUserId: widget.ad.userId.toString(),
-                  otherUserName: widget.ad.ownerName,
-                  otherUserPhone: widget.ad.phoneNumber,
-                )
-              ));
-            },
+            onTap: () => openAdChat(context, widget.ad),
             child: Container(height: 52,
               decoration: BoxDecoration(border: Border.all(color: const Color(0xFF0075FF), width: 2), borderRadius: BorderRadius.circular(14)),
               child: const Center(child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -626,12 +605,16 @@ class _FullScreenMediaGalleryState extends State<FullScreenMediaGallery> {
               final phone = widget.ad.phoneNumber;
               if (phone == null || phone.isEmpty) return;
               if (!_showPhone) {
-                if (mounted) setState(() => _showPhone = true);
+                if (mounted) {
+                  setState(() => _showPhone = true);
+                  AdReviewSheet.promptAfterCall(context, widget.ad, leaveWindow: const Duration(minutes: 3));
+                }
                 return;
               }
               final telUri = Uri.parse('tel:$phone');
               try {
                 if (await canLaunchUrl(telUri)) {
+                  if (mounted) AdReviewSheet.promptAfterCall(context, widget.ad);
                   await launchUrl(telUri);
                   ApiService().trackAdClick(widget.ad.id, 'call');
                 }

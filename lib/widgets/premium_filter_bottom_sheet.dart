@@ -511,7 +511,9 @@ class _PremiumFilterBottomSheetState extends State<PremiumFilterBottomSheet> {
           
           // Footer
           Container(
-            padding: const EdgeInsets.all(16),
+            // Keep the buttons above the system navigation bar (3-button / gesture bar).
+            // Not needed while the keyboard is open: the sheet is already lifted above it.
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + (bottomInset > 0 ? 0 : MediaQuery.of(context).viewPadding.bottom)),
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: Colors.black12)),

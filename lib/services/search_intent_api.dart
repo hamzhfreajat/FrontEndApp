@@ -45,7 +45,7 @@ class SearchIntentApi {
       final response = await http.get(uri);
       
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         return SearchIntent.fromJson(data);
       }
     } catch (e) {

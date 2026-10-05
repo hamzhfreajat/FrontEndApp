@@ -12,6 +12,8 @@ class Ad {
   final String? videoUrl;
   final List<String> images; // Array of image URLs natively 
   final int views;
+  final double? ratingAvg; // null while the ad has no reviews
+  final int reviewsCount;
   final int favoritesCount;
   final bool isHot;
   final List<String> tags;
@@ -42,6 +44,8 @@ class Ad {
     this.videoUrl,
     this.images = const [],
     this.views = 0,
+    this.ratingAvg,
+    this.reviewsCount = 0,
     this.favoritesCount = 0,
     this.isHot = false,
     this.tags = const [],
@@ -160,6 +164,8 @@ class Ad {
       videoUrl: json['video_url']?.toString() ?? (json['attributes'] != null && json['attributes']['video_url'] != null ? json['attributes']['video_url'].toString() : null),
       images: parsedImages,
       views: json['views'] != null ? (int.tryParse(json['views'].toString()) ?? 0) : 0,
+      ratingAvg: json['rating_avg'] != null ? double.tryParse(json['rating_avg'].toString()) : null,
+      reviewsCount: json['reviews_count'] != null ? (int.tryParse(json['reviews_count'].toString()) ?? 0) : 0,
       favoritesCount: json['favorites_count'] != null ? (int.tryParse(json['favorites_count'].toString()) ?? 0) : 0,
       isHot: json['is_hot'] == true || json['is_hot'] == 'true' || json['is_hot'] == 1,
       tags: parsedTags,
@@ -222,6 +228,8 @@ class Ad {
       'video_url': videoUrl,
       'image_urls': images,
       'views': views,
+      'rating_avg': ratingAvg,
+      'reviews_count': reviewsCount,
       'favorites_count': favoritesCount,
       'is_hot': isHot,
       'linked_tags': tags.map((t) => {'name': t}).toList(),

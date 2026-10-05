@@ -3,8 +3,10 @@ import 'dart:math';
 import '../models/ad.dart';
 import '../services/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../features/chat/presentation/screens/premium_chat_screen.dart';
 import 'premium_login_bottom_sheet.dart';
+import 'ad_review_sheet.dart';
+import '../utils/ad_contact.dart';
+import '../services/ad_rating_store.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import 'premium_video_player.dart';
@@ -275,6 +277,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                             )
                           : ApiService.networkImage(
                               images[index],
+                              card: true,
                               fit: BoxFit.cover,
                               errorWidget: const ColoredBox(
                                 color: Color(0xFFF3F4F9),
@@ -495,6 +498,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                           10), // inner radius slightly less than outer
                       child: ApiService.networkImage(
                         images[index],
+                        card: true,
                         fit: BoxFit.cover,
                         errorWidget: const ColoredBox(
                           color: Color(0xFFF1F5F9),
@@ -679,6 +683,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                       color: Colors.blueGrey.shade400,
                       fontSize: 11,
                       fontWeight: FontWeight.w500)),
+              _buildRating(),
               if (widget.ad.views >= 10) ...[
                 const SizedBox(width: 12),
                 Container(
@@ -752,6 +757,47 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
           _buildActionsRow(),
         ],
       ),
+    );
+  }
+
+  // "★ 4.5 (12)", hidden while the ad has no reviews
+  Widget _buildRating() {
+    return ValueListenableBuilder<Map<int, AdRating>>(
+      valueListenable: AdRatingStore.ratings,
+      builder: (context, ratings, _) {
+        // A rating recorded during this session is newer than the one in the (cached) list
+        final latest = ratings[widget.ad.id];
+        final average = latest != null ? latest.average : widget.ad.ratingAvg;
+        final count = latest != null ? latest.count : widget.ad.reviewsCount;
+        if (count <= 0 || average == null) return const SizedBox.shrink();
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(width: 12),
+            Container(
+                width: 3,
+                height: 3,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blueGrey.shade300)),
+            const SizedBox(width: 12),
+            const Icon(Icons.star_rounded,
+                size: 14, color: Color(0xFFFFB300)),
+            const SizedBox(width: 3),
+            Text(average.toStringAsFixed(1),
+                style: const TextStyle(
+                    color: Color(0xFF1E293B),
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w800)),
+            const SizedBox(width: 3),
+            Text('($count)',
+                style: TextStyle(
+                    color: Colors.blueGrey.shade400,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500)),
+          ],
+        );
+      },
     );
   }
 
@@ -1063,48 +1109,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                 label: 'محادثة',
                 color: const Color(0xFF3B82F6),
                 isSolid: false,
-                onTap: () {
-                  final authProvider =
-                      Provider.of<AuthProvider>(context, listen: false);
-                  final currentUserId =
-                      authProvider.userData?['sub']?.toString();
-                  if (currentUserId == null || currentUserId.isEmpty) {
-                    PremiumLoginBottomSheet.show(
-                      context,
-                      subtitle: 'يرجى تسجيل الدخول لبدء محادثة',
-                      onLoginSuccess: () {},
-                    );
-                    return;
-                  }
-                  if (currentUserId == widget.ad.userId.toString()) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('لا يمكنك بدء محادثة مع نفسك')));
-                    return;
-                  }
-                  ApiService().trackAdClick(widget.ad.id, 'chat');
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => PremiumChatScreen(
-                                adId: widget.ad.id.toString(),
-                                adTitle: widget.ad.title,
-                                adPrice: widget.ad.price.toStringAsFixed(0),
-                                adImageUrl: widget.ad.images.isNotEmpty
-                                    ? widget.ad.images.first
-                                    : '',
-                                isSeller: false,
-                                currentUserId: currentUserId,
-                                currentUserName: authProvider
-                                        .userData?['full_name']
-                                        ?.toString() ??
-                                    authProvider.userData?['username']
-                                        ?.toString() ??
-                                    'مستخدم',
-                                otherUserId: widget.ad.userId.toString(),
-                                otherUserName: widget.ad.ownerName,
-                                otherUserPhone: widget.ad.phoneNumber,
-                              )));
-                })),
+                onTap: () => openAdChat(context, widget.ad))),
         const SizedBox(width: 8),
         Expanded(
             child: _actionButton(
@@ -1125,6 +1130,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                   } else if (waPhone.startsWith('+')) {
                     waPhone = waPhone.substring(1);
                   }
+                  if (mounted && !widget.isPreview) AdReviewSheet.promptAfterCall(context, widget.ad);
                   final uri = Uri.parse('whatsapp://send?phone=$waPhone');
                   final fallbackUri = Uri.parse('https://wa.me/$waPhone');
                   try {
@@ -1164,6 +1170,7 @@ class _PremiumRealEstateCardState extends State<PremiumRealEstateCard>
                   final uri = Uri.parse('tel:$phone');
                   try {
                     if (await canLaunchUrl(uri)) {
+                      if (mounted && !widget.isPreview) AdReviewSheet.promptAfterCall(context, widget.ad);
                       await launchUrl(uri);
                       ApiService().trackAdClick(widget.ad.id, 'call');
                     } else {
