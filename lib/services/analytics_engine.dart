@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -31,6 +32,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
     
     final prefs = await SharedPreferences.getInstance();
     _userId = prefs.getString('user_id') ?? 'guest';
+    _setGoogleUser(_userId);
     
     WidgetsBinding.instance.addObserver(this);
     
@@ -39,6 +41,75 @@ class AnalyticsEngine with WidgetsBindingObserver {
 
   void setUserId(String userId) {
     _userId = userId;
+    _setGoogleUser(userId);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Google Analytics (Firebase). Every event this engine records is also sent
+  // there, so the app and the website can be read in the same Analytics property.
+  // ---------------------------------------------------------------------------
+  static const int _googleNameLimit = 40;
+  static const int _googleTextLimit = 100;
+  static const int _googleParamLimit = 25;
+
+  /// Null when Firebase did not start: the app keeps working without Google Analytics.
+  FirebaseAnalytics? get _google {
+    try {
+      return FirebaseAnalytics.instance;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _setGoogleUser(String? userId) {
+    // Only the account's internal number is sent, never a name, phone or email
+    final id = (userId == null || userId == 'guest') ? null : userId;
+    _google?.setUserId(id: id).catchError((_) {});
+  }
+
+  /// Google accepts letters, digits and underscores, starting with a letter, up to 40 characters.
+  String _googleName(String name) {
+    var clean = name.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '_');
+    if (clean.isEmpty || !RegExp(r'^[A-Za-z]').hasMatch(clean)) clean = 'e_$clean';
+    return clean.length > _googleNameLimit ? clean.substring(0, _googleNameLimit) : clean;
+  }
+
+  /// Google accepts text (up to 100 characters) and numbers only.
+  Map<String, Object> _googleParams(Map<String, dynamic> metadata) {
+    final params = <String, Object>{};
+    for (final entry in metadata.entries) {
+      if (params.length >= _googleParamLimit) break;
+      final value = entry.value;
+      if (value == null) continue;
+      if (value is num) {
+        params[_googleName(entry.key)] = value;
+      } else {
+        final text = value.toString();
+        params[_googleName(entry.key)] = text.length > _googleTextLimit ? text.substring(0, _googleTextLimit) : text;
+      }
+    }
+    return params;
+  }
+
+  void _sendToGoogle(String eventName, Map<String, dynamic> metadata) {
+    final google = _google;
+    if (google == null) return;
+    try {
+      if (eventName == 'screen_viewed') {
+        final screen = metadata['screen_name']?.toString();
+        if (screen != null && screen.isNotEmpty) {
+          google.logScreenView(screenName: screen).catchError((_) {});
+        }
+        return;
+      }
+      // Stack traces are long and can hold personal text; only the fact of the error is sent
+      final params = eventName == 'error'
+          ? _googleParams({'screen_name': metadata['screen_name']})
+          : _googleParams(metadata);
+      google.logEvent(name: _googleName(eventName), parameters: params.isEmpty ? null : params).catchError((_) {});
+    } catch (_) {
+      // Analytics must never break the app
+    }
   }
 
   @override
@@ -61,6 +132,7 @@ class AnalyticsEngine with WidgetsBindingObserver {
     };
     
     _queue.add(event);
+    _sendToGoogle(eventName, metadata);
     
     if (_queue.length >= 50) {
       flush();
