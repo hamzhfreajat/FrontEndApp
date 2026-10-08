@@ -948,6 +948,23 @@ class ApiService {
     }
   }
 
+  /// Moves every live ad of the user back to the top. The server leaves alone any ad republished
+  /// in the last 24 hours and reports how many moved and how many are still waiting.
+  Future<({int republished, int waiting})> republishAllMyAds() async {
+    final response = await _client.post(
+      Uri.parse('$baseUrl/my-ads/republish-all'),
+      headers: await _getHeaders(),
+    ).timeout(const Duration(seconds: 30));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to republish all ads');
+    }
+    final data = json.decode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    return (
+      republished: (data['republished'] as num?)?.toInt() ?? 0,
+      waiting: (data['waiting'] as num?)?.toInt() ?? 0,
+    );
+  }
+
   Future<Ad> republishAd(int adId) async {
     final response = await _client.post(
       Uri.parse('$baseUrl/ads/$adId/republish'),

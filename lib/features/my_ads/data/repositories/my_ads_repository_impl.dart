@@ -24,4 +24,9 @@ class MyAdsRepositoryImpl implements MyAdsRepository {
   Future<void> performBulkAction(List<int> adIds, String action) async {
     return await apiService.performMyAdsBulkAction(adIds, action);
   }
+
+  @override
+  Future<({int republished, int waiting})> republishAll() async {
+    return await apiService.republishAllMyAds();
+  }
 }

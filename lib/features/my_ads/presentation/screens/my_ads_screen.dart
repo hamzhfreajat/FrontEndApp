@@ -527,6 +527,18 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
           String translatedMsg = 'تم تنفيذ العملية بنجاح';
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(translatedMsg), backgroundColor: Colors.green));
         }
+        final republishAll = state.republishAllResult;
+        if (republishAll != null) {
+          final String message = republishAll.republished == 0
+              ? 'جميع إعلاناتك أُعيد نشرها خلال آخر 24 ساعة. حاول لاحقاً.'
+              : republishAll.waiting == 0
+                  ? 'تمت إعادة نشر ${republishAll.republished} إعلان'
+                  : 'تمت إعادة نشر ${republishAll.republished} إعلان، و${republishAll.waiting} أُعيد نشرها خلال آخر 24 ساعة';
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(message, style: const TextStyle(fontFamily: 'Tajawal', fontWeight: FontWeight.bold)),
+            backgroundColor: republishAll.republished == 0 ? Colors.orange : Colors.green,
+          ));
+        }
         if (state.errorMessage != null) {
           if (state.errorMessage!.contains('already_republished')) {
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -563,6 +575,11 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
                     child: MyAdsHeader(summary: state.dashboardSummary),
                   ),
                 ),
+                // Only worth a button with more than one live ad; a single ad has its own
+                if ((state.dashboardSummary?.activeAds ?? 0) > 1)
+                  SliverToBoxAdapter(
+                    child: _buildRepublishAllButton(context, state),
+                  ),
                 SliverPersistentHeader(
                   pinned: true,
                   delegate: _StickyTabBarDelegate(
@@ -703,6 +720,50 @@ class _MyAdsScreenState extends State<MyAdsScreen> {
         );
       },
     );
+  }
+
+  Widget _buildRepublishAllButton(BuildContext context, MyAdsState state) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+      child: SizedBox(
+        width: double.infinity,
+        height: 46,
+        child: ElevatedButton.icon(
+          onPressed: state.isActionLoading ? null : () => _confirmRepublishAll(context),
+          icon: const Icon(Icons.refresh_rounded, size: 20),
+          label: const Text('إعادة نشر جميع الإعلانات', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF1A73E8),
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmRepublishAll(BuildContext context) async {
+    final bloc = context.read<MyAdsBloc>();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('إعادة نشر جميع الإعلانات', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        content: const Text('سيتم رفع جميع إعلاناتك النشطة إلى أعلى القائمة. الإعلانات التي أُعيد نشرها خلال آخر 24 ساعة ستبقى كما هي.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(dialogContext).pop(false), child: const Text('إلغاء')),
+          ElevatedButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1A73E8), foregroundColor: Colors.white, elevation: 0),
+            child: const Text('إعادة النشر'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    AnalyticsEngine().logButtonTapped(buttonName: 'republish_all', location: 'my_ads_screen');
+    bloc.add(RepublishAllAds());
   }
 
   Widget _buildWalletSummaryCard() {

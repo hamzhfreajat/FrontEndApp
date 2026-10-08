@@ -11,6 +11,8 @@ class MyAdsState extends Equatable {
   final String activeFilter;
   final bool isActionLoading;
   final String? actionSuccessMessage;
+  /// Set for one emission after "republish all": how many ads moved and how many were republished too recently.
+  final ({int republished, int waiting})? republishAllResult;
 
   final bool isSelectionMode;
   final Set<int> selectedAdIds;
@@ -23,6 +25,7 @@ class MyAdsState extends Equatable {
     this.activeFilter = 'All',
     this.isActionLoading = false,
     this.actionSuccessMessage,
+    this.republishAllResult,
     this.isSelectionMode = false,
     this.selectedAdIds = const {},
   });
@@ -35,6 +38,7 @@ class MyAdsState extends Equatable {
     String? activeFilter,
     bool? isActionLoading,
     String? actionSuccessMessage,
+    ({int republished, int waiting})? republishAllResult,
     bool? isSelectionMode,
     Set<int>? selectedAdIds,
   }) {
@@ -46,6 +50,7 @@ class MyAdsState extends Equatable {
       activeFilter: activeFilter ?? this.activeFilter,
       isActionLoading: isActionLoading ?? this.isActionLoading,
       actionSuccessMessage: actionSuccessMessage,
+      republishAllResult: republishAllResult,
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
       selectedAdIds: selectedAdIds ?? this.selectedAdIds,
     );
@@ -60,6 +65,7 @@ class MyAdsState extends Equatable {
         activeFilter,
       isActionLoading,
       actionSuccessMessage,
+      republishAllResult,
       isSelectionMode,
       selectedAdIds,
     ];

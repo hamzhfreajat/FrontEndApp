@@ -11,6 +11,7 @@ class MyAdsBloc extends Bloc<MyAdsEvent, MyAdsState> {
     on<FetchAds>(_onFetchAds);
     on<PerformBulkAction>(_onPerformBulkAction);
     on<PerformSingleAction>(_onPerformSingleAction);
+    on<RepublishAllAds>(_onRepublishAllAds);
     on<ToggleSelectionMode>(_onToggleSelectionMode);
     on<ToggleAdSelection>(_onToggleAdSelection);
     on<SelectAllAds>(_onSelectAllAds);
@@ -82,6 +83,28 @@ class MyAdsBloc extends Bloc<MyAdsEvent, MyAdsState> {
       // Refresh data dynamically
       add(FetchAds(status: state.activeFilter));
       add(LoadDashboardData());
+    } catch (e) {
+      emit(state.copyWith(
+        isActionLoading: false,
+        errorMessage: 'Failed to perform action: ${e.toString()}',
+      ));
+    }
+  }
+
+  Future<void> _onRepublishAllAds(RepublishAllAds event, Emitter<MyAdsState> emit) async {
+    try {
+      emit(state.copyWith(isActionLoading: true));
+      final result = await repository.republishAll();
+      emit(state.copyWith(
+        isActionLoading: false,
+        republishAllResult: result,
+        isSelectionMode: false,
+        selectedAdIds: {},
+      ));
+      if (result.republished > 0) {
+        add(FetchAds(status: state.activeFilter));
+        add(LoadDashboardData());
+      }
     } catch (e) {
       emit(state.copyWith(
         isActionLoading: false,

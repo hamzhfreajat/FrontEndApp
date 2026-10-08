@@ -58,6 +58,9 @@ class ToggleAdSelection extends MyAdsEvent {
   List<Object> get props => [adId];
 }
 
+/// Republish every live ad of the user at once.
+class RepublishAllAds extends MyAdsEvent {}
+
 class SelectAllAds extends MyAdsEvent {}
 
 class ClearSelection extends MyAdsEvent {}
