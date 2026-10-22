@@ -11,6 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import '../services/consent_manager.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,6 +25,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Google's consent message comes first (only users in consent regions see it),
+      // then Apple's tracking question, then the ads start
+      await ConsentManager.instance.gather();
       if (Platform.isIOS) {
         try {
           await AppTrackingTransparency.requestTrackingAuthorization();
@@ -31,6 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
           debugPrint('Error requesting ATT: $e');
         }
       }
+      ConsentManager.instance.startAds();
       Future.delayed(const Duration(milliseconds: 3500), () {
         _navigateToNext();
       });

@@ -7,6 +7,7 @@ import '../../../../../screens/root_screen.dart';
 import '../../../../../screens/root_screen.dart';
 import '../../../../chat/presentation/screens/premium_chat_screen.dart';
 import '../../../../../services/api_service.dart';
+import '../../../../../services/consent_manager.dart';
 
 class SettingsSection extends StatelessWidget {
   const SettingsSection({Key? key}) : super(key: key);
@@ -186,6 +187,19 @@ class SettingsSection extends StatelessWidget {
                     ),
                   );
                 }),
+                // Users in consent regions (Europe, UK, Switzerland) must be able to change their ad choices
+                FutureBuilder<bool>(
+                  future: ConsentManager.instance.canChangeChoices,
+                  builder: (context, snapshot) {
+                    if (snapshot.data != true) return const SizedBox.shrink();
+                    return Column(children: [
+                      _buildDivider(),
+                      _buildSettingsTile(Icons.privacy_tip_outlined, 'خيارات الخصوصية والإعلانات', 'تعديل موافقتك على الإعلانات المخصّصة', context, false, () {
+                        ConsentManager.instance.showPrivacyOptions();
+                      }),
+                    ]);
+                  },
+                ),
                 _buildDivider(),
                 _buildSettingsTile(Icons.logout_rounded, context.tr('logout'), null, context, true, () async {
                   await context.read<AuthProvider>().logout(context);

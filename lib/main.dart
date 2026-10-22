@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'screens/root_screen.dart';
 import 'screens/splash_screen.dart';
@@ -72,7 +71,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoogleFonts.config.allowRuntimeFetching = true;
   
-  MobileAds.instance.initialize();
+  // Ads start after Google's consent step (see ConsentManager), which the splash screen runs first
   
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
